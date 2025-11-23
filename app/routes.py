@@ -58,7 +58,7 @@ def authorize():
         if not user:
             # Create new user
             user = User(
-                id=user_info['sub'],
+                id=user_id,
                 email=user_info['email'],
                 name=user_info.get('name', 'Unknown'),
                 profile_pic=user_info.get('picture', ''),
