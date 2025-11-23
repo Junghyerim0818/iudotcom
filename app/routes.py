@@ -18,7 +18,9 @@ google = oauth.register(
     access_token_url='https://oauth2.googleapis.com/token',
     authorize_url='https://accounts.google.com/o/oauth2/auth',
     api_base_url='https://www.googleapis.com/oauth2/v1/',
-    client_kwargs={'scope': 'email profile'}, # openid 제거 (에러 원인 차단)
+    client_kwargs={'scope': 'email profile'}, # openid 제거
+    # 아래 설정을 추가하여 메타데이터 자동 탐색을 원천 차단
+    server_metadata_url=None,
 )
 
 @login_manager.user_loader
