@@ -10,7 +10,7 @@ from .forms import PostForm, AdminUserForm
 bp = Blueprint('main', __name__)
 
 # Google OAuth Setup
-# 수동 설정으로 모든 URL 명시 (Vercel 환경 호환성)
+# 가장 단순하고 확실한 설정 (OpenID 검증 우회)
 google = oauth.register(
     name='google',
     client_id=os.environ.get('GOOGLE_CLIENT_ID'),
@@ -18,9 +18,7 @@ google = oauth.register(
     access_token_url='https://oauth2.googleapis.com/token',
     authorize_url='https://accounts.google.com/o/oauth2/auth',
     api_base_url='https://www.googleapis.com/oauth2/v1/',
-    userinfo_endpoint='https://openidconnect.googleapis.com/v1/userinfo',
-    jwks_uri='https://www.googleapis.com/oauth2/v3/certs',  # JWKS URI 직접 명시
-    client_kwargs={'scope': 'openid email profile'},
+    client_kwargs={'scope': 'email profile'}, # openid 제거 (에러 원인 차단)
 )
 
 @login_manager.user_loader
@@ -42,12 +40,12 @@ def login():
 def authorize():
     try:
         token = google.authorize_access_token()
-        # userinfo 엔드포인트 직접 호출
-        resp = google.get('https://openidconnect.googleapis.com/v1/userinfo')
+        # 직접 API를 호출해서 정보 가져오기 (가장 안전함)
+        resp = google.get('https://www.googleapis.com/oauth2/v1/userinfo')
         user_info = resp.json()
         
-        # user_info contains 'sub' (google id), 'email', 'name', 'picture'
-        user_id = user_info.get('sub')
+        # 구글이 주는 id는 'id' 필드에 있음 (openid 미사용 시)
+        user_id = user_info.get('id')
         
         if not user_id:
             flash('사용자 정보를 가져올 수 없습니다.', 'danger')
