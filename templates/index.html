@@ -7,9 +7,9 @@
             <div class="col-lg-8">
                 {% if latest_post %}
                     <div class="card shadow-sm h-100 border-0">
-                        {% if latest_post.has_image_data() or latest_post.image_filename %}
+                        {% if latest_post.has_image_data() or latest_post.image_filename or latest_post.image_url %}
                             <a href="{{ url_for('main.gallery') }}" class="position-relative d-block">
-                                <img src="{% if latest_post.has_image_data() %}{{ url_for('main.get_image', post_id=latest_post.id) }}{% elif latest_post.image_filename %}{{ url_for('static', filename='uploads/' + latest_post.image_filename) }}{% endif %}" 
+                                <img src="{% if latest_post.image_url %}{{ latest_post.image_url }}{% elif latest_post.has_image_data() %}{{ url_for('main.get_image', post_id=latest_post.id) }}{% elif latest_post.image_filename %}{{ url_for('static', filename='uploads/' + latest_post.image_filename) }}{% endif %}" 
                                      class="card-img-top" 
                                      alt="{{ latest_post.title }}"
                                      style="height: 70vh; object-fit: cover; cursor: pointer;">

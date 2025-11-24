@@ -236,14 +236,26 @@ def new_post():
     if form.validate_on_submit():
         image_data = None
         image_mimetype = None
+        image_url = None
+        
+        # 관리자인 경우 티스토리 이미지 URL 사용 가능
+        if current_user.is_admin() and form.image_url.data:
+            image_url = form.image_url.data.strip()
+        
         if form.category.data == 'gallery':
-            if form.image.data:
+            if image_url:
+                # URL이 있으면 URL 사용 (관리자만)
+                pass
+            elif form.image.data:
                 image_data, image_mimetype = save_picture(form.image.data)
             else:
                 if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                     return {'success': False, 'message': '갤러리에는 이미지가 필수입니다.'}, 400
                 flash('갤러리에는 이미지가 필수입니다.', 'danger')
                 return render_template('create_post.html', title='New Post', form=form)
+        elif image_url:
+            # URL이 있으면 URL 사용 (관리자만)
+            pass
         elif form.image.data:
              image_data, image_mimetype = save_picture(form.image.data)
              
@@ -253,6 +265,7 @@ def new_post():
             category=form.category.data,
             image_data=image_data,
             image_mimetype=image_mimetype,
+            image_url=image_url,
             author=current_user
         )
         db.session.add(post)

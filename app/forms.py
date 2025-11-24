@@ -13,8 +13,9 @@ class PostForm(FlaskForm):
         ('archive_2', '서포트 인증 글')
     ], validators=[DataRequired()])
     image = FileField('이미지 업로드', validators=[
-        FileAllowed(['jpg', 'png', 'jpeg', 'gif'], 'Images only!')
+        FileAllowed(['jpg', 'png', 'jpeg', 'gif', 'webp'], 'Images only!')
     ])
+    image_url = StringField('이미지 URL (티스토리 등)', validators=[Optional()])
     submit = SubmitField('작성하기')
 
 class AdminUserForm(FlaskForm):

@@ -73,6 +73,18 @@ def create_app(config_class=Config):
                         END IF;
                     END $$;
                 """))
+                # image_url 컬럼이 없으면 추가
+                db.session.execute(text("""
+                    DO $$ 
+                    BEGIN 
+                        IF NOT EXISTS (
+                            SELECT 1 FROM information_schema.columns 
+                            WHERE table_name='post' AND column_name='image_url'
+                        ) THEN
+                            ALTER TABLE post ADD COLUMN image_url VARCHAR(500);
+                        END IF;
+                    END $$;
+                """))
                 db.session.commit()
             except Exception as col_error:
                 # 컬럼 추가 실패 시 롤백 (이미 존재하거나 다른 이유)

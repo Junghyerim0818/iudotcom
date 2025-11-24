@@ -23,6 +23,7 @@ class Post(db.Model):
     image_filename = db.Column(db.String(100), nullable=True) # For gallery images (deprecated, use image_data)
     image_data = db.Column(db.LargeBinary, nullable=True) # 이미지 바이너리 데이터 (DB에 저장)
     image_mimetype = db.Column(db.String(50), nullable=True) # 이미지 MIME 타입 (예: 'image/jpeg', 'image/png')
+    image_url = db.Column(db.String(500), nullable=True) # 외부 이미지 URL (티스토리 등)
     
     # Category: 'gallery', 'archive_tech', 'archive_daily' (example names for the two archive types)
     # User asked for "two types of archive". Let's name them 'archive_1', 'archive_2' for now or allow user to rename.

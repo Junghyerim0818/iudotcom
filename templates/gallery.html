@@ -6,8 +6,8 @@
     {% for post in posts %}
     <div class="col">
         <div class="card h-100">
-            {% if post.has_image_data() or post.image_filename %}
-                <img src="{% if post.has_image_data() %}{{ url_for('main.get_image', post_id=post.id) }}{% elif post.image_filename %}{{ url_for('static', filename='uploads/' + post.image_filename) }}{% endif %}" class="card-img-top" alt="{{ post.title }}">
+            {% if post.has_image_data() or post.image_filename or post.image_url %}
+                <img src="{% if post.image_url %}{{ post.image_url }}{% elif post.has_image_data() %}{{ url_for('main.get_image', post_id=post.id) }}{% elif post.image_filename %}{{ url_for('static', filename='uploads/' + post.image_filename) }}{% endif %}" class="card-img-top" alt="{{ post.title }}">
             {% endif %}
             <div class="card-body">
                 <h5 class="card-title">{{ post.title }}</h5>

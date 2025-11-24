@@ -213,33 +213,29 @@ body {
 
 .main-content {
     margin-left: var(--sidebar-collapsed-width);
-    padding: 2rem 2rem 2rem 0;
+    padding: 1.5rem 1.5rem 1.5rem 1.5rem;
     transition: margin-left var(--transition-speed) ease;
     min-height: 100vh;
 }
 
 .sidebar.expanded ~ .main-content {
     margin-left: var(--sidebar-width);
+    padding: 1.5rem 1.5rem 1.5rem 1.5rem;
 }
 
-/* 메인 페이지: 사이드바와 이미지 사이 간격 최소화 */
-.main-content-index {
-    padding: 1.5rem 1rem 0.5rem 0.5rem;
-}
-
-.sidebar.expanded ~ .main-content-index {
-    padding: 1.5rem 1rem 0.5rem 0.5rem;
-}
-
-/* 갤러리/아카이브 페이지: 적당한 간격 유지 */
+/* 모든 페이지: 위아래 양옆 여백 통일 */
+.main-content-index,
 .main-content-gallery,
-.main-content-archive {
-    padding: 1.5rem 2rem 2rem 1rem;
+.main-content-archive,
+.main-content-admin {
+    padding: 1.5rem 1.5rem 1.5rem 1.5rem;
 }
 
+.sidebar.expanded ~ .main-content-index,
 .sidebar.expanded ~ .main-content-gallery,
-.sidebar.expanded ~ .main-content-archive {
-    padding: 1.5rem 2rem 2rem 1rem;
+.sidebar.expanded ~ .main-content-archive,
+.sidebar.expanded ~ .main-content-admin {
+    padding: 1.5rem 1.5rem 1.5rem 1.5rem;
 }
 
 .card-img-top {
