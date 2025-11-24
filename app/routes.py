@@ -14,10 +14,16 @@ bp = Blueprint('main', __name__)
 @bp.route('/static/<path:filename>')
 def serve_static(filename):
     """Static 파일을 직접 서빙 (루트의 static 폴더)"""
-    from flask import send_from_directory
+    from flask import send_from_directory, current_app
+    # Vercel 환경과 로컬 환경 모두 대응
     # app 폴더의 부모 디렉토리(프로젝트 루트)의 static 폴더
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     static_dir = os.path.join(base_dir, 'static')
+    
+    # 경로가 존재하지 않으면 Flask의 기본 static 폴더 사용
+    if not os.path.exists(static_dir):
+        static_dir = current_app.static_folder
+    
     return send_from_directory(static_dir, filename)
 
 # Google OAuth Setup
