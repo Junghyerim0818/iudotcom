@@ -34,14 +34,19 @@ def create_app(config_class=Config):
     # Create DB tables and upload folder
     with app.app_context():
         db.create_all()
-        # 업로드 폴더 생성
+        # 업로드 폴더 생성 (Vercel 환경에서는 /tmp 사용)
         upload_folder = app.config.get('UPLOAD_FOLDER')
-        if upload_folder and not os.path.exists(upload_folder):
-            os.makedirs(upload_folder)
-        # 프로필 폴더 생성
-        profile_folder = os.path.join(upload_folder, 'profiles') if upload_folder else None
-        if profile_folder and not os.path.exists(profile_folder):
-            os.makedirs(profile_folder)
+        if upload_folder:
+            try:
+                if not os.path.exists(upload_folder):
+                    os.makedirs(upload_folder)
+                # 프로필 폴더 생성
+                profile_folder = os.path.join(upload_folder, 'profiles')
+                if not os.path.exists(profile_folder):
+                    os.makedirs(profile_folder)
+            except (OSError, PermissionError) as e:
+                # Vercel 환경에서 폴더 생성 실패 시 무시 (외부 스토리지 사용 권장)
+                print(f"Warning: Could not create upload folder: {e}")
 
     return app
 

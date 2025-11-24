@@ -15,5 +15,10 @@ class Config:
     )
     
     # Uploads
-    UPLOAD_FOLDER = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'app/static/uploads')
+    # Vercel 환경에서는 /tmp 디렉토리 사용 (임시 저장소)
+    # 프로덕션에서는 외부 스토리지(S3, Cloudinary 등) 사용 권장
+    if os.environ.get('VERCEL'):
+        UPLOAD_FOLDER = os.path.join('/tmp', 'uploads')
+    else:
+        UPLOAD_FOLDER = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'app/static/uploads')
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024
