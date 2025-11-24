@@ -5,22 +5,19 @@ from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.utils import secure_filename
 from . import db, oauth, login_manager
 from .models import User, Post
-from .forms import PostForm, AdminUserForm
+from .forms import PostForm, AdminUserForm, ProfileForm
 
 bp = Blueprint('main', __name__)
 
-# Google OAuth Setup - Low Level Configuration
-# authlib의 자동 설정을 피하기 위해 모든 파라미터를 수동 지정
+# Google OAuth Setup
 google = oauth.register(
     name='google',
     client_id=os.environ.get('GOOGLE_CLIENT_ID'),
     client_secret=os.environ.get('GOOGLE_CLIENT_SECRET'),
-    access_token_url='https://oauth2.googleapis.com/token',
-    authorize_url='https://accounts.google.com/o/oauth2/auth',
-    api_base_url='https://www.googleapis.com/oauth2/v1/',
-    client_kwargs={'scope': 'email profile'},
-    # JWKS 관련 설정 명시적 비활성화 (빈 딕셔너리나 None으로 설정하여 우회 시도)
-    fetch_token=lambda *args, **kwargs: google.framework_client.fetch_token(*args, **kwargs),
+    server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
+    client_kwargs={
+        'scope': 'openid email profile'
+    }
 )
 
 @login_manager.user_loader
@@ -29,7 +26,11 @@ def load_user(user_id):
 
 @bp.route('/')
 def index():
-    return render_template('index.html')
+    # 최근 갤러리 글들 가져오기
+    gallery_posts = Post.query.filter_by(category='gallery').order_by(Post.created_at.desc()).all()
+    latest_post = gallery_posts[0] if gallery_posts else None
+    other_posts = gallery_posts[1:] if len(gallery_posts) > 1 else []
+    return render_template('index.html', latest_post=latest_post, other_posts=other_posts)
 
 @bp.route('/login')
 def login():
@@ -53,8 +54,8 @@ def authorize():
         
         if not user_id:
             flash('사용자 정보를 가져올 수 없습니다.', 'danger')
-            return redirect(url_for('main.index'))
-
+            return render_template('login_callback.html', success=False, message='사용자 정보를 가져올 수 없습니다.')
+        
         user = User.query.filter_by(id=user_id).first()
         
         if not user:
@@ -77,10 +78,10 @@ def authorize():
             
         login_user(user)
         flash('로그인되었습니다.', 'success')
-        return redirect(url_for('main.index'))
+        return render_template('login_callback.html', success=True, message='로그인되었습니다.')
     except Exception as e:
         flash(f'로그인 실패: {str(e)}', 'danger')
-        return redirect(url_for('main.index'))
+        return render_template('login_callback.html', success=False, message=f'로그인 실패: {str(e)}')
 
 @bp.route('/logout')
 @login_required
@@ -97,10 +98,66 @@ def save_picture(form_picture):
     form_picture.save(picture_path)
     return picture_fn
 
+def save_profile_picture(form_picture, user_id):
+    """프로필 사진을 저장하고 500x500으로 리사이즈"""
+    try:
+        from PIL import Image
+    except ImportError:
+        # PIL이 없으면 기본 저장만 수행
+        random_hex = secrets.token_hex(8)
+        _, f_ext = os.path.splitext(form_picture.filename)
+        picture_fn = f'profile_{user_id}_{random_hex}{f_ext}'
+        profile_folder = os.path.join(current_app.config['UPLOAD_FOLDER'], 'profiles')
+        os.makedirs(profile_folder, exist_ok=True)
+        picture_path = os.path.join(profile_folder, picture_fn)
+        form_picture.save(picture_path)
+        return picture_fn
+    
+    # 파일 크기 확인 (2MB)
+    form_picture.seek(0, os.SEEK_END)
+    file_size = form_picture.tell()
+    form_picture.seek(0)
+    
+    if file_size > 2 * 1024 * 1024:
+        raise ValueError('파일 크기는 2MB 이하여야 합니다.')
+    
+    random_hex = secrets.token_hex(8)
+    _, f_ext = os.path.splitext(form_picture.filename)
+    picture_fn = f'profile_{user_id}_{random_hex}{f_ext}'
+    profile_folder = os.path.join(current_app.config['UPLOAD_FOLDER'], 'profiles')
+    os.makedirs(profile_folder, exist_ok=True)
+    picture_path = os.path.join(profile_folder, picture_fn)
+    
+    # 이미지 열기 및 리사이즈
+    image = Image.open(form_picture)
+    # RGB로 변환 (RGBA인 경우)
+    if image.mode in ('RGBA', 'LA', 'P'):
+        rgb_image = Image.new('RGB', image.size, (255, 255, 255))
+        if image.mode == 'P':
+            image = image.convert('RGBA')
+        rgb_image.paste(image, mask=image.split()[-1] if image.mode in ('RGBA', 'LA') else None)
+        image = rgb_image
+    
+    # 500x500으로 리사이즈 (비율 유지)
+    image.thumbnail((500, 500), Image.Resampling.LANCZOS)
+    
+    # 정사각형으로 만들기 (중앙 정렬)
+    width, height = image.size
+    size = max(width, height)
+    new_image = Image.new('RGB', (size, size), (255, 255, 255))
+    new_image.paste(image, ((size - width) // 2, (size - height) // 2))
+    new_image = new_image.resize((500, 500), Image.Resampling.LANCZOS)
+    
+    # 저장
+    new_image.save(picture_path, 'JPEG', quality=85)
+    return picture_fn
+
 @bp.route('/post/new', methods=['GET', 'POST'])
 @login_required
 def new_post():
     if not current_user.is_writer():
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return {'success': False, 'message': '글쓰기 권한이 없습니다. 관리자에게 문의하세요.'}, 403
         flash('글쓰기 권한이 없습니다. 관리자에게 문의하세요.', 'danger')
         return redirect(url_for('main.index'))
         
@@ -111,6 +168,8 @@ def new_post():
             if form.image.data:
                 image_file = save_picture(form.image.data)
             else:
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return {'success': False, 'message': '갤러리에는 이미지가 필수입니다.'}, 400
                 flash('갤러리에는 이미지가 필수입니다.', 'danger')
                 return render_template('create_post.html', title='New Post', form=form)
         elif form.image.data:
@@ -126,8 +185,21 @@ def new_post():
         db.session.add(post)
         db.session.commit()
         flash('글이 작성되었습니다!', 'success')
+        
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            from flask import jsonify
+            return jsonify({'success': True, 'message': '글이 작성되었습니다!'})
         return redirect(url_for('main.index'))
         
+    # GET 요청 또는 폼 검증 실패 시
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        # AJAX 요청인 경우 폼만 반환
+        from flask import jsonify
+        if request.method == 'GET':
+            # 폼 HTML 반환
+            form_html = render_template('create_post.html', title='New Post', form=form)
+            return form_html
+        return jsonify({'success': False, 'message': '폼 검증에 실패했습니다.'}), 400
     return render_template('create_post.html', title='New Post', form=form)
 
 @bp.route('/gallery')
@@ -168,4 +240,53 @@ def update_user_role(user_id):
         flash('잘못된 권한 설정입니다.', 'danger')
         
     return redirect(url_for('main.admin'))
+
+@bp.route('/profile/update', methods=['POST'])
+@login_required
+def update_profile():
+    try:
+        # 이름 업데이트
+        new_name = request.form.get('name', '').strip()
+        if new_name:
+            current_user.name = new_name
+        
+        # 프로필 사진 업데이트
+        if 'profile_image' in request.files:
+            profile_image = request.files['profile_image']
+            if profile_image and profile_image.filename:
+                # 기존 프로필 사진 삭제 (로컬에 저장된 경우)
+                if current_user.profile_pic and current_user.profile_pic.startswith('profile_'):
+                    old_pic_path = os.path.join(
+                        current_app.config['UPLOAD_FOLDER'], 
+                        'profiles', 
+                        current_user.profile_pic
+                    )
+                    if os.path.exists(old_pic_path):
+                        try:
+                            os.remove(old_pic_path)
+                        except:
+                            pass
+                
+                # 새 프로필 사진 저장
+                picture_fn = save_profile_picture(profile_image, current_user.id)
+                current_user.profile_pic = picture_fn
+        
+        db.session.commit()
+        flash('프로필이 수정되었습니다.', 'success')
+        
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            from flask import jsonify
+            return jsonify({'success': True, 'message': '프로필이 수정되었습니다.'})
+        
+        return redirect(url_for('main.index'))
+    except Exception as e:
+        db.session.rollback()
+        error_msg = str(e) if str(e) else '프로필 수정에 실패했습니다.'
+        flash(error_msg, 'danger')
+        
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            from flask import jsonify
+            return jsonify({'success': False, 'message': error_msg}), 400
+        
+        return redirect(url_for('main.index'))
 

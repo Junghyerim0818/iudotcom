@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
 from wtforms import StringField, TextAreaField, SubmitField, SelectField
-from wtforms.validators import DataRequired
+from wtforms.validators import DataRequired, Length, Optional
 
 class PostForm(FlaskForm):
     title = StringField('제목', validators=[DataRequired()])
@@ -24,4 +24,10 @@ class AdminUserForm(FlaskForm):
         ('admin', '관리자')
     ])
     submit = SubmitField('수정')
+
+class ProfileForm(FlaskForm):
+    name = StringField('별명', validators=[DataRequired(), Length(max=100)])
+    profile_image = FileField('프로필 사진', validators=[
+        FileAllowed(['jpg', 'png', 'jpeg', 'gif'], '이미지 파일만 업로드 가능합니다!')
+    ])
 
