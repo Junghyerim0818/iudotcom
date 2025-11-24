@@ -22,7 +22,8 @@ def analytics():
     """Vercel Analytics 데이터 수집 엔드포인트"""
     return '', 200
 
-# 로컬 개발 시에만 실행
+# Flask main 진입점
 if __name__ == '__main__':
+    # 로컬 개발 환경에서 Flask 앱 실행
     app.run(debug=True, host='127.0.0.1', port=5000)
 
