@@ -11,4 +11,4 @@ from index import app
 
 if __name__ == '__main__':
     # 로컬 개발용 설정
-    app.run(debug=True, host='127.0.0.1', port=5000)
+    app.run(debug=True, host='0.0.0.0', port=80)
