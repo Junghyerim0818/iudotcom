@@ -38,15 +38,19 @@ def create_app(config_class=Config):
         upload_folder = app.config.get('UPLOAD_FOLDER')
         if upload_folder:
             try:
-                if not os.path.exists(upload_folder):
-                    os.makedirs(upload_folder)
-                # 프로필 폴더 생성
-                profile_folder = os.path.join(upload_folder, 'profiles')
-                if not os.path.exists(profile_folder):
-                    os.makedirs(profile_folder)
+                # Vercel 환경 체크: /var/task로 시작하는 경로는 절대 생성하지 않음
+                # /tmp로 시작하는 경로만 생성 시도
+                if upload_folder.startswith('/tmp') or (not upload_folder.startswith('/var') and not upload_folder.startswith('/usr')):
+                    if not os.path.exists(upload_folder):
+                        os.makedirs(upload_folder, exist_ok=True)
+                    # 프로필 폴더 생성
+                    profile_folder = os.path.join(upload_folder, 'profiles')
+                    if not os.path.exists(profile_folder):
+                        os.makedirs(profile_folder, exist_ok=True)
             except (OSError, PermissionError) as e:
                 # Vercel 환경에서 폴더 생성 실패 시 무시 (외부 스토리지 사용 권장)
-                print(f"Warning: Could not create upload folder: {e}")
+                # 로그만 출력하고 계속 진행
+                pass
 
     return app
 

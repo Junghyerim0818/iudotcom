@@ -17,8 +17,17 @@ class Config:
     # Uploads
     # Vercel 환경에서는 /tmp 디렉토리 사용 (임시 저장소)
     # 프로덕션에서는 외부 스토리지(S3, Cloudinary 등) 사용 권장
-    if os.environ.get('VERCEL'):
+    # Vercel 환경 감지: /var/task 경로가 있으면 Vercel 환경
+    import sys
+    is_vercel = (
+        os.environ.get('VERCEL') or 
+        os.environ.get('VERCEL_ENV') or 
+        (sys.path and any('/var/task' in p for p in sys.path))
+    )
+    
+    if is_vercel:
         UPLOAD_FOLDER = os.path.join('/tmp', 'uploads')
     else:
+        # 로컬 개발 환경
         UPLOAD_FOLDER = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'app/static/uploads')
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024
