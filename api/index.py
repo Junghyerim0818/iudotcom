@@ -1,9 +1,9 @@
 import os
+# Vercel 환경 감지 - import 전에 설정해야 함
+os.environ['VERCEL'] = '1'
+
 from flask import request, jsonify
 from app import create_app
-
-# Vercel 환경 감지
-os.environ['VERCEL'] = '1'
 
 app = create_app()
 

@@ -61,10 +61,14 @@ class Config:
         UPLOAD_FOLDER = os.path.join('/tmp', 'uploads')
     else:
         # 로컬 개발 환경
-        _local_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'app/static/uploads')
-        # /var/task가 포함되어 있으면 /tmp 사용
-        if '/var/task' in _local_path:
+        try:
+            _local_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'app/static/uploads')
+            # /var/task가 포함되어 있으면 Vercel 환경으로 간주하고 /tmp 사용
+            if '/var/task' in _local_path:
+                UPLOAD_FOLDER = os.path.join('/tmp', 'uploads')
+            else:
+                UPLOAD_FOLDER = _local_path
+        except:
+            # 경로 생성 실패 시 기본값으로 /tmp 사용 (안전)
             UPLOAD_FOLDER = os.path.join('/tmp', 'uploads')
-        else:
-            UPLOAD_FOLDER = _local_path
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024
