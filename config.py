@@ -55,9 +55,16 @@ class Config:
         except:
             pass
     
+    # 기본값을 /tmp로 설정 (Vercel 환경에서 안전)
+    # app/__init__.py에서 최종적으로 경로를 검증하고 변경함
     if _is_vercel:
         UPLOAD_FOLDER = os.path.join('/tmp', 'uploads')
     else:
         # 로컬 개발 환경
-        UPLOAD_FOLDER = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'app/static/uploads')
+        _local_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'app/static/uploads')
+        # /var/task가 포함되어 있으면 /tmp 사용
+        if '/var/task' in _local_path:
+            UPLOAD_FOLDER = os.path.join('/tmp', 'uploads')
+        else:
+            UPLOAD_FOLDER = _local_path
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024
