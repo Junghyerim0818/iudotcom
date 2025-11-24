@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flask Gallery & Archive</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <!-- Vercel Analytics -->
+    <script>
+        (function() {
+            var script = document.createElement('script');
+            script.src = 'https://va.vercel-scripts.com/v1/script.js';
+            script.defer = true;
+            script.setAttribute('data-api', '/api/analytics');
+            document.head.appendChild(script);
+        })();
+    </script>
+    <style>
+        @import url('https://cdn.rawgit.com/moonspam/NanumSquare/master/nanumsquare.css');
+
+        :root {
+            --sidebar-width: 280px;
+            --sidebar-collapsed-width: 80px;
+            --sidebar-bg: #212529;
+            --sidebar-text: #ffffff;
+            --sidebar-hover: #343a40;
+            --transition-speed: 0.3s;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'NanumSquare', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: var(--sidebar-collapsed-width);
+            background-color: var(--sidebar-bg);
+            color: var(--sidebar-text);
+            transition: width var(--transition-speed) ease;
+            z-index: 1000;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .sidebar.expanded {
+            width: var(--sidebar-width);
+        }
+
+
+        .sidebar-header {
+            padding: 1.5rem 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            min-height: 70px;
+        }
+
+        .sidebar:not(.expanded) .sidebar-header {
+            justify-content: center;
+            padding: 1.5rem 0.5rem;
+        }
+
+        .sidebar-brand {
+            font-size: 1.25rem;
+            font-weight: 600;
+            white-space: nowrap;
+            opacity: 1;
+            transition: opacity var(--transition-speed);
+        }
+
+        .sidebar:not(.expanded) .sidebar-brand {
+            opacity: 0;
+            width: 0;
+            overflow: hidden;
+        }
+
+        .sidebar-toggle {
+            background: none;
+            border: none;
+            color: var(--sidebar-text);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            transition: background-color 0.2s;
+        }
+
+        .sidebar-toggle:hover {
+            background-color: var(--sidebar-hover);
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar-menu-item {
+            margin: 0.25rem 0;
+        }
+
+        .sidebar-menu-link {
+            display: flex;
+            align-items: center;
+            padding: 0.875rem 1rem;
+            color: var(--sidebar-text);
+            text-decoration: none;
+            transition: background-color 0.2s;
+            white-space: nowrap;
+        }
+
+        .sidebar:not(.expanded) .sidebar-menu-link {
+            justify-content: center;
+            padding: 0.875rem 0.5rem;
+        }
+
+        .sidebar-menu-link:hover {
+            background-color: var(--sidebar-hover);
+            color: var(--sidebar-text);
+        }
+
+        .sidebar-menu-link.active {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-menu-icon {
+            font-size: 1.25rem;
+            width: 24px;
+            margin-right: 1rem;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .sidebar:not(.expanded) .sidebar-menu-icon {
+            margin-right: 0;
+            width: auto;
+        }
+
+        .sidebar-menu-text {
+            opacity: 1;
+            transition: opacity var(--transition-speed);
+        }
+
+        .sidebar:not(.expanded) .sidebar-menu-text {
+            opacity: 0;
+            width: 0;
+            overflow: hidden;
+        }
+
+        .sidebar-divider {
+            height: 1px;
+            background-color: rgba(255, 255, 255, 0.1);
+            margin: 0.5rem 0;
+        }
+
+        .sidebar-section-title {
+            padding: 1rem 1rem 0.5rem;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            opacity: 0.6;
+            white-space: nowrap;
+        }
+
+        .sidebar:not(.expanded) .sidebar-section-title {
+            opacity: 0;
+            width: 0;
+            overflow: hidden;
+        }
+
+        .sidebar-profile {
+            padding: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: auto;
+        }
+
+        .sidebar:not(.expanded) .sidebar-profile {
+            padding: 1rem 0.5rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .sidebar-profile-content {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .sidebar:not(.expanded) .sidebar-profile-content {
+            justify-content: center;
+        }
+
+        .sidebar-profile-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .sidebar-profile-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .sidebar-profile-name {
+            font-size: 0.875rem;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sidebar-profile-email {
+            font-size: 0.75rem;
+            opacity: 0.7;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sidebar:not(.expanded) .sidebar-profile-info {
+            display: none;
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-collapsed-width);
+            padding: 2rem 2rem 2rem 0;
+            transition: margin-left var(--transition-speed) ease;
+            min-height: 100vh;
+        }
+
+        .sidebar.expanded ~ .main-content {
+            margin-left: var(--sidebar-width);
+        }
+
+        .card-img-top {
+            height: 200px;
+            object-fit: cover;
+        }
+
+        /* 모달 스타일 */
+        .modal-content {
+            border-radius: 0.5rem;
+        }
+
+        .modal-header {
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .modal-footer {
+            border-top: 1px solid #dee2e6;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: var(--sidebar-collapsed-width);
+            }
+
+            .sidebar.expanded {
+                width: var(--sidebar-width);
+            }
+
+            .main-content {
+                margin-left: var(--sidebar-collapsed-width);
+            }
+
+            .sidebar.expanded ~ .main-content {
+                margin-left: var(--sidebar-width);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 사이드바 -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <span class="sidebar-brand">My Site</span>
+            <button class="sidebar-toggle" id="sidebarToggle" aria-label="사이드바 토글">
+                <i class="bi bi-list" id="sidebarToggleIcon"></i>
+            </button>
+        </div>
+
+        <nav>
+            <ul class="sidebar-menu">
+                <!-- 프로필/로그인 섹션 -->
+                <li class="sidebar-menu-item">
+                    {% if current_user.is_authenticated %}
+                        <div class="sidebar-profile">
+                            <div class="sidebar-profile-content">
+                                {% if current_user.profile_pic %}
+                                    <img src="{{ url_for('static', filename='uploads/profiles/' + current_user.profile_pic) if current_user.profile_pic.startswith('profile_') else current_user.profile_pic }}" alt="프로필" class="sidebar-profile-avatar">
+                                {% else %}
+                                    <div class="sidebar-profile-avatar bg-secondary d-flex align-items-center justify-content-center">
+                                        <i class="bi bi-person-fill text-white"></i>
+                                    </div>
+                                {% endif %}
+                                <div class="sidebar-profile-info">
+                                    <div class="sidebar-profile-name">{{ current_user.name or 'Guest' }}</div>
+                                    <div class="sidebar-profile-email">{{ current_user.email }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="sidebar-profile">
+                            <div class="sidebar-profile-content">
+                                <div class="sidebar-profile-avatar bg-secondary d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-person-fill text-white"></i>
+                                </div>
+                                <div class="sidebar-profile-info">
+                                    <div class="sidebar-profile-name">Guest</div>
+                                </div>
+                            </div>
+                        </div>
+                        <a href="#" class="sidebar-menu-link" data-bs-toggle="modal" data-bs-target="#loginModal">
+                            <i class="bi bi-box-arrow-in-right sidebar-menu-icon"></i>
+                            <span class="sidebar-menu-text">로그인</span>
+                        </a>
+                    {% endif %}
+                </li>
+
+                <li class="sidebar-menu-item"><div class="sidebar-divider"></div></li>
+
+                <!-- 이동 메뉴 섹션 -->
+                <li class="sidebar-menu-item">
+                    <div class="sidebar-section-title">메뉴</div>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="{{ url_for('main.index') }}" class="sidebar-menu-link {% if request.endpoint == 'main.index' %}active{% endif %}">
+                        <i class="bi bi-house-door sidebar-menu-icon"></i>
+                        <span class="sidebar-menu-text">홈</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="{{ url_for('main.gallery') }}" class="sidebar-menu-link {% if request.endpoint == 'main.gallery' %}active{% endif %}">
+                        <i class="bi bi-images sidebar-menu-icon"></i>
+                        <span class="sidebar-menu-text">갤러리</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="{{ url_for('main.archive', type_name='archive_1') }}" class="sidebar-menu-link {% if request.endpoint == 'main.archive' and request.view_args.type_name == 'archive_1' %}active{% endif %}">
+                        <i class="bi bi-archive sidebar-menu-icon"></i>
+                        <span class="sidebar-menu-text">아카이브 1</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="{{ url_for('main.archive', type_name='archive_2') }}" class="sidebar-menu-link {% if request.endpoint == 'main.archive' and request.view_args.type_name == 'archive_2' %}active{% endif %}">
+                        <i class="bi bi-archive-fill sidebar-menu-icon"></i>
+                        <span class="sidebar-menu-text">아카이브 2</span>
+                    </a>
+                </li>
+
+                {% if current_user.is_authenticated %}
+                    {% if current_user.is_writer() %}
+                        <li class="sidebar-menu-item">
+                            <a href="#" class="sidebar-menu-link" data-bs-toggle="modal" data-bs-target="#newPostModal">
+                                <i class="bi bi-pencil-square sidebar-menu-icon"></i>
+                                <span class="sidebar-menu-text">글쓰기</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                    {% if current_user.is_admin() %}
+                        <li class="sidebar-menu-item">
+                            <a href="{{ url_for('main.admin') }}" class="sidebar-menu-link {% if request.endpoint == 'main.admin' %}active{% endif %}">
+                                <i class="bi bi-shield-check sidebar-menu-icon"></i>
+                                <span class="sidebar-menu-text">관리자</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                {% endif %}
+
+                <li class="sidebar-menu-item"><div class="sidebar-divider"></div></li>
+
+                <!-- 설정 섹션 -->
+                {% if current_user.is_authenticated %}
+                    <li class="sidebar-menu-item">
+                        <a href="{{ url_for('main.logout') }}" class="sidebar-menu-link">
+                            <i class="bi bi-box-arrow-right sidebar-menu-icon"></i>
+                            <span class="sidebar-menu-text">로그아웃</span>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- 메인 콘텐츠 -->
+    <div class="main-content">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- 로그인 모달 -->
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="loginModalLabel">로그인</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <p class="mb-4">Google 계정으로 로그인하세요</p>
+                    <a href="{{ url_for('main.login') }}" class="btn btn-primary" id="googleLoginBtn">
+                        <i class="bi bi-google me-2"></i>Google로 로그인
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 글쓰기 모달 -->
+    {% if current_user.is_authenticated and current_user.is_writer() %}
+    <div class="modal fade" id="newPostModal" tabindex="-1" aria-labelledby="newPostModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="newPostModalLabel">새 글 작성</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div id="newPostModalBody">
+                    <div class="text-center p-4">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">로딩 중...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 사이드바 토글 기능
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebarIcon = document.getElementById('sidebarToggleIcon');
+
+        // 로컬 스토리지에서 사이드바 상태 불러오기 (기본값: 접힌 상태)
+        const sidebarExpanded = localStorage.getItem('sidebarExpanded') === 'true';
+        if (sidebarExpanded) {
+            sidebar.classList.add('expanded');
+            sidebarIcon.classList.remove('bi-list');
+            sidebarIcon.classList.add('bi-x-lg');
+        } else {
+            sidebarIcon.classList.remove('bi-x-lg');
+            sidebarIcon.classList.add('bi-list');
+        }
+
+        sidebarToggle.addEventListener('click', function() {
+            sidebar.classList.toggle('expanded');
+            
+            // 아이콘 변경
+            if (sidebar.classList.contains('expanded')) {
+                sidebarIcon.classList.remove('bi-list');
+                sidebarIcon.classList.add('bi-x-lg');
+                localStorage.setItem('sidebarExpanded', 'true');
+            } else {
+                sidebarIcon.classList.remove('bi-x-lg');
+                sidebarIcon.classList.add('bi-list');
+                localStorage.setItem('sidebarExpanded', 'false');
+            }
+        });
+
+        // 로그인 모달에서 Google 로그인 버튼 클릭 시 팝업 열기
+        document.getElementById('googleLoginBtn')?.addEventListener('click', function(e) {
+            e.preventDefault();
+            const loginUrl = this.getAttribute('href');
+            const popup = window.open(loginUrl, 'GoogleLogin', 'width=500,height=600,scrollbars=yes,resizable=yes');
+            
+            // 팝업에서 로그인 완료 메시지 수신
+            window.addEventListener('message', function(event) {
+                if (event.data && event.data.type === 'login') {
+                    if (event.data.success) {
+                        // 로그인 성공 시 모달 닫고 페이지 새로고침
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
+                        if (modal) modal.hide();
+                        window.location.reload();
+                    } else {
+                        alert(event.data.message || '로그인에 실패했습니다.');
+                    }
+                }
+            });
+            
+            // 팝업이 닫혔는지 확인
+            const checkInterval = setInterval(function() {
+                if (popup.closed) {
+                    clearInterval(checkInterval);
+                }
+            }, 500);
+        });
+
+        // 글쓰기 모달이 열릴 때 폼 로드
+        const newPostModal = document.getElementById('newPostModal');
+        if (newPostModal) {
+            newPostModal.addEventListener('show.bs.modal', function() {
+                const modalBody = document.getElementById('newPostModalBody');
+                // 폼 HTML 가져오기
+                fetch('{{ url_for("main.new_post") }}', {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.text())
+                .then(html => {
+                    // 폼 부분만 추출
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const form = doc.querySelector('form');
+                    if (form) {
+                        modalBody.innerHTML = form.outerHTML;
+                        // 폼 제출 이벤트 리스너 추가
+                        const newPostForm = document.getElementById('newPostForm');
+                        if (newPostForm) {
+                            newPostForm.addEventListener('submit', function(e) {
+                                e.preventDefault();
+                                const formData = new FormData(this);
+                                
+                                fetch(this.action, {
+                                    method: 'POST',
+                                    body: formData,
+                                    headers: {
+                                        'X-Requested-With': 'XMLHttpRequest'
+                                    }
+                                })
+                                .then(response => {
+                                    if (response.redirected) {
+                                        window.location.href = response.url;
+                                    } else {
+                                        return response.json().then(data => {
+                                            if (data.success) {
+                                                // 성공 시 모달 닫고 페이지 새로고침
+                                                const modal = bootstrap.Modal.getInstance(newPostModal);
+                                                modal.hide();
+                                                window.location.reload();
+                                            } else {
+                                                alert(data.message || '글 작성에 실패했습니다.');
+                                            }
+                                        });
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Error:', error);
+                                    // 폼 제출 실패 시 일반 폼 제출로 폴백
+                                    this.submit();
+                                });
+                            });
+                        }
+                    } else {
+                        modalBody.innerHTML = '<div class="alert alert-danger">폼을 불러올 수 없습니다.</div>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    modalBody.innerHTML = '<div class="alert alert-danger">오류가 발생했습니다.</div>';
+                });
+            });
+        }
+    </script>
+</body>
+</html>
+
