@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flask Gallery & Archive</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <!-- Vercel Analytics -->
+    <script>
+        (function() {
+            var script = document.createElement('script');
+            script.src = 'https://va.vercel-scripts.com/v1/script.js';
+            script.defer = true;
+            script.setAttribute('data-api', '/api/analytics');
+            document.head.appendChild(script);
+        })();
+    </script>
+</head>
+<body>
+    <!-- 사이드바 -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <span class="sidebar-brand">My Site</span>
+            <button class="sidebar-toggle" id="sidebarToggle" aria-label="사이드바 토글">
+                <i class="bi bi-list" id="sidebarToggleIcon"></i>
+            </button>
+        </div>
+
+        <nav>
+            <ul class="sidebar-menu">
+                <!-- 프로필/로그인 섹션 -->
+                <li class="sidebar-menu-item">
+                    {% if current_user.is_authenticated %}
+                        <div class="sidebar-profile">
+                            <div class="sidebar-profile-content">
+                                {% if current_user.profile_pic %}
+                                    <img src="{{ url_for('static', filename='uploads/profiles/' + current_user.profile_pic) if current_user.profile_pic.startswith('profile_') else current_user.profile_pic }}" alt="프로필" class="sidebar-profile-avatar">
+                                {% else %}
+                                    <div class="sidebar-profile-avatar bg-secondary d-flex align-items-center justify-content-center">
+                                        <i class="bi bi-person-fill text-white"></i>
+                                    </div>
+                                {% endif %}
+                                <div class="sidebar-profile-info">
+                                    <div class="sidebar-profile-name">{{ current_user.name or 'Guest' }}</div>
+                                    <div class="sidebar-profile-email">{{ current_user.email }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="sidebar-profile">
+                            <div class="sidebar-profile-content">
+                                <div class="sidebar-profile-avatar bg-secondary d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-person-fill text-white"></i>
+                                </div>
+                                <div class="sidebar-profile-info">
+                                    <div class="sidebar-profile-name">Guest</div>
+                                </div>
+                            </div>
+                        </div>
+                        <a href="#" class="sidebar-menu-link" data-bs-toggle="modal" data-bs-target="#loginModal">
+                            <i class="bi bi-box-arrow-in-right sidebar-menu-icon"></i>
+                            <span class="sidebar-menu-text">로그인</span>
+                        </a>
+                    {% endif %}
+                </li>
+
+                <li class="sidebar-menu-item"><div class="sidebar-divider"></div></li>
+
+                <!-- 이동 메뉴 섹션 -->
+                <li class="sidebar-menu-item">
+                    <div class="sidebar-section-title">메뉴</div>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="{{ url_for('main.index') }}" class="sidebar-menu-link {% if request.endpoint == 'main.index' %}active{% endif %}">
+                        <i class="bi bi-house-door sidebar-menu-icon"></i>
+                        <span class="sidebar-menu-text">홈</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="{{ url_for('main.gallery') }}" class="sidebar-menu-link {% if request.endpoint == 'main.gallery' %}active{% endif %}">
+                        <i class="bi bi-images sidebar-menu-icon"></i>
+                        <span class="sidebar-menu-text">갤러리</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="{{ url_for('main.archive', type_name='archive_1') }}" class="sidebar-menu-link {% if request.endpoint == 'main.archive' and request.view_args.type_name == 'archive_1' %}active{% endif %}">
+                        <i class="bi bi-archive sidebar-menu-icon"></i>
+                        <span class="sidebar-menu-text">아카이브 1</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="{{ url_for('main.archive', type_name='archive_2') }}" class="sidebar-menu-link {% if request.endpoint == 'main.archive' and request.view_args.type_name == 'archive_2' %}active{% endif %}">
+                        <i class="bi bi-archive-fill sidebar-menu-icon"></i>
+                        <span class="sidebar-menu-text">아카이브 2</span>
+                    </a>
+                </li>
+
+                {% if current_user.is_authenticated %}
+                    {% if current_user.is_writer() %}
+                        <li class="sidebar-menu-item">
+                            <a href="#" class="sidebar-menu-link" data-bs-toggle="modal" data-bs-target="#newPostModal">
+                                <i class="bi bi-pencil-square sidebar-menu-icon"></i>
+                                <span class="sidebar-menu-text">글쓰기</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                    {% if current_user.is_admin() %}
+                        <li class="sidebar-menu-item">
+                            <a href="{{ url_for('main.admin') }}" class="sidebar-menu-link {% if request.endpoint == 'main.admin' %}active{% endif %}">
+                                <i class="bi bi-shield-check sidebar-menu-icon"></i>
+                                <span class="sidebar-menu-text">관리자</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                {% endif %}
+
+                <li class="sidebar-menu-item"><div class="sidebar-divider"></div></li>
+
+                <!-- 설정 섹션 -->
+                {% if current_user.is_authenticated %}
+                    <li class="sidebar-menu-item">
+                        <a href="{{ url_for('main.logout') }}" class="sidebar-menu-link">
+                            <i class="bi bi-box-arrow-right sidebar-menu-icon"></i>
+                            <span class="sidebar-menu-text">로그아웃</span>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- 메인 콘텐츠 -->
+    <div class="main-content">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- 로그인 모달 -->
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="loginModalLabel">로그인</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <p class="mb-4">Google 계정으로 로그인하세요</p>
+                    <a href="{{ url_for('main.login') }}" class="btn btn-primary" id="googleLoginBtn">
+                        <i class="bi bi-google me-2"></i>Google로 로그인
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 글쓰기 모달 -->
+    {% if current_user.is_authenticated and current_user.is_writer() %}
+    <div class="modal fade" id="newPostModal" tabindex="-1" aria-labelledby="newPostModalLabel" aria-hidden="true" data-form-url="{{ url_for('main.new_post') }}">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="newPostModalLabel">새 글 작성</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div id="newPostModalBody">
+                    <div class="text-center p-4">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">로딩 중...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/base.js') }}"></script>
+</body>
+</html>
+

@@ -12,8 +12,9 @@ login_manager = LoginManager()
 oauth = OAuth()
 
 def create_app(config_class=Config):
-    # static과 templates 폴더를 명시적으로 지정 (app 폴더 기준)
-    base_dir = os.path.dirname(os.path.abspath(__file__))
+    # static과 templates 폴더를 명시적으로 지정 (루트 폴더 기준)
+    # app 폴더의 부모 디렉토리(프로젝트 루트)를 기준으로 설정
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     app = Flask(__name__, 
                 static_folder=os.path.join(base_dir, 'static'),
                 static_url_path='/static',  # static URL 경로 명시
