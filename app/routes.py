@@ -100,6 +100,17 @@ def save_picture(form_picture):
 
 def save_profile_picture(form_picture, user_id):
     """프로필 사진을 저장하고 500x500으로 리사이즈"""
+    # 안전한 디렉토리 생성 헬퍼 함수
+    def safe_makedirs(path):
+        """안전하게 디렉토리 생성 (/var 경로 차단)"""
+        if '/var/task' in path or path.startswith('/var') or path.startswith('/usr'):
+            raise OSError(f"Unsafe path: {path}")
+        try:
+            os.makedirs(path, exist_ok=True)
+        except (OSError, PermissionError):
+            # 이미 존재하거나 권한 문제 시 무시
+            pass
+    
     try:
         from PIL import Image
     except ImportError:
@@ -108,7 +119,7 @@ def save_profile_picture(form_picture, user_id):
         _, f_ext = os.path.splitext(form_picture.filename)
         picture_fn = f'profile_{user_id}_{random_hex}{f_ext}'
         profile_folder = os.path.join(current_app.config['UPLOAD_FOLDER'], 'profiles')
-        os.makedirs(profile_folder, exist_ok=True)
+        safe_makedirs(profile_folder)
         picture_path = os.path.join(profile_folder, picture_fn)
         form_picture.save(picture_path)
         return picture_fn
@@ -125,7 +136,7 @@ def save_profile_picture(form_picture, user_id):
     _, f_ext = os.path.splitext(form_picture.filename)
     picture_fn = f'profile_{user_id}_{random_hex}{f_ext}'
     profile_folder = os.path.join(current_app.config['UPLOAD_FOLDER'], 'profiles')
-    os.makedirs(profile_folder, exist_ok=True)
+    safe_makedirs(profile_folder)
     picture_path = os.path.join(profile_folder, picture_fn)
     
     # 이미지 열기 및 리사이즈

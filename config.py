@@ -46,6 +46,7 @@ class Config:
     # Vercel 환경에서는 /tmp 디렉토리 사용 (임시 저장소)
     # 프로덕션에서는 외부 스토리지(S3, Cloudinary 등) 사용 권장
     _is_vercel = is_vercel_environment()
+    
     # 추가 안전장치: 경로에 /var/task가 포함되어 있으면 Vercel 환경으로 간주
     if not _is_vercel:
         try:
@@ -55,21 +56,43 @@ class Config:
         except:
             pass
     
+    # 안전장치: sys.path나 환경 변수로도 확인
+    if not _is_vercel:
+        try:
+            if sys.path and any('/var/task' in str(p) for p in sys.path):
+                _is_vercel = True
+        except:
+            pass
+    
     # 기본값을 /tmp로 설정 (Vercel 환경에서 안전)
     # app/__init__.py에서 최종적으로 경로를 검증하고 변경함
+    # 안전 우선: 확실하지 않으면 /tmp 사용
     if _is_vercel:
         UPLOAD_FOLDER = os.path.join('/tmp', 'uploads')
     else:
-        # 로컬 개발 환경
+        # 로컬 개발 환경 확인
         try:
             _local_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'app/static/uploads')
-            # /var/task가 포함되어 있으면 Vercel 환경으로 간주하고 /tmp 사용
-            # 경로의 어느 부분이든 /var/task를 포함하면 안전을 위해 /tmp 사용
-            if '/var/task' in _local_path or _local_path.startswith('/var'):
+            _abs_local_path = os.path.abspath(_local_path)
+            
+            # /var/task가 포함되어 있거나 /var, /usr로 시작하면 무조건 /tmp 사용
+            if '/var/task' in _local_path or '/var/task' in _abs_local_path:
+                UPLOAD_FOLDER = os.path.join('/tmp', 'uploads')
+            elif _local_path.startswith('/var') or _local_path.startswith('/usr'):
+                UPLOAD_FOLDER = os.path.join('/tmp', 'uploads')
+            elif _abs_local_path.startswith('/var') or _abs_local_path.startswith('/usr'):
                 UPLOAD_FOLDER = os.path.join('/tmp', 'uploads')
             else:
-                UPLOAD_FOLDER = _local_path
-        except:
+                # Windows 경로인 경우에만 로컬 경로 사용
+                if os.name == 'nt' and ':' in _local_path:
+                    UPLOAD_FOLDER = _local_path
+                elif not _local_path.startswith('/'):
+                    # 상대 경로인 경우
+                    UPLOAD_FOLDER = _local_path
+                else:
+                    # Unix 계열이고 안전한 경로인 경우
+                    UPLOAD_FOLDER = _local_path
+        except Exception:
             # 경로 생성 실패 시 기본값으로 /tmp 사용 (안전)
             UPLOAD_FOLDER = os.path.join('/tmp', 'uploads')
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024
