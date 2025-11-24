@@ -9,8 +9,8 @@ class PostForm(FlaskForm):
     # Category selection: Gallery or Archive types
     category = SelectField('카테고리', choices=[
         ('gallery', '갤러리'), 
-        ('archive_1', '아카이브 1'), 
-        ('archive_2', '아카이브 2')
+        ('archive_1', '아이유 인증 글'), 
+        ('archive_2', '서포트 인증 글')
     ], validators=[DataRequired()])
     image = FileField('이미지 업로드', validators=[
         FileAllowed(['jpg', 'png', 'jpeg', 'gif'], 'Images only!')

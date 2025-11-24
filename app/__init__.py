@@ -30,6 +30,13 @@ def create_app(config_class=Config):
 
     from .routes import bp as main_bp
     app.register_blueprint(main_bp)
+    
+    # 언어 설정을 템플릿에 전달하는 컨텍스트 프로세서
+    @app.context_processor
+    def inject_language():
+        from flask import session
+        lang = session.get('language', 'ko')  # 기본값: 한국어
+        return dict(current_lang=lang)
 
     # Create DB tables and add missing columns
     with app.app_context():

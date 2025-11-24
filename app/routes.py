@@ -1,7 +1,7 @@
 import os
 import secrets
 import base64
-from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app, abort, Response
+from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app, abort, Response, session
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.utils import secure_filename
 from . import db, oauth, login_manager
@@ -190,6 +190,13 @@ def logout():
     flash('로그아웃되었습니다.', 'info')
     return redirect(url_for('main.index'))
 
+@bp.route('/lang/<lang_code>')
+def change_language(lang_code):
+    """언어 변경"""
+    if lang_code in ['ko', 'en']:
+        session['language'] = lang_code
+    return redirect(request.referrer or url_for('main.index'))
+
 @bp.route('/image/<int:post_id>')
 def get_image(post_id):
     """DB에 저장된 이미지를 반환하는 라우트"""
@@ -283,11 +290,22 @@ def archive(type_name):
         abort(404)
     try:
         posts = Post.query.filter_by(category=type_name).order_by(Post.created_at.desc()).all()
-        title = '아카이브 1' if type_name == 'archive_1' else '아카이브 2'
+        # 언어에 따라 제목 설정
+        from flask import session
+        current_lang = session.get('language', 'ko')
+        if type_name == 'archive_1':
+            title = 'IU Verification' if current_lang == 'en' else '아이유 인증 글'
+        else:
+            title = 'Support Verification' if current_lang == 'en' else '서포트 인증 글'
         return render_template('archive.html', posts=posts, title=title)
     except Exception as e:
         current_app.logger.error(f"Error in archive route: {str(e)}")
-        title = '아카이브 1' if type_name == 'archive_1' else '아카이브 2'
+        from flask import session
+        current_lang = session.get('language', 'ko')
+        if type_name == 'archive_1':
+            title = 'IU Verification' if current_lang == 'en' else '아이유 인증 글'
+        else:
+            title = 'Support Verification' if current_lang == 'en' else '서포트 인증 글'
         return render_template('archive.html', posts=[], title=title)
 
 @bp.route('/admin', methods=['GET', 'POST'])

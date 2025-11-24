@@ -224,22 +224,22 @@ body {
 
 /* 메인 페이지: 사이드바와 이미지 사이 간격 최소화 */
 .main-content-index {
-    padding: 0.5rem 1rem 0.5rem 0.5rem;
+    padding: 1.5rem 1rem 0.5rem 0.5rem;
 }
 
 .sidebar.expanded ~ .main-content-index {
-    padding: 0.5rem 1rem 0.5rem 0.5rem;
+    padding: 1.5rem 1rem 0.5rem 0.5rem;
 }
 
 /* 갤러리/아카이브 페이지: 적당한 간격 유지 */
 .main-content-gallery,
 .main-content-archive {
-    padding: 2rem 2rem 2rem 1rem;
+    padding: 1.5rem 2rem 2rem 1rem;
 }
 
 .sidebar.expanded ~ .main-content-gallery,
 .sidebar.expanded ~ .main-content-archive {
-    padding: 2rem 2rem 2rem 1rem;
+    padding: 1.5rem 2rem 2rem 1rem;
 }
 
 .card-img-top {
