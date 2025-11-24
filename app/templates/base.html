@@ -381,12 +381,6 @@
                 <!-- 설정 섹션 -->
                 {% if current_user.is_authenticated %}
                     <li class="sidebar-menu-item">
-                        <a href="#" class="sidebar-menu-link" data-bs-toggle="modal" data-bs-target="#profileModal">
-                            <i class="bi bi-person-circle sidebar-menu-icon"></i>
-                            <span class="sidebar-menu-text">프로필 수정</span>
-                        </a>
-                    </li>
-                    <li class="sidebar-menu-item">
                         <a href="{{ url_for('main.logout') }}" class="sidebar-menu-link">
                             <i class="bi bi-box-arrow-right sidebar-menu-icon"></i>
                             <span class="sidebar-menu-text">로그아웃</span>
@@ -430,48 +424,6 @@
             </div>
         </div>
     </div>
-
-    <!-- 프로필 수정 모달 -->
-    {% if current_user.is_authenticated %}
-    <div class="modal fade" id="profileModal" tabindex="-1" aria-labelledby="profileModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="profileModalLabel">프로필 수정</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form id="profileForm" method="POST" enctype="multipart/form-data" action="{{ url_for('main.update_profile') }}">
-                    <div class="modal-body">
-                        <div class="text-center mb-4">
-                            <div class="position-relative d-inline-block">
-                                {% if current_user.profile_pic %}
-                                    <img id="profilePreview" src="{{ url_for('static', filename='uploads/profiles/' + current_user.profile_pic) if current_user.profile_pic.startswith('profile_') else current_user.profile_pic }}" alt="프로필" class="rounded-circle" style="width: 120px; height: 120px; object-fit: cover;">
-                                {% else %}
-                                    <div id="profilePreview" class="bg-secondary rounded-circle d-flex align-items-center justify-content-center" style="width: 120px; height: 120px;">
-                                        <i class="bi bi-person-fill text-white" style="font-size: 3rem;"></i>
-                                    </div>
-                                {% endif %}
-                                <label for="profileImage" class="position-absolute bottom-0 end-0 bg-primary text-white rounded-circle p-2" style="cursor: pointer; width: 36px; height: 36px;">
-                                    <i class="bi bi-camera"></i>
-                                </label>
-                                <input type="file" class="d-none" id="profileImage" name="profile_image" accept="image/*">
-                            </div>
-                            <div class="form-text mt-2">최대 2MB, 권장 크기: 500x500</div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="profileName" class="form-label">별명</label>
-                            <input type="text" class="form-control" id="profileName" name="name" value="{{ current_user.name or '' }}" required>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-                        <button type="submit" class="btn btn-primary">저장</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-    {% endif %}
 
     <!-- 글쓰기 모달 -->
     {% if current_user.is_authenticated and current_user.is_writer() %}
@@ -553,71 +505,6 @@
                     clearInterval(checkInterval);
                 }
             }, 500);
-        });
-
-        // 프로필 이미지 미리보기
-        document.getElementById('profileImage')?.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                // 파일 크기 확인 (2MB)
-                if (file.size > 2 * 1024 * 1024) {
-                    alert('파일 크기는 2MB 이하여야 합니다.');
-                    e.target.value = '';
-                    return;
-                }
-                
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const preview = document.getElementById('profilePreview');
-                    if (preview.tagName === 'IMG') {
-                        preview.src = e.target.result;
-                    } else {
-                        // div를 img로 교체
-                        const img = document.createElement('img');
-                        img.id = 'profilePreview';
-                        img.src = e.target.result;
-                        img.className = 'rounded-circle';
-                        img.style.width = '120px';
-                        img.style.height = '120px';
-                        img.style.objectFit = 'cover';
-                        preview.parentNode.replaceChild(img, preview);
-                    }
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        // 프로필 폼 제출 처리
-        document.getElementById('profileForm')?.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const formData = new FormData(this);
-            
-            fetch(this.action, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(response => {
-                if (response.redirected) {
-                    window.location.href = response.url;
-                } else {
-                    return response.json().then(data => {
-                        if (data.success) {
-                            const modal = bootstrap.Modal.getInstance(document.getElementById('profileModal'));
-                            modal.hide();
-                            window.location.reload();
-                        } else {
-                            alert(data.message || '프로필 수정에 실패했습니다.');
-                        }
-                    });
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                this.submit();
-            });
         });
 
         // 글쓰기 모달이 열릴 때 폼 로드

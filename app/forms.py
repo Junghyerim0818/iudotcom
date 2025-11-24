@@ -25,9 +25,4 @@ class AdminUserForm(FlaskForm):
     ])
     submit = SubmitField('수정')
 
-class ProfileForm(FlaskForm):
-    name = StringField('별명', validators=[DataRequired(), Length(max=100)])
-    profile_image = FileField('프로필 사진', validators=[
-        FileAllowed(['jpg', 'png', 'jpeg', 'gif'], '이미지 파일만 업로드 가능합니다!')
-    ])
 

@@ -1,11 +1,12 @@
 import os
 import secrets
-from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app, abort
+import base64
+from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app, abort, Response
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.utils import secure_filename
 from . import db, oauth, login_manager
 from .models import User, Post
-from .forms import PostForm, AdminUserForm, ProfileForm
+from .forms import PostForm, AdminUserForm
 
 bp = Blueprint('main', __name__)
 
@@ -90,78 +91,25 @@ def logout():
     flash('로그아웃되었습니다.', 'info')
     return redirect(url_for('main.index'))
 
-def save_picture(form_picture):
-    random_hex = secrets.token_hex(8)
-    _, f_ext = os.path.splitext(form_picture.filename)
-    picture_fn = random_hex + f_ext
-    picture_path = os.path.join(current_app.config['UPLOAD_FOLDER'], picture_fn)
-    form_picture.save(picture_path)
-    return picture_fn
+@bp.route('/image/<int:post_id>')
+def get_image(post_id):
+    """DB에 저장된 이미지를 반환하는 라우트"""
+    post = Post.query.get_or_404(post_id)
+    if post.image_data:
+        return Response(post.image_data, mimetype=post.image_mimetype or 'image/jpeg')
+    abort(404)
 
-def save_profile_picture(form_picture, user_id):
-    """프로필 사진을 저장하고 500x500으로 리사이즈"""
-    # 안전한 디렉토리 생성 헬퍼 함수
-    def safe_makedirs(path):
-        """안전하게 디렉토리 생성 (/var 경로 차단)"""
-        if '/var/task' in path or path.startswith('/var') or path.startswith('/usr'):
-            raise OSError(f"Unsafe path: {path}")
-        try:
-            os.makedirs(path, exist_ok=True)
-        except (OSError, PermissionError):
-            # 이미 존재하거나 권한 문제 시 무시
-            pass
+def save_picture(form_picture):
+    """이미지를 DB에 저장하고 (image_data, image_mimetype) 튜플 반환"""
+    # 파일 데이터 읽기
+    image_data = form_picture.read()
     
-    try:
-        from PIL import Image
-    except ImportError:
-        # PIL이 없으면 기본 저장만 수행
-        random_hex = secrets.token_hex(8)
-        _, f_ext = os.path.splitext(form_picture.filename)
-        picture_fn = f'profile_{user_id}_{random_hex}{f_ext}'
-        profile_folder = os.path.join(current_app.config['UPLOAD_FOLDER'], 'profiles')
-        safe_makedirs(profile_folder)
-        picture_path = os.path.join(profile_folder, picture_fn)
-        form_picture.save(picture_path)
-        return picture_fn
+    # MIME 타입 결정
+    mimetype = form_picture.content_type or 'image/jpeg'
+    if not mimetype or not mimetype.startswith('image/'):
+        mimetype = 'image/jpeg'
     
-    # 파일 크기 확인 (2MB)
-    form_picture.seek(0, os.SEEK_END)
-    file_size = form_picture.tell()
-    form_picture.seek(0)
-    
-    if file_size > 2 * 1024 * 1024:
-        raise ValueError('파일 크기는 2MB 이하여야 합니다.')
-    
-    random_hex = secrets.token_hex(8)
-    _, f_ext = os.path.splitext(form_picture.filename)
-    picture_fn = f'profile_{user_id}_{random_hex}{f_ext}'
-    profile_folder = os.path.join(current_app.config['UPLOAD_FOLDER'], 'profiles')
-    safe_makedirs(profile_folder)
-    picture_path = os.path.join(profile_folder, picture_fn)
-    
-    # 이미지 열기 및 리사이즈
-    image = Image.open(form_picture)
-    # RGB로 변환 (RGBA인 경우)
-    if image.mode in ('RGBA', 'LA', 'P'):
-        rgb_image = Image.new('RGB', image.size, (255, 255, 255))
-        if image.mode == 'P':
-            image = image.convert('RGBA')
-        rgb_image.paste(image, mask=image.split()[-1] if image.mode in ('RGBA', 'LA') else None)
-        image = rgb_image
-    
-    # 500x500으로 리사이즈 (비율 유지)
-    image.thumbnail((500, 500), Image.Resampling.LANCZOS)
-    
-    # 정사각형으로 만들기 (중앙 정렬)
-    width, height = image.size
-    size = max(width, height)
-    new_image = Image.new('RGB', (size, size), (255, 255, 255))
-    new_image.paste(image, ((size - width) // 2, (size - height) // 2))
-    new_image = new_image.resize((500, 500), Image.Resampling.LANCZOS)
-    
-    # 저장
-    new_image.save(picture_path, 'JPEG', quality=85)
-    return picture_fn
+    return (image_data, mimetype)
 
 @bp.route('/post/new', methods=['GET', 'POST'])
 @login_required
@@ -174,23 +122,25 @@ def new_post():
         
     form = PostForm()
     if form.validate_on_submit():
-        image_file = None
+        image_data = None
+        image_mimetype = None
         if form.category.data == 'gallery':
             if form.image.data:
-                image_file = save_picture(form.image.data)
+                image_data, image_mimetype = save_picture(form.image.data)
             else:
                 if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                     return {'success': False, 'message': '갤러리에는 이미지가 필수입니다.'}, 400
                 flash('갤러리에는 이미지가 필수입니다.', 'danger')
                 return render_template('create_post.html', title='New Post', form=form)
         elif form.image.data:
-             image_file = save_picture(form.image.data)
+             image_data, image_mimetype = save_picture(form.image.data)
              
         post = Post(
             title=form.title.data,
             content=form.content.data,
             category=form.category.data,
-            image_filename=image_file,
+            image_data=image_data,
+            image_mimetype=image_mimetype,
             author=current_user
         )
         db.session.add(post)
@@ -252,52 +202,4 @@ def update_user_role(user_id):
         
     return redirect(url_for('main.admin'))
 
-@bp.route('/profile/update', methods=['POST'])
-@login_required
-def update_profile():
-    try:
-        # 이름 업데이트
-        new_name = request.form.get('name', '').strip()
-        if new_name:
-            current_user.name = new_name
-        
-        # 프로필 사진 업데이트
-        if 'profile_image' in request.files:
-            profile_image = request.files['profile_image']
-            if profile_image and profile_image.filename:
-                # 기존 프로필 사진 삭제 (로컬에 저장된 경우)
-                if current_user.profile_pic and current_user.profile_pic.startswith('profile_'):
-                    old_pic_path = os.path.join(
-                        current_app.config['UPLOAD_FOLDER'], 
-                        'profiles', 
-                        current_user.profile_pic
-                    )
-                    if os.path.exists(old_pic_path):
-                        try:
-                            os.remove(old_pic_path)
-                        except:
-                            pass
-                
-                # 새 프로필 사진 저장
-                picture_fn = save_profile_picture(profile_image, current_user.id)
-                current_user.profile_pic = picture_fn
-        
-        db.session.commit()
-        flash('프로필이 수정되었습니다.', 'success')
-        
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            from flask import jsonify
-            return jsonify({'success': True, 'message': '프로필이 수정되었습니다.'})
-        
-        return redirect(url_for('main.index'))
-    except Exception as e:
-        db.session.rollback()
-        error_msg = str(e) if str(e) else '프로필 수정에 실패했습니다.'
-        flash(error_msg, 'danger')
-        
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            from flask import jsonify
-            return jsonify({'success': False, 'message': error_msg}), 400
-        
-        return redirect(url_for('main.index'))
 
