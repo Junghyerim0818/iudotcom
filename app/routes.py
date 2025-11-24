@@ -27,10 +27,16 @@ def serve_static(filename):
     return send_from_directory(static_dir, filename)
 
 # Google OAuth Setup
+client_id = os.environ.get('GOOGLE_CLIENT_ID')
+client_secret = os.environ.get('GOOGLE_CLIENT_SECRET')
+
+if not client_id or not client_secret:
+    print("Warning: GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET not set")
+
 google = oauth.register(
     name='google',
-    client_id=os.environ.get('GOOGLE_CLIENT_ID'),
-    client_secret=os.environ.get('GOOGLE_CLIENT_SECRET'),
+    client_id=client_id,
+    client_secret=client_secret,
     server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
     client_kwargs={
         'scope': 'openid email profile'
@@ -58,12 +64,23 @@ def index():
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('main.index'))
+    
+    # 환경 변수 확인
+    if not client_id or not client_secret:
+        flash('OAuth 설정이 올바르지 않습니다. 관리자에게 문의하세요.', 'danger')
+        return redirect(url_for('main.index'))
+    
     redirect_uri = url_for('main.authorize', _external=True)
     return google.authorize_redirect(redirect_uri)
 
 @bp.route('/login/callback')
 def authorize():
     try:
+        # 환경 변수 확인
+        if not client_id or not client_secret:
+            flash('OAuth 설정이 올바르지 않습니다. 관리자에게 문의하세요.', 'danger')
+            return render_template('login_callback.html', success=False, message='OAuth 설정 오류')
+        
         # authorize_access_token 내부에서 JWKS 검증을 시도할 수 있으므로
         # fetch_token을 직접 호출하거나 검증 옵션을 끕니다.
         token = google.authorize_access_token()
