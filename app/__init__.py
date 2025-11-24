@@ -37,19 +37,30 @@ def create_app(config_class=Config):
         # 업로드 폴더 생성 (Vercel 환경에서는 /tmp 사용)
         upload_folder = app.config.get('UPLOAD_FOLDER')
         if upload_folder:
-            # Vercel 환경 체크: /var/task가 포함된 경로는 절대 생성하지 않음
+            # Vercel 환경 체크: /var/task가 포함된 경로나 /var, /usr로 시작하는 경로는 절대 생성하지 않음
             # 즉시 /tmp로 변경 (가장 먼저 체크)
-            if '/var/task' in upload_folder or upload_folder.startswith('/var'):
+            needs_redirect = (
+                '/var/task' in upload_folder or 
+                upload_folder.startswith('/var') or 
+                upload_folder.startswith('/usr')
+            )
+            
+            if needs_redirect:
                 upload_folder = os.path.join('/tmp', 'uploads')
                 app.config['UPLOAD_FOLDER'] = upload_folder
             
-            # 최종 안전장치: /var로 시작하면 절대 생성하지 않음
-            if upload_folder.startswith('/var'):
-                upload_folder = os.path.join('/tmp', 'uploads')
-                app.config['UPLOAD_FOLDER'] = upload_folder
+            # os.makedirs 호출 전 최종 검증: /var 또는 /usr로 시작하거나 /var/task를 포함하면 절대 생성하지 않음
+            # 경로의 모든 부분을 검사하여 안전성 확인
+            path_parts = upload_folder.split(os.sep)
+            is_safe_path = (
+                not upload_folder.startswith('/var') and 
+                not upload_folder.startswith('/usr') and 
+                '/var/task' not in upload_folder and
+                '/var' not in path_parts and
+                '/usr' not in path_parts
+            )
             
-            # os.makedirs 호출 전 최종 검증: /var로 시작하면 절대 생성하지 않음
-            if not upload_folder.startswith('/var') and not upload_folder.startswith('/usr'):
+            if is_safe_path:
                 # /tmp로 시작하는 경로만 생성 시도
                 if upload_folder.startswith('/tmp'):
                     try:
@@ -64,6 +75,7 @@ def create_app(config_class=Config):
                         pass
                 else:
                     # 로컬 개발 환경에서만 폴더 생성
+                    # 경로에 /var/task가 포함되어 있는지 다시 한 번 확인
                     try:
                         if not os.path.exists(upload_folder):
                             os.makedirs(upload_folder, exist_ok=True)
@@ -72,6 +84,7 @@ def create_app(config_class=Config):
                             os.makedirs(profile_folder, exist_ok=True)
                     except (OSError, PermissionError):
                         pass
+            # is_safe_path가 False이면 디렉토리 생성을 시도하지 않음 (Vercel 환경)
 
     return app
 

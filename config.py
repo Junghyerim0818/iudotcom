@@ -64,7 +64,8 @@ class Config:
         try:
             _local_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'app/static/uploads')
             # /var/task가 포함되어 있으면 Vercel 환경으로 간주하고 /tmp 사용
-            if '/var/task' in _local_path:
+            # 경로의 어느 부분이든 /var/task를 포함하면 안전을 위해 /tmp 사용
+            if '/var/task' in _local_path or _local_path.startswith('/var'):
                 UPLOAD_FOLDER = os.path.join('/tmp', 'uploads')
             else:
                 UPLOAD_FOLDER = _local_path
