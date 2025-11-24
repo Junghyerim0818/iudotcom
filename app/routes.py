@@ -76,7 +76,8 @@ def login():
         return redirect(url_for('main.index'))
     
     redirect_uri = url_for('main.authorize', _external=True)
-    return google.authorize_redirect(redirect_uri)
+    # 계정 선택 화면이 나오도록 prompt 파라미터 추가
+    return google.authorize_redirect(redirect_uri, prompt='select_account')
 
 @bp.route('/login/callback')
 def authorize():
