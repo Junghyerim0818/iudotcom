@@ -26,22 +26,27 @@ def serve_static(filename):
     
     return send_from_directory(static_dir, filename)
 
-# Google OAuth Setup
-client_id = os.environ.get('GOOGLE_CLIENT_ID')
-client_secret = os.environ.get('GOOGLE_CLIENT_SECRET')
-
-if not client_id or not client_secret:
-    print("Warning: GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET not set")
-
-google = oauth.register(
-    name='google',
-    client_id=client_id,
-    client_secret=client_secret,
-    server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
-    client_kwargs={
-        'scope': 'openid email profile'
-    }
-)
+# Google OAuth Setup - 지연 등록 방식
+def get_google_client():
+    """Google OAuth 클라이언트를 가져오거나 등록"""
+    if hasattr(oauth, 'google'):
+        return oauth.google
+    
+    client_id = os.environ.get('GOOGLE_CLIENT_ID')
+    client_secret = os.environ.get('GOOGLE_CLIENT_SECRET')
+    
+    if not client_id or not client_secret:
+        return None
+    
+    return oauth.register(
+        name='google',
+        client_id=client_id,
+        client_secret=client_secret,
+        server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
+        client_kwargs={
+            'scope': 'openid email profile'
+        }
+    )
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -65,8 +70,8 @@ def login():
     if current_user.is_authenticated:
         return redirect(url_for('main.index'))
     
-    # 환경 변수 확인
-    if not client_id or not client_secret:
+    google = get_google_client()
+    if not google:
         flash('OAuth 설정이 올바르지 않습니다. 관리자에게 문의하세요.', 'danger')
         return redirect(url_for('main.index'))
     
@@ -76,8 +81,8 @@ def login():
 @bp.route('/login/callback')
 def authorize():
     try:
-        # 환경 변수 확인
-        if not client_id or not client_secret:
+        google = get_google_client()
+        if not google:
             flash('OAuth 설정이 올바르지 않습니다. 관리자에게 문의하세요.', 'danger')
             return render_template('login_callback.html', success=False, message='OAuth 설정 오류')
         
