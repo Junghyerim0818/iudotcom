@@ -243,6 +243,17 @@ body {
     object-fit: cover;
 }
 
+/* 갤러리 카드 호버 효과 */
+.gallery-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+}
+
+.gallery-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
 /* 모달 스타일 */
 .modal-content {
     border-radius: 0.5rem;

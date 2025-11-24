@@ -297,6 +297,30 @@ def gallery():
         current_app.logger.error(f"Error in gallery route: {str(e)}")
         return render_template('gallery.html', posts=[])
 
+@bp.route('/gallery/<int:post_id>')
+def gallery_detail(post_id):
+    """갤러리 상세 페이지 - 원본 이미지 보기"""
+    try:
+        post = Post.query.get_or_404(post_id)
+        if post.category != 'gallery':
+            abort(404)
+        
+        # 이전/다음 포스트 가져오기
+        prev_post = Post.query.filter(
+            Post.category == 'gallery',
+            Post.id < post_id
+        ).order_by(Post.id.desc()).first()
+        
+        next_post = Post.query.filter(
+            Post.category == 'gallery',
+            Post.id > post_id
+        ).order_by(Post.id.asc()).first()
+        
+        return render_template('gallery_detail.html', post=post, prev_post=prev_post, next_post=next_post)
+    except Exception as e:
+        current_app.logger.error(f"Error in gallery_detail route: {str(e)}")
+        abort(404)
+
 @bp.route('/archive/<type_name>')
 def archive(type_name):
     if type_name not in ['archive_1', 'archive_2']:

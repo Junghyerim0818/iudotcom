@@ -5,16 +5,18 @@
 <div class="row row-cols-1 row-cols-md-3 g-4">
     {% for post in posts %}
     <div class="col">
-        <div class="card h-100">
-            {% if post.has_image_data() or post.image_filename or post.image_url %}
-                <img src="{% if post.image_url %}{{ post.image_url }}{% elif post.has_image_data() %}{{ url_for('main.get_image', post_id=post.id) }}{% elif post.image_filename %}{{ url_for('static', filename='uploads/' + post.image_filename) }}{% endif %}" class="card-img-top" alt="{{ post.title }}">
-            {% endif %}
-            <div class="card-body">
-                <h5 class="card-title">{{ post.title }}</h5>
-                <p class="card-text">{{ post.content }}</p>
-                <p class="card-text"><small class="text-muted">By {{ post.author.name }} on {{ post.created_at.strftime('%Y-%m-%d') }}</small></p>
+        <a href="{{ url_for('main.gallery_detail', post_id=post.id) }}" class="text-decoration-none">
+            <div class="card h-100 gallery-card">
+                {% if post.has_image_data() or post.image_filename or post.image_url %}
+                    <img src="{% if post.image_url %}{{ post.image_url }}{% elif post.has_image_data() %}{{ url_for('main.get_image', post_id=post.id) }}{% elif post.image_filename %}{{ url_for('static', filename='uploads/' + post.image_filename) }}{% endif %}" class="card-img-top" alt="{{ post.title }}">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title text-dark">{{ post.title }}</h5>
+                    <p class="card-text text-dark">{{ post.content }}</p>
+                    <p class="card-text"><small class="text-muted">By {{ post.author.name }} on {{ post.created_at.strftime('%Y-%m-%d') }}</small></p>
+                </div>
             </div>
-        </div>
+        </a>
     </div>
     {% else %}
     <p>게시물이 없습니다.</p>
