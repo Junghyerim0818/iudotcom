@@ -132,7 +132,7 @@
     </aside>
 
     <!-- 메인 콘텐츠 -->
-    <div class="main-content">
+    <div class="main-content {% if request.endpoint == 'main.gallery' %}main-content-gallery{% elif request.endpoint == 'main.archive' %}main-content-archive{% elif request.endpoint == 'main.index' %}main-content-index{% endif %}">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
