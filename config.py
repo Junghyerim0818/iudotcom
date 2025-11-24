@@ -1,4 +1,20 @@
 import os
+import sys
+
+# Vercel 환경 감지 (가장 확실한 방법)
+def is_vercel_environment():
+    """Vercel 환경인지 확인"""
+    # 환경 변수 확인
+    if os.environ.get('VERCEL') or os.environ.get('VERCEL_ENV'):
+        return True
+    # sys.path에 /var/task가 있는지 확인
+    if sys.path and any('/var/task' in str(p) for p in sys.path):
+        return True
+    # 현재 파일 경로 확인
+    current_file = os.path.abspath(__file__)
+    if '/var/task' in current_file:
+        return True
+    return False
 
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'you-will-never-guess'
@@ -17,15 +33,7 @@ class Config:
     # Uploads
     # Vercel 환경에서는 /tmp 디렉토리 사용 (임시 저장소)
     # 프로덕션에서는 외부 스토리지(S3, Cloudinary 등) 사용 권장
-    # Vercel 환경 감지: /var/task 경로가 있으면 Vercel 환경
-    import sys
-    is_vercel = (
-        os.environ.get('VERCEL') or 
-        os.environ.get('VERCEL_ENV') or 
-        (sys.path and any('/var/task' in p for p in sys.path))
-    )
-    
-    if is_vercel:
+    if is_vercel_environment():
         UPLOAD_FOLDER = os.path.join('/tmp', 'uploads')
     else:
         # 로컬 개발 환경
