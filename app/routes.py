@@ -81,52 +81,107 @@ def login():
 
 @bp.route('/login/callback')
 def authorize():
+    import traceback
+    error_details = []
+    
     try:
+        # 1. OAuth 클라이언트 확인
+        error_details.append("Step 1: Getting Google OAuth client")
         google = get_google_client()
         if not google:
-            flash('OAuth 설정이 올바르지 않습니다. 관리자에게 문의하세요.', 'danger')
-            return render_template('login_callback.html', success=False, message='OAuth 설정 오류')
+            error_msg = "Google OAuth client not available"
+            error_details.append(f"ERROR: {error_msg}")
+            return f"<pre>{chr(10).join(error_details)}</pre>", 500
         
-        # authorize_access_token 내부에서 JWKS 검증을 시도할 수 있으므로
-        # fetch_token을 직접 호출하거나 검증 옵션을 끕니다.
-        token = google.authorize_access_token()
+        # 2. 토큰 인증
+        error_details.append("Step 2: Authorizing access token")
+        try:
+            token = google.authorize_access_token()
+            error_details.append(f"SUCCESS: Token received")
+        except Exception as e:
+            error_msg = f"Error authorizing access token: {str(e)}"
+            error_details.append(f"ERROR: {error_msg}")
+            error_details.append(f"Traceback: {traceback.format_exc()}")
+            return f"<pre>{chr(10).join(error_details)}</pre>", 500
         
-        # 사용자 정보 가져오기
-        resp = google.get('https://www.googleapis.com/oauth2/v2/userinfo')
-        user_info = resp.json()
+        # 3. 사용자 정보 가져오기
+        error_details.append("Step 3: Fetching user info")
+        try:
+            resp = google.get('https://www.googleapis.com/oauth2/v2/userinfo')
+            user_info = resp.json()
+            error_details.append(f"SUCCESS: User info received: {user_info}")
+        except Exception as e:
+            error_msg = f"Error fetching user info: {str(e)}"
+            error_details.append(f"ERROR: {error_msg}")
+            error_details.append(f"Traceback: {traceback.format_exc()}")
+            return f"<pre>{chr(10).join(error_details)}</pre>", 500
         
+        # 4. User ID 확인
+        error_details.append("Step 4: Checking user ID")
         user_id = user_info.get('id')
-        
         if not user_id:
-            flash('사용자 정보를 가져올 수 없습니다.', 'danger')
-            return render_template('login_callback.html', success=False, message='사용자 정보를 가져올 수 없습니다.')
+            error_msg = "User ID not found in user_info"
+            error_details.append(f"ERROR: {error_msg}")
+            error_details.append(f"User info keys: {list(user_info.keys())}")
+            return f"<pre>{chr(10).join(error_details)}</pre>", 500
         
-        user = User.query.filter_by(id=user_id).first()
-        
-        if not user:
-            # Create new user
-            user = User(
-                id=user_id,
-                email=user_info['email'],
-                name=user_info.get('name', 'Unknown'),
-                profile_pic=user_info.get('picture', ''),
-                role='user' # Default role
-            )
-            db.session.add(user)
-            db.session.commit()
-        else:
-            # Update info just in case
-            user.email = user_info['email']
-            user.name = user_info.get('name', user.name)
-            user.profile_pic = user_info.get('picture', user.profile_pic)
-            db.session.commit()
+        # 5. 데이터베이스 작업
+        error_details.append("Step 5: Database operations")
+        try:
+            user = User.query.filter_by(id=user_id).first()
             
-        login_user(user)
-        flash('로그인되었습니다.', 'success')
-        return render_template('login_callback.html', success=True, message='로그인되었습니다.')
+            if not user:
+                error_details.append("Creating new user")
+                user = User(
+                    id=user_id,
+                    email=user_info.get('email', ''),
+                    name=user_info.get('name', 'Unknown'),
+                    profile_pic=user_info.get('picture', ''),
+                    role='user'
+                )
+                db.session.add(user)
+                db.session.commit()
+                error_details.append("SUCCESS: New user created")
+            else:
+                error_details.append("Updating existing user")
+                user.email = user_info.get('email', user.email)
+                user.name = user_info.get('name', user.name)
+                user.profile_pic = user_info.get('picture', user.profile_pic)
+                db.session.commit()
+                error_details.append("SUCCESS: User updated")
+        except Exception as e:
+            error_msg = f"Database error: {str(e)}"
+            error_details.append(f"ERROR: {error_msg}")
+            error_details.append(f"Traceback: {traceback.format_exc()}")
+            db.session.rollback()
+            return f"<pre>{chr(10).join(error_details)}</pre>", 500
+        
+        # 6. 로그인 처리
+        error_details.append("Step 6: Logging in user")
+        try:
+            login_user(user)
+            error_details.append("SUCCESS: User logged in")
+        except Exception as e:
+            error_msg = f"Login error: {str(e)}"
+            error_details.append(f"ERROR: {error_msg}")
+            error_details.append(f"Traceback: {traceback.format_exc()}")
+            return f"<pre>{chr(10).join(error_details)}</pre>", 500
+        
+        # 7. 템플릿 렌더링
+        error_details.append("Step 7: Rendering template")
+        try:
+            return render_template('login_callback.html', success=True, message='로그인되었습니다.')
+        except Exception as e:
+            error_msg = f"Template rendering error: {str(e)}"
+            error_details.append(f"ERROR: {error_msg}")
+            error_details.append(f"Traceback: {traceback.format_exc()}")
+            return f"<pre>{chr(10).join(error_details)}</pre>", 500
+            
     except Exception as e:
-        flash(f'로그인 실패: {str(e)}', 'danger')
-        return render_template('login_callback.html', success=False, message=f'로그인 실패: {str(e)}')
+        error_msg = f"Unexpected error: {str(e)}"
+        error_details.append(f"FATAL ERROR: {error_msg}")
+        error_details.append(f"Full traceback: {traceback.format_exc()}")
+        return f"<pre>{chr(10).join(error_details)}</pre>", 500
 
 @bp.route('/logout')
 @login_required
