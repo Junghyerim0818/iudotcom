@@ -3,9 +3,9 @@
 :root {
     --sidebar-width: 280px;
     --sidebar-collapsed-width: 80px;
-    --sidebar-bg: #212529;
+    --sidebar-bg: #6a1b9a;
     --sidebar-text: #ffffff;
-    --sidebar-hover: #343a40;
+    --sidebar-hover: #7b2cbf;
     --transition-speed: 0.3s;
 }
 
@@ -258,6 +258,40 @@ body {
 
 .modal-footer {
     border-top: 1px solid #dee2e6;
+}
+
+/* 언어 선택 드롭다운 스타일 */
+.sidebar-language-select {
+    padding: 0.5rem 1rem;
+}
+
+.sidebar-language-dropdown {
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--sidebar-text);
+    border-radius: 0.25rem;
+}
+
+.sidebar-language-dropdown:focus {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: var(--sidebar-text);
+    box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-language-dropdown option {
+    background-color: var(--sidebar-bg);
+    color: var(--sidebar-text);
+}
+
+.sidebar:not(.expanded) .sidebar-language-select {
+    padding: 0.5rem;
+    display: flex;
+    justify-content: center;
+}
+
+.sidebar:not(.expanded) .sidebar-language-dropdown {
+    width: 100%;
 }
 
 @media (max-width: 768px) {
