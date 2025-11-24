@@ -31,13 +31,47 @@ def create_app(config_class=Config):
     from .routes import bp as main_bp
     app.register_blueprint(main_bp)
 
-    # Create DB tables
+    # Create DB tables and add missing columns
     with app.app_context():
         try:
             # 데이터베이스 테이블 생성 시도
             # Vercel 환경에서는 Postgres가 이미 설정되어 있어야 하며,
             # SQLite를 사용하려고 하면 실패할 수 있음
             db.create_all()
+            
+            # 기존 테이블에 누락된 컬럼 추가 (Postgres용)
+            try:
+                from sqlalchemy import text
+                # image_data 컬럼이 없으면 추가
+                db.session.execute(text("""
+                    DO $$ 
+                    BEGIN 
+                        IF NOT EXISTS (
+                            SELECT 1 FROM information_schema.columns 
+                            WHERE table_name='post' AND column_name='image_data'
+                        ) THEN
+                            ALTER TABLE post ADD COLUMN image_data BYTEA;
+                        END IF;
+                    END $$;
+                """))
+                # image_mimetype 컬럼이 없으면 추가
+                db.session.execute(text("""
+                    DO $$ 
+                    BEGIN 
+                        IF NOT EXISTS (
+                            SELECT 1 FROM information_schema.columns 
+                            WHERE table_name='post' AND column_name='image_mimetype'
+                        ) THEN
+                            ALTER TABLE post ADD COLUMN image_mimetype VARCHAR(50);
+                        END IF;
+                    END $$;
+                """))
+                db.session.commit()
+            except Exception as col_error:
+                # 컬럼 추가 실패 시 롤백 (이미 존재하거나 다른 이유)
+                db.session.rollback()
+                import sys
+                print(f"Info: Column migration check: {str(col_error)}", file=sys.stderr)
         except Exception as e:
             # 데이터베이스 연결 또는 테이블 생성 실패 시 로깅만 하고 계속 진행
             # (Vercel 환경에서 Postgres가 제대로 설정되지 않은 경우 등)
