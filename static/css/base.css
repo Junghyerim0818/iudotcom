@@ -1,22 +1,22 @@
 :root {
     --sidebar-width: 280px;
     --sidebar-collapsed-width: 80px;
-    --sidebar-bg: #0f0f0f;
-    --sidebar-text: #ffffff;
-    --sidebar-hover: rgba(255, 255, 255, 0.08);
+    --sidebar-bg: #ffffff;
+    --sidebar-text: #212529;
+    --sidebar-hover: rgba(0, 0, 0, 0.05);
     --transition-speed: 0.25s;
     --transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
-    --bg-primary: #000000;
-    --bg-secondary: #0f0f0f;
-    --bg-tertiary: #1a1a1a;
-    --text-primary: #ffffff;
-    --text-secondary: rgba(255, 255, 255, 0.6);
-    --text-tertiary: rgba(255, 255, 255, 0.4);
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8f9fa;
+    --bg-tertiary: #e9ecef;
+    --text-primary: #212529;
+    --text-secondary: rgba(0, 0, 0, 0.6);
+    --text-tertiary: rgba(0, 0, 0, 0.4);
     --accent-color: #ff6b9d;
-    --border-color: rgba(255, 255, 255, 0.08);
-    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
-    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+    --border-color: rgba(0, 0, 0, 0.1);
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.15);
+    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
 /* 부드러운 스크롤 */
@@ -29,7 +29,7 @@ html {
 body {
     margin: 0;
     padding: 0;
-    font-family: 'Pretendard', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', '맑은 고딕', sans-serif;
     background-color: var(--bg-primary);
     color: var(--text-primary);
     overflow-x: hidden;
@@ -38,12 +38,12 @@ body {
     letter-spacing: -0.01em;
 }
 
-/* 타이포그래피 개선 */
+/* 타이포그래피 개선 (NHN 스타일) */
 h1, h2, h3, h4, h5, h6 {
-    font-family: 'Pretendard', 'Inter', sans-serif;
+    font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
     font-weight: 700;
     letter-spacing: -0.02em;
-    line-height: 1.2;
+    line-height: 1.4;
     margin: 0;
 }
 
@@ -68,31 +68,20 @@ a:hover {
     top: 0;
     left: 0;
     height: 100vh;
-    width: var(--sidebar-collapsed-width);
+    width: var(--sidebar-width);
     background-color: var(--sidebar-bg);
     color: var(--sidebar-text);
     z-index: 1000;
     overflow-y: auto;
     overflow-x: hidden;
-    /* 초기 로딩 시 transition 비활성화 */
-    transition: none;
     border-right: 1px solid var(--border-color);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
 }
 
-/* 로딩 완료 후 transition 활성화 */
-.sidebar.loaded {
-    transition: width var(--transition-speed) var(--transition-easing);
-}
-
+/* 항상 펼쳐진 상태 */
 .sidebar.expanded {
     width: var(--sidebar-width);
-}
-
-/* 닫힐 때 더 빠른 애니메이션 */
-.sidebar.loaded:not(.expanded) {
-    transition: width calc(var(--transition-speed) * 0.85) cubic-bezier(0.4, 0, 0.6, 1);
 }
 
 
@@ -100,69 +89,21 @@ a:hover {
     padding: 1.5rem 1rem;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
     border-bottom: 1px solid var(--border-color);
     min-height: 70px;
     position: relative;
 }
 
-.sidebar:not(.expanded) .sidebar-header {
-    justify-content: center;
-    padding: 1.5rem 0.5rem;
-}
-
-/* 토글 버튼 위치 조정 */
-.sidebar-toggle {
-    background: none;
-    border: none;
-    color: var(--sidebar-text);
-    font-size: 1.5rem;
-    cursor: pointer;
-    padding: 0.5rem;
-    border-radius: 0.25rem;
-    transition: background-color 0.2s, 
-                left calc(var(--transition-speed) * 0.85) cubic-bezier(0.4, 0, 0.6, 1),
-                transform calc(var(--transition-speed) * 0.85) cubic-bezier(0.4, 0, 0.6, 1);
-    position: relative;
-    z-index: 1;
-    flex-shrink: 0;
-}
-
-.sidebar-toggle:hover {
-    background-color: var(--sidebar-hover);
-}
-
-/* 접힐 때 토글 버튼을 중앙에 고정 */
-.sidebar:not(.expanded) .sidebar-toggle {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-}
-
-/* 펼쳐질 때 토글 버튼 위치 (오른쪽) */
-.sidebar.expanded .sidebar-toggle {
-    position: relative;
-    left: auto;
-    transform: none;
-}
+/* 토글 버튼 제거됨 */
 
 .sidebar-brand {
     font-size: 1.25rem;
     font-weight: 700;
     white-space: nowrap;
     opacity: 1;
-    transition: opacity calc(var(--transition-speed) * 0.8) var(--transition-easing) 0.1s,
-                width var(--transition-speed) var(--transition-easing) 0.05s;
     letter-spacing: -0.02em;
-    font-family: 'Pretendard', 'Inter', sans-serif;
-}
-
-.sidebar:not(.expanded) .sidebar-brand {
-    opacity: 0;
-    width: 0;
-    overflow: hidden;
-    transition: opacity calc(var(--transition-speed) * 0.6) var(--transition-easing), 
-                width calc(var(--transition-speed) * 0.7) var(--transition-easing);
+    font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
 }
 
 .sidebar-menu {
@@ -190,10 +131,6 @@ a:hover {
     margin: 0.125rem 0.5rem;
 }
 
-.sidebar:not(.expanded) .sidebar-menu-link {
-    justify-content: center;
-    padding: 0.875rem 0.5rem;
-}
 
 .sidebar-menu-link:hover {
     background-color: var(--sidebar-hover);
@@ -202,7 +139,7 @@ a:hover {
 }
 
 .sidebar-menu-link.active {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(0, 0, 0, 0.05);
     font-weight: 600;
     position: relative;
 }
@@ -223,21 +160,11 @@ a:hover {
 
 .sidebar-menu-text {
     opacity: 1;
-    transition: opacity calc(var(--transition-speed) * 0.8) var(--transition-easing) 0.1s, 
-                width var(--transition-speed) var(--transition-easing) 0.05s;
-}
-
-.sidebar:not(.expanded) .sidebar-menu-text {
-    opacity: 0;
-    width: 0;
-    overflow: hidden;
-    transition: opacity calc(var(--transition-speed) * 0.6) var(--transition-easing), 
-                width calc(var(--transition-speed) * 0.7) var(--transition-easing);
 }
 
 .sidebar-divider {
     height: 1px;
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(0, 0, 0, 0.1);
     margin: 0.5rem 0;
 }
 
@@ -248,40 +175,20 @@ a:hover {
     letter-spacing: 0.1em;
     opacity: 0.5;
     white-space: nowrap;
-    transition: opacity calc(var(--transition-speed) * 0.8) var(--transition-easing) 0.1s,
-                width var(--transition-speed) var(--transition-easing) 0.05s;
     font-weight: 600;
-    font-family: 'Inter', sans-serif;
-}
-
-.sidebar:not(.expanded) .sidebar-section-title {
-    opacity: 0;
-    width: 0;
-    overflow: hidden;
-    transition: opacity calc(var(--transition-speed) * 0.6) var(--transition-easing), 
-                width calc(var(--transition-speed) * 0.7) var(--transition-easing);
+    font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
 }
 
 .sidebar-profile {
     padding: 1rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
     margin-top: auto;
-}
-
-.sidebar:not(.expanded) .sidebar-profile {
-    padding: 1rem 0.5rem;
-    display: flex;
-    justify-content: center;
 }
 
 .sidebar-profile-content {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-}
-
-.sidebar:not(.expanded) .sidebar-profile-content {
-    justify-content: center;
 }
 
 .sidebar-profile-avatar {
@@ -313,28 +220,17 @@ a:hover {
     text-overflow: ellipsis;
 }
 
-.sidebar:not(.expanded) .sidebar-profile-info {
-    display: none;
-    transition: opacity calc(var(--transition-speed) * 0.6) var(--transition-easing);
+.sidebar-profile-info {
+    flex: 1;
+    min-width: 0;
 }
 
 .main-content {
-    margin-left: var(--sidebar-collapsed-width);
+    margin-left: var(--sidebar-width);
     padding: 1.5rem 1.5rem 1.5rem 1.5rem;
-    transition: margin-left var(--transition-speed) var(--transition-easing);
     min-height: 100vh;
     background-color: var(--bg-primary);
     color: var(--text-primary);
-}
-
-/* 사이드바가 닫힐 때 메인 콘텐츠도 더 빠르게 조정 */
-.sidebar:not(.expanded) ~ .main-content {
-    transition: margin-left calc(var(--transition-speed) * 0.85) cubic-bezier(0.4, 0, 0.6, 1);
-}
-
-.sidebar.expanded ~ .main-content {
-    margin-left: var(--sidebar-width);
-    padding: 1.5rem 1.5rem 1.5rem 1.5rem;
 }
 
 /* 모든 페이지: 위아래 양옆 여백 통일 */
@@ -355,24 +251,13 @@ a:hover {
 /* 메인 홈 최신 글 이미지 (사이드바 옆 고정) */
 .latest-post-image-wrapper {
     position: fixed;
-    left: var(--sidebar-collapsed-width);
+    left: var(--sidebar-width);
     top: 0;
-    width: var(--sidebar-collapsed-width);
+    width: var(--sidebar-width);
     height: 100vh;
     overflow: hidden;
     z-index: 999;
-    transition: left var(--transition-speed) var(--transition-easing),
-                width var(--transition-speed) var(--transition-easing);
-}
-
-.sidebar.expanded ~ .main-content .latest-post-image-wrapper {
-    left: var(--sidebar-width);
-    width: var(--sidebar-width);
-}
-
-.sidebar:not(.expanded) ~ .main-content .latest-post-image-wrapper {
-    transition: left calc(var(--transition-speed) * 0.85) cubic-bezier(0.4, 0, 0.6, 1),
-                width calc(var(--transition-speed) * 0.85) cubic-bezier(0.4, 0, 0.6, 1);
+    background-color: #f8f9fa;
 }
 
 .latest-post-image-link {
@@ -398,7 +283,7 @@ a:hover {
 .latest-post-placeholder {
     width: 100%;
     height: 100%;
-    background-color: #6c757d;
+    background-color: #e9ecef;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -414,9 +299,9 @@ a:hover {
     width: 50%;
     height: 100%;
     background: linear-gradient(to left, 
-        rgba(10, 10, 10, 0.95) 0%,
-        rgba(10, 10, 10, 0.7) 30%,
-        rgba(10, 10, 10, 0.3) 60%,
+        rgba(255, 255, 255, 0.95) 0%,
+        rgba(255, 255, 255, 0.7) 30%,
+        rgba(255, 255, 255, 0.3) 60%,
         transparent 100%);
     pointer-events: none;
     z-index: 1;
@@ -431,19 +316,19 @@ a:hover {
     right: 0;
     padding: 2.5rem 1.5rem;
     background: linear-gradient(to top, 
-        rgba(10, 10, 10, 0.95) 0%,
-        rgba(10, 10, 10, 0.6) 50%,
+        rgba(255, 255, 255, 0.95) 0%,
+        rgba(255, 255, 255, 0.6) 50%,
         transparent 100%);
     z-index: 2;
     backdrop-filter: blur(10px);
 }
 
 .latest-post-title {
-    color: white;
+    color: #212529;
     font-size: 1.75rem;
     font-weight: 700;
     margin-bottom: 0.75rem;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+    text-shadow: 0 2px 8px rgba(255, 255, 255, 0.8);
     letter-spacing: -0.02em;
     line-height: 1.2;
     transition: transform 0.3s ease;
@@ -454,31 +339,247 @@ a:hover {
 }
 
 .latest-post-date {
-    color: rgba(255, 255, 255, 0.7);
+    color: rgba(0, 0, 0, 0.7);
     font-size: 0.875rem;
     margin: 0;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+    text-shadow: 0 1px 3px rgba(255, 255, 255, 0.6);
     font-weight: 300;
     letter-spacing: 0.05em;
 }
 
 /* 메인 콘텐츠가 최신 글 이미지 옆에 위치하도록 조정 */
 .main-content-index {
-    margin-left: calc(var(--sidebar-collapsed-width) * 2);
-    transition: margin-left var(--transition-speed) var(--transition-easing);
-}
-
-.sidebar.expanded ~ .main-content-index {
     margin-left: calc(var(--sidebar-width) * 2);
 }
 
-.sidebar:not(.expanded) ~ .main-content-index {
-    transition: margin-left calc(var(--transition-speed) * 0.85) cubic-bezier(0.4, 0, 0.6, 1);
+/* 갤러리 카드 리스트 컨테이너 */
+.gallery-cards-container {
+    padding: 3rem 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-color) transparent;
+}
+
+.gallery-cards-container::-webkit-scrollbar {
+    height: 8px;
+}
+
+.gallery-cards-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.gallery-cards-container::-webkit-scrollbar-thumb {
+    background-color: var(--border-color);
+    border-radius: 4px;
+}
+
+.gallery-cards-wrapper {
+    display: flex;
+    gap: 0;
+    padding: 2rem calc(var(--sidebar-width) + 2rem) 2rem 2rem;
+    position: relative;
+}
+
+.gallery-card-item {
+    flex: 0 0 380px;
+    height: 500px;
+    margin-left: -120px;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1;
+}
+
+.gallery-card-item:first-child {
+    margin-left: 0;
+}
+
+.gallery-card-item:hover {
+    margin-left: -60px;
+    z-index: 10;
+    transform: translateY(-20px) scale(1.05);
+}
+
+.gallery-card-item:hover ~ .gallery-card-item {
+    transform: translateX(60px);
+}
+
+.gallery-card-link {
+    display: block;
+    width: 100%;
+    height: 100%;
+    text-decoration: none;
+    color: inherit;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.gallery-card-item:hover .gallery-card-link {
+    transform: rotateY(-8deg) rotateX(5deg);
+}
+
+.gallery-card-image-wrapper {
+    width: 100%;
+    height: 60%;
+    overflow: hidden;
+    border-radius: 16px 16px 0 0;
+    background-color: var(--bg-tertiary);
+    position: relative;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.gallery-card-item:hover .gallery-card-image-wrapper {
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+.gallery-card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.gallery-card-item:hover .gallery-card-image {
+    transform: scale(1.15);
+}
+
+.gallery-card-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--bg-tertiary);
+    color: var(--text-tertiary);
+}
+
+.gallery-card-placeholder i {
+    font-size: 3rem;
+}
+
+.gallery-card-content {
+    padding: 1.5rem;
+    background-color: #ffffff;
+    border-radius: 0 0 16px 16px;
+    height: 40%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border-color);
+    border-top: none;
+    transition: box-shadow 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.gallery-card-item:hover .gallery-card-content {
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+}
+
+.gallery-card-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 0.75rem 0;
+    letter-spacing: -0.02em;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.gallery-card-text {
+    font-size: 0.9375rem;
+    color: var(--text-secondary);
+    margin: 0 0 1rem 0;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    flex: 1;
+}
+
+.gallery-card-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.875rem;
+    color: var(--text-tertiary);
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.gallery-card-author {
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.gallery-card-date {
+    color: var(--text-tertiary);
+}
+
+.gallery-cards-empty {
+    padding: 4rem 2rem;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 1.125rem;
+}
+
+/* 카드 스택 효과 */
+.gallery-card-item::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, transparent 0%, rgba(0, 0, 0, 0.03) 100%);
+    border-radius: 16px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    z-index: 1;
+}
+
+.gallery-card-item:hover::after {
+    opacity: 1;
+}
+
+@media (max-width: 1200px) {
+    .gallery-card-item {
+        flex: 0 0 320px;
+        height: 450px;
+    }
+}
+
+@media (max-width: 768px) {
+    .gallery-cards-wrapper {
+        gap: 1.5rem;
+        padding: 0 1rem;
+    }
+    
+    .gallery-card-item {
+        flex: 0 0 280px;
+        height: 400px;
+    }
+    
+    .gallery-card-item:hover .gallery-card-link {
+        transform: translateX(10px);
+    }
+    
+    .gallery-card-item:hover ~ .gallery-card-item .gallery-card-link {
+        transform: translateX(-10px);
+    }
 }
 
 /* 갤러리 목록 카드 스타일 */
 .gallery-list-card {
-    background: rgba(15, 15, 15, 0.9);
+    background: #ffffff;
     backdrop-filter: blur(30px);
     -webkit-backdrop-filter: blur(30px);
     border-radius: 16px;
@@ -491,7 +592,7 @@ a:hover {
 .gallery-list-card:hover {
     transform: translateY(-4px);
     box-shadow: var(--shadow-lg);
-    border-color: rgba(255, 255, 255, 0.15);
+    border-color: rgba(0, 0, 0, 0.15);
 }
 
 .gallery-list-header {
@@ -505,7 +606,7 @@ a:hover {
     font-weight: 700;
     margin: 0;
     letter-spacing: -0.02em;
-    font-family: 'Pretendard', 'Inter', sans-serif;
+    font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
 }
 
 .gallery-list-items {
@@ -539,7 +640,7 @@ a:hover {
 }
 
 .gallery-list-item:hover {
-    background-color: rgba(255, 255, 255, 0.05);
+    background-color: rgba(0, 0, 0, 0.03);
     transform: translateX(4px);
 }
 
@@ -561,7 +662,7 @@ a:hover {
     margin: 0;
     flex: 1;
     letter-spacing: -0.02em;
-    font-family: 'Pretendard', 'Inter', sans-serif;
+    font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
 }
 
 .gallery-item-date {
@@ -593,15 +694,29 @@ a:hover {
 }
 
 @media (max-width: 768px) {
+    .sidebar {
+        width: 100%;
+        height: auto;
+        max-height: 70vh;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+        border-radius: 0 0 1rem 1rem;
+        box-shadow: var(--shadow-lg);
+    }
+    
     .latest-post-image-wrapper {
         display: none;
     }
     
-    .main-content-index {
+    .main-content {
         margin-left: 0;
+        padding-top: calc(70vh + 1.5rem);
     }
     
-    .sidebar.expanded ~ .main-content-index {
+    .main-content-index {
         margin-left: 0;
     }
     
@@ -681,7 +796,7 @@ a:hover {
     letter-spacing: -0.01em;
     border-radius: 12px;
     transition: all 0.3s ease;
-    font-family: 'Pretendard', 'Inter', sans-serif;
+    font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
 }
 
 .btn-primary {
@@ -703,7 +818,7 @@ a:hover {
     color: var(--text-primary);
     border-radius: 12px;
     padding: 0.75rem 1rem;
-    font-family: 'Pretendard', 'Inter', sans-serif;
+    font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
     transition: all 0.3s ease;
 }
 
@@ -743,17 +858,17 @@ a:hover {
 }
 
 .sidebar-language-dropdown {
-    background-color: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background-color: rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.1);
     color: var(--sidebar-text);
     border-radius: 0.25rem;
 }
 
 .sidebar-language-dropdown:focus {
-    background-color: rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.3);
+    background-color: rgba(0, 0, 0, 0.08);
+    border-color: rgba(0, 0, 0, 0.2);
     color: var(--sidebar-text);
-    box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 0 0.2rem rgba(0, 0, 0, 0.05);
 }
 
 .sidebar-language-dropdown option {
@@ -761,17 +876,7 @@ a:hover {
     color: var(--sidebar-text);
 }
 
-.sidebar:not(.expanded) .sidebar-language-section {
-    display: none;
-}
-
-.sidebar:not(.expanded) .sidebar-language-select {
-    display: none;
-}
-
-.sidebar:not(.expanded) .sidebar-language-dropdown {
-    width: 100%;
-}
+/* 언어 선택 항상 표시 */
 
 @media (max-width: 768px) {
     .sidebar {
@@ -784,25 +889,15 @@ a:hover {
         max-height: 70vh;
         overflow-y: auto;
         z-index: 1000;
-        transform: translateY(-100%);
-        transition: transform var(--transition-speed) var(--transition-easing);
-        border-radius: 0 0 1rem 1rem;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    .sidebar.expanded {
         transform: translateY(0);
-        width: 100%;
+        border-radius: 0 0 1rem 1rem;
+        box-shadow: var(--shadow-lg);
     }
 
     .main-content {
         margin-left: 0;
         padding: 1rem;
-        padding-top: 70px; /* 사이드바 헤더 공간 확보 */
-    }
-
-    .sidebar.expanded ~ .main-content {
-        margin-left: 0;
+        padding-top: calc(70vh + 1rem);
     }
 
     /* 모바일에서 사이드바 헤더를 상단에 고정 */

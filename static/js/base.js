@@ -14,18 +14,6 @@ document.addEventListener('DOMContentLoaded', function() {
             // 즉시 페이지 이동 (애니메이션 없이)
             const href = this.getAttribute('href');
             if (href && href !== '#' && !href.includes('javascript:') && href.startsWith('/')) {
-                // 사이드바가 열려있으면 닫기
-                const sidebar = document.getElementById('sidebar');
-                if (sidebar && sidebar.classList.contains('expanded')) {
-                    sidebar.classList.remove('expanded');
-                    const sidebarIcon = document.getElementById('sidebarToggleIcon');
-                    if (sidebarIcon) {
-                        sidebarIcon.classList.remove('bi-x-lg');
-                        sidebarIcon.classList.add('bi-list');
-                    }
-                    localStorage.setItem('sidebarExpanded', 'false');
-                }
-                
                 // 즉시 이동
                 window.location.href = href;
             }
@@ -33,48 +21,12 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// 사이드바 토글 기능
+// 사이드바는 항상 펼쳐진 상태로 유지
 document.addEventListener('DOMContentLoaded', function() {
     const sidebar = document.getElementById('sidebar');
-    const sidebarToggle = document.getElementById('sidebarToggle');
-    const sidebarIcon = document.getElementById('sidebarToggleIcon');
-
-    // 초기 로딩 시 애니메이션 방지를 위해 즉시 상태 적용
-    // 기본적으로 접힌 상태로 시작
-    const sidebarExpanded = localStorage.getItem('sidebarExpanded') === 'true';
-    
-    // 초기 상태를 즉시 적용 (애니메이션 없이)
-    if (!sidebarExpanded) {
-        sidebar.classList.remove('expanded');
-        sidebarIcon.classList.remove('bi-x-lg');
-        sidebarIcon.classList.add('bi-list');
-        localStorage.setItem('sidebarExpanded', 'false');
-    } else {
-        // 펼쳐진 상태로 저장되어 있으면 펼침
+    if (sidebar) {
         sidebar.classList.add('expanded');
-        sidebarIcon.classList.remove('bi-list');
-        sidebarIcon.classList.add('bi-x-lg');
     }
-    
-    // 약간의 지연 후 transition 활성화 (초기 로딩 애니메이션 방지)
-    setTimeout(function() {
-        sidebar.classList.add('loaded');
-    }, 100);
-
-    sidebarToggle.addEventListener('click', function() {
-        sidebar.classList.toggle('expanded');
-        
-        // 아이콘 변경
-        if (sidebar.classList.contains('expanded')) {
-            sidebarIcon.classList.remove('bi-list');
-            sidebarIcon.classList.add('bi-x-lg');
-            localStorage.setItem('sidebarExpanded', 'true');
-        } else {
-            sidebarIcon.classList.remove('bi-x-lg');
-            sidebarIcon.classList.add('bi-list');
-            localStorage.setItem('sidebarExpanded', 'false');
-        }
-    });
 
     // 로그인 모달에서 Google 로그인 버튼 클릭 시 팝업 열기
     const googleLoginBtn = document.getElementById('googleLoginBtn');
