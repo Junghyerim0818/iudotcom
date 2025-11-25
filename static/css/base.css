@@ -6,7 +6,8 @@
     --sidebar-bg: #6a1b9a;
     --sidebar-text: #ffffff;
     --sidebar-hover: #7b2cbf;
-    --transition-speed: 0.3s;
+    --transition-speed: 0.4s;
+    --transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 body {
@@ -23,7 +24,7 @@ body {
     width: var(--sidebar-collapsed-width);
     background-color: var(--sidebar-bg);
     color: var(--sidebar-text);
-    transition: width var(--transition-speed) ease;
+    transition: width var(--transition-speed) var(--transition-easing);
     z-index: 1000;
     overflow-y: auto;
     overflow-x: hidden;
@@ -53,7 +54,7 @@ body {
     font-weight: 600;
     white-space: nowrap;
     opacity: 1;
-    transition: opacity var(--transition-speed);
+    transition: opacity var(--transition-speed) var(--transition-easing);
 }
 
 .sidebar:not(.expanded) .sidebar-brand {
@@ -126,7 +127,7 @@ body {
 
 .sidebar-menu-text {
     opacity: 1;
-    transition: opacity var(--transition-speed);
+    transition: opacity var(--transition-speed) var(--transition-easing), width var(--transition-speed) var(--transition-easing);
 }
 
 .sidebar:not(.expanded) .sidebar-menu-text {
@@ -148,6 +149,7 @@ body {
     letter-spacing: 0.05em;
     opacity: 0.6;
     white-space: nowrap;
+    transition: opacity var(--transition-speed) var(--transition-easing), width var(--transition-speed) var(--transition-easing);
 }
 
 .sidebar:not(.expanded) .sidebar-section-title {
@@ -214,7 +216,7 @@ body {
 .main-content {
     margin-left: var(--sidebar-collapsed-width);
     padding: 1.5rem 1.5rem 1.5rem 1.5rem;
-    transition: margin-left var(--transition-speed) ease;
+    transition: margin-left var(--transition-speed) var(--transition-easing);
     min-height: 100vh;
 }
 
@@ -291,10 +293,12 @@ body {
     color: var(--sidebar-text);
 }
 
+.sidebar:not(.expanded) .sidebar-language-section {
+    display: none;
+}
+
 .sidebar:not(.expanded) .sidebar-language-select {
-    padding: 0.5rem;
-    display: flex;
-    justify-content: center;
+    display: none;
 }
 
 .sidebar:not(.expanded) .sidebar-language-dropdown {
@@ -313,7 +317,7 @@ body {
         overflow-y: auto;
         z-index: 1000;
         transform: translateY(-100%);
-        transition: transform var(--transition-speed) ease;
+        transition: transform var(--transition-speed) var(--transition-easing);
         border-radius: 0 0 1rem 1rem;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }

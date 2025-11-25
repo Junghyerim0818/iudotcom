@@ -131,10 +131,10 @@
                 <li class="sidebar-menu-item"><div class="sidebar-divider"></div></li>
                 
                 <!-- 언어 변경 섹션 -->
-                <li class="sidebar-menu-item">
+                <li class="sidebar-menu-item sidebar-language-section">
                     <div class="sidebar-section-title">{% if current_lang == 'en' %}Language{% else %}언어{% endif %}</div>
                 </li>
-                <li class="sidebar-menu-item">
+                <li class="sidebar-menu-item sidebar-language-section">
                     <div class="sidebar-language-select">
                         <select id="languageSelect" class="form-select form-select-sm sidebar-language-dropdown" onchange="window.location.href='/lang/' + this.value">
                             <option value="ko" {% if current_lang == 'ko' %}selected{% endif %}>한국어</option>
