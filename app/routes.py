@@ -470,4 +470,25 @@ def edit_post(post_id):
     
     return render_template('edit_post.html', form=form, post=post)
 
+@bp.route('/post/<int:post_id>/delete', methods=['POST'])
+@login_required
+def delete_post(post_id):
+    if not current_user.is_admin():
+        abort(403)
+    
+    post = Post.query.get_or_404(post_id)
+    category = post.category
+    
+    db.session.delete(post)
+    db.session.commit()
+    flash('글이 삭제되었습니다.', 'success')
+    
+    # 카테고리에 따라 리다이렉트
+    if category == 'gallery':
+        return redirect(url_for('main.gallery'))
+    elif category in ['archive_1', 'archive_2']:
+        return redirect(url_for('main.archive', type_name=category))
+    else:
+        return redirect(url_for('main.index'))
+
 
