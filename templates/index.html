@@ -18,18 +18,15 @@
                 {% for post in gallery_posts %}
                     <div class="gallery-card-item" data-index="{{ loop.index0 }}" data-post-id="{{ post.id }}" data-card-index="{{ loop.index0 }}">
                         <a href="{{ url_for('main.gallery_detail', post_id=post.id) }}" class="gallery-card-link" data-card-index="{{ loop.index0 }}">
-                            <div class="gallery-card-image-wrapper">
-                                {% if post.has_image_data() or post.image_filename or post.image_url %}
-                                    <img src="{% if post.image_url %}{{ post.image_url }}{% elif post.has_image_data() %}{{ url_for('main.get_image', post_id=post.id) }}{% elif post.image_filename %}{{ url_for('static', filename='uploads/' + post.image_filename) }}{% endif %}" 
-                                         class="gallery-card-image" 
-                                         alt="{{ post.title }}">
-                                {% else %}
-                                    <div class="gallery-card-placeholder">
-                                        <i class="bi bi-image"></i>
-                                    </div>
-                                {% endif %}
-                            </div>
-                            <div class="gallery-card-content">
+                            {% if post.has_image_data() or post.image_filename or post.image_url %}
+                                {% set image_url = post.image_url if post.image_url else (url_for('main.get_image', post_id=post.id) if post.has_image_data() else url_for('static', filename='uploads/' + post.image_filename)) %}
+                                <div class="gallery-card-background" data-bg-image="{{ image_url }}"></div>
+                            {% else %}
+                                <div class="gallery-card-background gallery-card-placeholder-bg">
+                                    <i class="bi bi-image"></i>
+                                </div>
+                            {% endif %}
+                            <div class="gallery-card-overlay">
                                 <h3 class="gallery-card-title">{{ post.title }}</h3>
                                 <p class="gallery-card-text">{{ post.content[:100] }}{% if post.content|length > 100 %}...{% endif %}</p>
                                 <div class="gallery-card-meta">

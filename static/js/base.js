@@ -140,6 +140,15 @@ document.addEventListener('DOMContentLoaded', function() {
     if (gallerySliderWrapper && gallerySliderTrack) {
         cardItems = gallerySliderTrack.querySelectorAll('.gallery-card-item');
         
+        // 배경 이미지 설정
+        cardItems.forEach((card) => {
+            const bgElement = card.querySelector('.gallery-card-background[data-bg-image]');
+            if (bgElement) {
+                const imageUrl = bgElement.getAttribute('data-bg-image');
+                bgElement.style.backgroundImage = `url('${imageUrl}')`;
+            }
+        });
+        
         // 카드 클릭 이벤트 리스너 추가 (Stack Overflow 예제처럼 중앙으로 이동)
         cardItems.forEach((card, index) => {
             const cardLink = card.querySelector('.gallery-card-link');
