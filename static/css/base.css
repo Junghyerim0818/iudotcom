@@ -34,6 +34,11 @@ body {
     width: var(--sidebar-width);
 }
 
+/* 닫힐 때 더 빠른 애니메이션 */
+.sidebar:not(.expanded) {
+    transition: width calc(var(--transition-speed) * 0.85) cubic-bezier(0.4, 0, 0.6, 1);
+}
+
 
 .sidebar-header {
     padding: 1.5rem 1rem;
@@ -54,13 +59,16 @@ body {
     font-weight: 600;
     white-space: nowrap;
     opacity: 1;
-    transition: opacity var(--transition-speed) var(--transition-easing);
+    transition: opacity calc(var(--transition-speed) * 0.8) var(--transition-easing) 0.1s,
+                width var(--transition-speed) var(--transition-easing) 0.05s;
 }
 
 .sidebar:not(.expanded) .sidebar-brand {
     opacity: 0;
     width: 0;
     overflow: hidden;
+    transition: opacity calc(var(--transition-speed) * 0.6) var(--transition-easing), 
+                width calc(var(--transition-speed) * 0.7) var(--transition-easing);
 }
 
 .sidebar-toggle {
@@ -127,13 +135,16 @@ body {
 
 .sidebar-menu-text {
     opacity: 1;
-    transition: opacity var(--transition-speed) var(--transition-easing), width var(--transition-speed) var(--transition-easing);
+    transition: opacity calc(var(--transition-speed) * 0.8) var(--transition-easing) 0.1s, 
+                width var(--transition-speed) var(--transition-easing) 0.05s;
 }
 
 .sidebar:not(.expanded) .sidebar-menu-text {
     opacity: 0;
     width: 0;
     overflow: hidden;
+    transition: opacity calc(var(--transition-speed) * 0.6) var(--transition-easing), 
+                width calc(var(--transition-speed) * 0.7) var(--transition-easing);
 }
 
 .sidebar-divider {
@@ -149,13 +160,16 @@ body {
     letter-spacing: 0.05em;
     opacity: 0.6;
     white-space: nowrap;
-    transition: opacity var(--transition-speed) var(--transition-easing), width var(--transition-speed) var(--transition-easing);
+    transition: opacity calc(var(--transition-speed) * 0.8) var(--transition-easing) 0.1s,
+                width var(--transition-speed) var(--transition-easing) 0.05s;
 }
 
 .sidebar:not(.expanded) .sidebar-section-title {
     opacity: 0;
     width: 0;
     overflow: hidden;
+    transition: opacity calc(var(--transition-speed) * 0.6) var(--transition-easing), 
+                width calc(var(--transition-speed) * 0.7) var(--transition-easing);
 }
 
 .sidebar-profile {
@@ -211,6 +225,7 @@ body {
 
 .sidebar:not(.expanded) .sidebar-profile-info {
     display: none;
+    transition: opacity calc(var(--transition-speed) * 0.6) var(--transition-easing);
 }
 
 .main-content {
@@ -218,6 +233,11 @@ body {
     padding: 1.5rem 1.5rem 1.5rem 1.5rem;
     transition: margin-left var(--transition-speed) var(--transition-easing);
     min-height: 100vh;
+}
+
+/* 사이드바가 닫힐 때 메인 콘텐츠도 더 빠르게 조정 */
+.sidebar:not(.expanded) ~ .main-content {
+    transition: margin-left calc(var(--transition-speed) * 0.85) cubic-bezier(0.4, 0, 0.6, 1);
 }
 
 .sidebar.expanded ~ .main-content {
