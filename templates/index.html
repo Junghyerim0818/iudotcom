@@ -1,85 +1,68 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container-fluid px-3">
-        <div class="row g-4">
-            <!-- 왼쪽: 최근 갤러리 글의 큰 이미지 -->
-            <div class="col-lg-8">
-                {% if latest_post %}
-                    <div class="card shadow-sm h-100 border-0">
-                        {% if latest_post.has_image_data() or latest_post.image_filename or latest_post.image_url %}
-                            <a href="{{ url_for('main.gallery_detail', post_id=latest_post.id) }}" class="position-relative d-block">
-                                <img src="{% if latest_post.image_url %}{{ latest_post.image_url }}{% elif latest_post.has_image_data() %}{{ url_for('main.get_image', post_id=latest_post.id) }}{% elif latest_post.image_filename %}{{ url_for('static', filename='uploads/' + latest_post.image_filename) }}{% endif %}" 
-                                     class="card-img-top" 
-                                     alt="{{ latest_post.title }}"
-                                     style="height: 70vh; object-fit: cover; cursor: pointer;">
-                                <div class="position-absolute bottom-0 start-0 end-0 p-4 text-white" 
-                                     style="background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);">
-                                    <h3 class="mb-2 text-white">{{ latest_post.title }}</h3>
-                                    <p class="mb-0 text-white-50">
-                                        {{ latest_post.created_at.strftime('%Y-%m-%d') }}
-                                    </p>
-                                </div>
-                            </a>
-                        {% else %}
-                            <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center position-relative" 
-                                 style="height: 70vh;">
-                                <i class="bi bi-image text-white" style="font-size: 4rem;"></i>
-                                <div class="position-absolute bottom-0 start-0 end-0 p-4 text-white" 
-                                     style="background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);">
-                                    <h3 class="mb-2 text-white">{{ latest_post.title }}</h3>
-                                    <p class="mb-0 text-white-50">
-                                        {{ latest_post.created_at.strftime('%Y-%m-%d') }}
-                                    </p>
-                                </div>
-                            </div>
-                        {% endif %}
-                    </div>
-                {% else %}
-                    <div class="card shadow-sm h-100">
-                        <div class="card-body d-flex align-items-center justify-content-center" style="min-height: 70vh;">
-                            <div class="text-center text-muted">
-                                <i class="bi bi-image" style="font-size: 4rem;"></i>
-                                <p class="mt-3">갤러리에 글이 없습니다.</p>
-                            </div>
-                        </div>
-                    </div>
-                {% endif %}
+<!-- 최신 갤러리 글 이미지 (사이드바 옆 고정) -->
+{% if latest_post %}
+    <div class="latest-post-image-wrapper">
+        {% if latest_post.has_image_data() or latest_post.image_filename or latest_post.image_url %}
+            <a href="{{ url_for('main.gallery_detail', post_id=latest_post.id) }}" class="latest-post-image-link">
+                <img src="{% if latest_post.image_url %}{{ latest_post.image_url }}{% elif latest_post.has_image_data() %}{{ url_for('main.get_image', post_id=latest_post.id) }}{% elif latest_post.image_filename %}{{ url_for('static', filename='uploads/' + latest_post.image_filename) }}{% endif %}" 
+                     class="latest-post-image" 
+                     alt="{{ latest_post.title }}">
+                <!-- 오른쪽 그라데이션 오버레이 -->
+                <div class="latest-post-gradient-overlay"></div>
+                <!-- 하단 정보 -->
+                <div class="latest-post-info">
+                    <h3 class="latest-post-title">{{ latest_post.title }}</h3>
+                    <p class="latest-post-date">{{ latest_post.created_at.strftime('%Y-%m-%d') }}</p>
+                </div>
+            </a>
+        {% else %}
+            <div class="latest-post-placeholder">
+                <i class="bi bi-image text-white" style="font-size: 4rem;"></i>
+                <div class="latest-post-info">
+                    <h3 class="latest-post-title">{{ latest_post.title }}</h3>
+                    <p class="latest-post-date">{{ latest_post.created_at.strftime('%Y-%m-%d') }}</p>
+                </div>
             </div>
-            
-            <!-- 오른쪽: 갤러리 글 목록 -->
-            <div class="col-lg-4">
-                <div class="card shadow-sm border-0">
-                    <div class="card-header bg-white border-0 pb-0">
-                        <h5 class="mb-0">갤러리</h5>
-                    </div>
-                    <div class="list-group list-group-flush border-0">
-                        {% if latest_post %}
-                            <a href="{{ url_for('main.gallery') }}" class="list-group-item list-group-item-action border-0">
-                                <div class="d-flex w-100 justify-content-between">
-                                    <h6 class="mb-1">{{ latest_post.title }}</h6>
-                                    <small>{{ latest_post.created_at.strftime('%m/%d') }}</small>
-                                </div>
-                                <p class="mb-1 text-muted small">{{ latest_post.content[:50] }}{% if latest_post.content|length > 50 %}...{% endif %}</p>
-                                <small class="text-muted">{{ latest_post.author.name }}</small>
-                            </a>
-                        {% endif %}
-                        {% for post in other_posts %}
-                            <a href="{{ url_for('main.gallery') }}" class="list-group-item list-group-item-action border-0">
-                                <div class="d-flex w-100 justify-content-between">
-                                    <h6 class="mb-1">{{ post.title }}</h6>
-                                    <small>{{ post.created_at.strftime('%m/%d') }}</small>
-                                </div>
-                                <p class="mb-1 text-muted small">{{ post.content[:50] }}{% if post.content|length > 50 %}...{% endif %}</p>
-                                <small class="text-muted">{{ post.author.name }}</small>
-                            </a>
-                        {% endfor %}
-                        {% if not latest_post and not other_posts %}
-                            <div class="list-group-item text-center text-muted py-4">
-                                <p class="mb-0">갤러리에 글이 없습니다.</p>
+        {% endif %}
+    </div>
+{% endif %}
+
+<!-- 오른쪽: 갤러리 글 목록 -->
+<div class="container-fluid px-3">
+    <div class="row">
+        <div class="col-lg-4 offset-lg-0">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white border-0 pb-0">
+                    <h5 class="mb-0">갤러리</h5>
+                </div>
+                <div class="list-group list-group-flush border-0">
+                    {% if latest_post %}
+                        <a href="{{ url_for('main.gallery_detail', post_id=latest_post.id) }}" class="list-group-item list-group-item-action border-0">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ latest_post.title }}</h6>
+                                <small>{{ latest_post.created_at.strftime('%m/%d') }}</small>
                             </div>
-                        {% endif %}
-                    </div>
+                            <p class="mb-1 text-muted small">{{ latest_post.content[:50] }}{% if latest_post.content|length > 50 %}...{% endif %}</p>
+                            <small class="text-muted">{{ latest_post.author.name }}</small>
+                        </a>
+                    {% endif %}
+                    {% for post in other_posts %}
+                        <a href="{{ url_for('main.gallery_detail', post_id=post.id) }}" class="list-group-item list-group-item-action border-0">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ post.title }}</h6>
+                                <small>{{ post.created_at.strftime('%m/%d') }}</small>
+                            </div>
+                            <p class="mb-1 text-muted small">{{ post.content[:50] }}{% if post.content|length > 50 %}...{% endif %}</p>
+                            <small class="text-muted">{{ post.author.name }}</small>
+                        </a>
+                    {% endfor %}
+                    {% if not latest_post and not other_posts %}
+                        <div class="list-group-item text-center text-muted py-4">
+                            <p class="mb-0">갤러리에 글이 없습니다.</p>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
         </div>

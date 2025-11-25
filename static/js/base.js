@@ -4,20 +4,27 @@ document.addEventListener('DOMContentLoaded', function() {
     const sidebarToggle = document.getElementById('sidebarToggle');
     const sidebarIcon = document.getElementById('sidebarToggleIcon');
 
-    // 로컬 스토리지에서 사이드바 상태 불러오기 (기본값: 접힌 상태)
-    // 기본적으로 접힌 상태로 시작 (localStorage에 값이 없으면 접힌 상태)
+    // 초기 로딩 시 애니메이션 방지를 위해 즉시 상태 적용
+    // 기본적으로 접힌 상태로 시작
     const sidebarExpanded = localStorage.getItem('sidebarExpanded') === 'true';
-    if (sidebarExpanded) {
-        sidebar.classList.add('expanded');
-        sidebarIcon.classList.remove('bi-list');
-        sidebarIcon.classList.add('bi-x-lg');
-    } else {
-        // 명시적으로 접힌 상태로 설정
+    
+    // 초기 상태를 즉시 적용 (애니메이션 없이)
+    if (!sidebarExpanded) {
         sidebar.classList.remove('expanded');
         sidebarIcon.classList.remove('bi-x-lg');
         sidebarIcon.classList.add('bi-list');
         localStorage.setItem('sidebarExpanded', 'false');
+    } else {
+        // 펼쳐진 상태로 저장되어 있으면 펼침
+        sidebar.classList.add('expanded');
+        sidebarIcon.classList.remove('bi-list');
+        sidebarIcon.classList.add('bi-x-lg');
     }
+    
+    // 약간의 지연 후 transition 활성화 (초기 로딩 애니메이션 방지)
+    setTimeout(function() {
+        sidebar.classList.add('loaded');
+    }, 100);
 
     sidebarToggle.addEventListener('click', function() {
         sidebar.classList.toggle('expanded');
