@@ -3,7 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="IU DOTCOM - 아이유 팬 커뮤니티">
     <title>IU DOTCOM</title>
+    <!-- Google Fonts - Pretendard (SM 스타일 폰트) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Inter 폰트 추가 -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
@@ -168,7 +175,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="loginModalLabel">{% if current_lang == 'en' %}Login{% else %}로그인{% endif %}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body text-center">
                     <p class="mb-4">{% if current_lang == 'en' %}Sign in with your Google account{% else %}Google 계정으로 로그인하세요{% endif %}</p>
@@ -187,11 +194,11 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="newPostModalLabel">{% if current_lang == 'en' %}New Post{% else %}새 글 작성{% endif %}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div id="newPostModalBody">
                     <div class="text-center p-4">
-                        <div class="spinner-border" role="status">
+                        <div class="spinner-border text-light" role="status">
                             <span class="visually-hidden">로딩 중...</span>
                         </div>
                     </div>
