@@ -656,12 +656,13 @@ a:hover {
     transform: translateY(-50%) scale(1.1);
 }
 
+/* 이미지(카드) 중심 기준으로 좌우 배치 */
 .gallery-slider-prev {
-    left: calc(var(--sidebar-width) + 1rem);
+    left: calc(50% - 250px - 60px); /* 화면 중앙 - 카드 너비의 절반 - 버튼과의 간격 */
 }
 
 .gallery-slider-next {
-    right: 1rem;
+    left: calc(50% + 250px + 10px); /* 화면 중앙 + 카드 너비의 절반 + 버튼과의 간격 */
 }
 
 /* 홈 버튼 */
@@ -728,7 +729,11 @@ a:hover {
     }
     
     .gallery-slider-prev {
-        left: 1rem;
+        left: calc(50% - 210px - 60px); /* 태블릿 카드 너비 기준 */
+    }
+    
+    .gallery-slider-next {
+        left: calc(50% + 210px + 10px);
     }
 }
 
@@ -770,11 +775,11 @@ a:hover {
     }
     
     .gallery-slider-prev {
-        left: 0.5rem;
+        left: calc(50% - 175px - 50px); /* 모바일 카드 너비 기준 */
     }
     
     .gallery-slider-next {
-        right: 0.5rem;
+        left: calc(50% + 175px + 10px);
     }
     
     .gallery-home-btn {
