@@ -30,7 +30,7 @@
                                 <h3 class="gallery-card-title">{{ post.title }}</h3>
                                 <p class="gallery-card-text">{{ post.content[:100] }}{% if post.content|length > 100 %}...{% endif %}</p>
                                 <div class="gallery-card-meta">
-                                    <span class="gallery-card-author">{{ post.author.name }}</span>
+                                    <span class="gallery-card-author">{% if post.author.is_admin() %}관리자{% else %}{{ post.author.name }}{% endif %}</span>
                                     <span class="gallery-card-date">{{ post.created_at.strftime('%Y.%m.%d') }}</span>
                                 </div>
                             </div>

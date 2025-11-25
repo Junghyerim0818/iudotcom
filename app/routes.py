@@ -185,7 +185,6 @@ def authorize():
 @login_required
 def logout():
     logout_user()
-    flash('로그아웃되었습니다.', 'info')
     return redirect(url_for('main.index'))
 
 @bp.route('/lang/<lang_code>')
