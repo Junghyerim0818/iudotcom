@@ -126,5 +126,116 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
+    
+    // 갤러리 카드 슬라이더 기능
+    const gallerySliderWrapper = document.getElementById('gallerySliderWrapper');
+    const gallerySliderTrack = document.getElementById('gallerySliderTrack');
+    const gallerySliderPrev = document.getElementById('gallerySliderPrev');
+    const gallerySliderNext = document.getElementById('gallerySliderNext');
+    const galleryHomeBtn = document.getElementById('galleryHomeBtn');
+    
+    if (gallerySliderWrapper && gallerySliderTrack) {
+        const cardItems = gallerySliderTrack.querySelectorAll('.gallery-card-item');
+        let currentIndex = 0;
+        
+        // 카드 너비 계산 (반응형 대응)
+        function getCardWidth() {
+            if (cardItems.length > 0) {
+                const firstCard = cardItems[0];
+                const cardStyle = window.getComputedStyle(firstCard);
+                const cardWidth = parseInt(cardStyle.width);
+                const gap = parseInt(window.getComputedStyle(gallerySliderTrack).gap) || 32;
+                return { width: cardWidth, gap: gap };
+            }
+            return { width: 380, gap: 32 }; // 기본값
+        }
+        
+        // 이전 버튼
+        if (gallerySliderPrev) {
+            gallerySliderPrev.addEventListener('click', function() {
+                if (currentIndex > 0) {
+                    currentIndex--;
+                    scrollToCard(currentIndex);
+                }
+            });
+        }
+        
+        // 다음 버튼
+        if (gallerySliderNext) {
+            gallerySliderNext.addEventListener('click', function() {
+                if (currentIndex < cardItems.length - 1) {
+                    currentIndex++;
+                    scrollToCard(currentIndex);
+                }
+            });
+        }
+        
+        // 홈 버튼 (첫 번째 카드로 이동)
+        if (galleryHomeBtn) {
+            galleryHomeBtn.addEventListener('click', function() {
+                currentIndex = 0;
+                scrollToCard(0);
+            });
+        }
+        
+        // 카드로 스크롤하는 함수
+        function scrollToCard(index) {
+            if (cardItems[index]) {
+                const card = cardItems[index];
+                const cardLeft = card.offsetLeft;
+                const wrapperWidth = gallerySliderWrapper.offsetWidth;
+                const cardDimensions = getCardWidth();
+                const scrollPosition = cardLeft - (wrapperWidth / 2) + (cardDimensions.width / 2);
+                
+                gallerySliderWrapper.scrollTo({
+                    left: Math.max(0, scrollPosition),
+                    behavior: 'smooth'
+                });
+            }
+        }
+        
+        // 스크롤 이벤트로 현재 인덱스 업데이트
+        let scrollTimeout;
+        gallerySliderWrapper.addEventListener('scroll', function() {
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(function() {
+                updateCurrentIndex();
+            }, 100);
+        });
+        
+        function updateCurrentIndex() {
+            const scrollLeft = gallerySliderWrapper.scrollLeft;
+            const wrapperWidth = gallerySliderWrapper.offsetWidth;
+            const centerPoint = scrollLeft + wrapperWidth / 2;
+            const cardDimensions = getCardWidth();
+            
+            let closestIndex = 0;
+            let closestDistance = Infinity;
+            
+            cardItems.forEach((card, index) => {
+                const cardLeft = card.offsetLeft;
+                const cardCenter = cardLeft + cardDimensions.width / 2;
+                const distance = Math.abs(centerPoint - cardCenter);
+                
+                if (distance < closestDistance) {
+                    closestDistance = distance;
+                    closestIndex = index;
+                }
+            });
+            
+            currentIndex = closestIndex;
+        }
+        
+        // 휠 이벤트로 가로 스크롤 (선택사항)
+        gallerySliderWrapper.addEventListener('wheel', function(e) {
+            if (e.deltaY !== 0) {
+                e.preventDefault();
+                gallerySliderWrapper.scrollLeft += e.deltaY;
+            }
+        }, { passive: false });
+        
+        // 초기 인덱스 설정
+        updateCurrentIndex();
+    }
 });
 

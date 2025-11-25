@@ -1,93 +1,62 @@
 {% extends "base.html" %}
 
 {% block content %}
-<!-- 최신 갤러리 글 이미지 (사이드바 옆 고정) -->
-{% if latest_post %}
-    <div class="latest-post-image-wrapper">
-        {% if latest_post.has_image_data() or latest_post.image_filename or latest_post.image_url %}
-            <a href="{{ url_for('main.gallery_detail', post_id=latest_post.id) }}" class="latest-post-image-link">
-                <img src="{% if latest_post.image_url %}{{ latest_post.image_url }}{% elif latest_post.has_image_data() %}{{ url_for('main.get_image', post_id=latest_post.id) }}{% elif latest_post.image_filename %}{{ url_for('static', filename='uploads/' + latest_post.image_filename) }}{% endif %}" 
-                     class="latest-post-image" 
-                     alt="{{ latest_post.title }}">
-                <!-- 오른쪽 그라데이션 오버레이 -->
-                <div class="latest-post-gradient-overlay"></div>
-                <!-- 하단 정보 -->
-                <div class="latest-post-info">
-                    <h3 class="latest-post-title">{{ latest_post.title }}</h3>
-                    <p class="latest-post-date">{{ latest_post.created_at.strftime('%Y-%m-%d') }}</p>
-                </div>
-            </a>
-        {% else %}
-            <div class="latest-post-placeholder">
-                <i class="bi bi-image text-white" style="font-size: 4rem;"></i>
-                <div class="latest-post-info">
-                    <h3 class="latest-post-title">{{ latest_post.title }}</h3>
-                    <p class="latest-post-date">{{ latest_post.created_at.strftime('%Y-%m-%d') }}</p>
-                </div>
-            </div>
-        {% endif %}
-    </div>
-{% endif %}
-
-<!-- 갤러리 카드 리스트 -->
-<div class="gallery-cards-container">
-    <div class="gallery-cards-wrapper">
-        {% if latest_post %}
-            <div class="gallery-card-item" data-index="0">
-                <a href="{{ url_for('main.gallery_detail', post_id=latest_post.id) }}" class="gallery-card-link">
-                    <div class="gallery-card-image-wrapper">
-                        {% if latest_post.has_image_data() or latest_post.image_filename or latest_post.image_url %}
-                            <img src="{% if latest_post.image_url %}{{ latest_post.image_url }}{% elif latest_post.has_image_data() %}{{ url_for('main.get_image', post_id=latest_post.id) }}{% elif latest_post.image_filename %}{{ url_for('static', filename='uploads/' + latest_post.image_filename) }}{% endif %}" 
-                                 class="gallery-card-image" 
-                                 alt="{{ latest_post.title }}">
-                        {% else %}
-                            <div class="gallery-card-placeholder">
-                                <i class="bi bi-image"></i>
+<!-- 갤러리 카드 슬라이더 -->
+<div class="gallery-slider-container">
+    <!-- 네비게이션 버튼 -->
+    <button class="gallery-slider-nav gallery-slider-prev" id="gallerySliderPrev" aria-label="이전">
+        <i class="bi bi-chevron-left"></i>
+    </button>
+    <button class="gallery-slider-nav gallery-slider-next" id="gallerySliderNext" aria-label="다음">
+        <i class="bi bi-chevron-right"></i>
+    </button>
+    
+    <!-- 카드 슬라이더 -->
+    <div class="gallery-slider-wrapper" id="gallerySliderWrapper">
+        <div class="gallery-slider-track" id="gallerySliderTrack">
+            {% if gallery_posts %}
+                {% for post in gallery_posts %}
+                    <div class="gallery-card-item" data-index="{{ loop.index0 }}" data-post-id="{{ post.id }}">
+                        <a href="{{ url_for('main.gallery_detail', post_id=post.id) }}" class="gallery-card-link">
+                            <div class="gallery-card-image-wrapper">
+                                {% if post.has_image_data() or post.image_filename or post.image_url %}
+                                    <img src="{% if post.image_url %}{{ post.image_url }}{% elif post.has_image_data() %}{{ url_for('main.get_image', post_id=post.id) }}{% elif post.image_filename %}{{ url_for('static', filename='uploads/' + post.image_filename) }}{% endif %}" 
+                                         class="gallery-card-image" 
+                                         alt="{{ post.title }}">
+                                {% else %}
+                                    <div class="gallery-card-placeholder">
+                                        <i class="bi bi-image"></i>
+                                    </div>
+                                {% endif %}
                             </div>
-                        {% endif %}
-                    </div>
-                    <div class="gallery-card-content">
-                        <h3 class="gallery-card-title">{{ latest_post.title }}</h3>
-                        <p class="gallery-card-text">{{ latest_post.content[:100] }}{% if latest_post.content|length > 100 %}...{% endif %}</p>
-                        <div class="gallery-card-meta">
-                            <span class="gallery-card-author">{{ latest_post.author.name }}</span>
-                            <span class="gallery-card-date">{{ latest_post.created_at.strftime('%Y.%m.%d') }}</span>
-                        </div>
-                    </div>
-                </a>
-            </div>
-        {% endif %}
-        {% for post in other_posts %}
-            <div class="gallery-card-item" data-index="{{ loop.index }}">
-                <a href="{{ url_for('main.gallery_detail', post_id=post.id) }}" class="gallery-card-link">
-                    <div class="gallery-card-image-wrapper">
-                        {% if post.has_image_data() or post.image_filename or post.image_url %}
-                            <img src="{% if post.image_url %}{{ post.image_url }}{% elif post.has_image_data() %}{{ url_for('main.get_image', post_id=post.id) }}{% elif post.image_filename %}{{ url_for('static', filename='uploads/' + post.image_filename) }}{% endif %}" 
-                                 class="gallery-card-image" 
-                                 alt="{{ post.title }}">
-                        {% else %}
-                            <div class="gallery-card-placeholder">
-                                <i class="bi bi-image"></i>
+                            <div class="gallery-card-content">
+                                <h3 class="gallery-card-title">{{ post.title }}</h3>
+                                <p class="gallery-card-text">{{ post.content[:100] }}{% if post.content|length > 100 %}...{% endif %}</p>
+                                <div class="gallery-card-meta">
+                                    <span class="gallery-card-author">{{ post.author.name }}</span>
+                                    <span class="gallery-card-date">{{ post.created_at.strftime('%Y.%m.%d') }}</span>
+                                </div>
                             </div>
-                        {% endif %}
+                        </a>
                     </div>
-                    <div class="gallery-card-content">
-                        <h3 class="gallery-card-title">{{ post.title }}</h3>
-                        <p class="gallery-card-text">{{ post.content[:100] }}{% if post.content|length > 100 %}...{% endif %}</p>
-                        <div class="gallery-card-meta">
-                            <span class="gallery-card-author">{{ post.author.name }}</span>
-                            <span class="gallery-card-date">{{ post.created_at.strftime('%Y.%m.%d') }}</span>
-                        </div>
-                    </div>
-                </a>
-            </div>
-        {% endfor %}
-        {% if not latest_post and not other_posts %}
-            <div class="gallery-cards-empty">
-                <p>갤러리에 글이 없습니다.</p>
-            </div>
-        {% endif %}
+                {% endfor %}
+            {% else %}
+                <div class="gallery-cards-empty">
+                    <p>갤러리에 글이 없습니다.</p>
+                </div>
+            {% endif %}
+        </div>
     </div>
+    
+    <!-- 홈 버튼 (최신 글로 돌아가기) -->
+    {% if gallery_posts %}
+    <div class="gallery-slider-controls">
+        <button class="gallery-home-btn" id="galleryHomeBtn" aria-label="최신 글로 이동">
+            <i class="bi bi-house-fill"></i>
+            <span>{% if current_lang == 'en' %}Home{% else %}홈{% endif %}</span>
+        </button>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}
 

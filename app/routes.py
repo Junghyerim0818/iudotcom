@@ -55,15 +55,13 @@ def load_user(user_id):
 @bp.route('/')
 def index():
     try:
-        # 최근 갤러리 글들 가져오기
+        # 최근 갤러리 글들 가져오기 (날짜순 정렬 - 최신이 맨 앞)
         gallery_posts = Post.query.filter_by(category='gallery').order_by(Post.created_at.desc()).all()
-        latest_post = gallery_posts[0] if gallery_posts else None
-        other_posts = gallery_posts[1:] if len(gallery_posts) > 1 else []
-        return render_template('index.html', latest_post=latest_post, other_posts=other_posts)
+        return render_template('index.html', gallery_posts=gallery_posts)
     except Exception as e:
         current_app.logger.error(f"Error in index route: {str(e)}")
         # DB 스키마가 업데이트되지 않은 경우를 대비해 빈 결과 반환
-        return render_template('index.html', latest_post=None, other_posts=[])
+        return render_template('index.html', gallery_posts=[])
 
 @bp.route('/login')
 def login():
