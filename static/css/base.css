@@ -3,17 +3,30 @@
 :root {
     --sidebar-width: 280px;
     --sidebar-collapsed-width: 80px;
-    --sidebar-bg: #6a1b9a;
+    --sidebar-bg: #1a1a1a;
     --sidebar-text: #ffffff;
-    --sidebar-hover: #7b2cbf;
+    --sidebar-hover: rgba(255, 255, 255, 0.1);
     --transition-speed: 0.4s;
     --transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
+    --bg-primary: #0a0a0a;
+    --bg-secondary: #1a1a1a;
+    --text-primary: #ffffff;
+    --text-secondary: rgba(255, 255, 255, 0.7);
+    --accent-color: #ff6b9d;
 }
 
 body {
     margin: 0;
     padding: 0;
     font-family: 'NanumSquare', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    overflow-x: hidden;
+}
+
+/* 부드러운 스크롤 */
+html {
+    scroll-behavior: smooth;
 }
 
 .sidebar {
@@ -260,6 +273,8 @@ body {
     padding: 1.5rem 1.5rem 1.5rem 1.5rem;
     transition: margin-left var(--transition-speed) var(--transition-easing);
     min-height: 100vh;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
 }
 
 /* 사이드바가 닫힐 때 메인 콘텐츠도 더 빠르게 조정 */
@@ -323,6 +338,11 @@ body {
     height: 100%;
     object-fit: cover;
     display: block;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.latest-post-image-link:hover .latest-post-image {
+    transform: scale(1.05);
 }
 
 .latest-post-placeholder {
@@ -341,11 +361,16 @@ body {
     position: absolute;
     top: 0;
     right: 0;
-    width: 40%;
+    width: 50%;
     height: 100%;
-    background: linear-gradient(to left, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.4), transparent);
+    background: linear-gradient(to left, 
+        rgba(10, 10, 10, 0.95) 0%,
+        rgba(10, 10, 10, 0.7) 30%,
+        rgba(10, 10, 10, 0.3) 60%,
+        transparent 100%);
     pointer-events: none;
     z-index: 1;
+    transition: opacity 0.3s ease;
 }
 
 /* 하단 정보 */
@@ -354,24 +379,37 @@ body {
     bottom: 0;
     left: 0;
     right: 0;
-    padding: 2rem 1.5rem;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.4), transparent);
+    padding: 2.5rem 1.5rem;
+    background: linear-gradient(to top, 
+        rgba(10, 10, 10, 0.95) 0%,
+        rgba(10, 10, 10, 0.6) 50%,
+        transparent 100%);
     z-index: 2;
+    backdrop-filter: blur(10px);
 }
 
 .latest-post-title {
     color: white;
-    font-size: 1.5rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    transition: transform 0.3s ease;
+}
+
+.latest-post-image-link:hover .latest-post-title {
+    transform: translateY(-2px);
 }
 
 .latest-post-date {
-    color: rgba(255, 255, 255, 0.8);
+    color: rgba(255, 255, 255, 0.7);
     font-size: 0.875rem;
     margin: 0;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+    font-weight: 300;
+    letter-spacing: 0.05em;
 }
 
 /* 메인 콘텐츠가 최신 글 이미지 옆에 위치하도록 조정 */
@@ -388,6 +426,117 @@ body {
     transition: margin-left calc(var(--transition-speed) * 0.85) cubic-bezier(0.4, 0, 0.6, 1);
 }
 
+/* 갤러리 목록 카드 스타일 (SM 스타일) */
+.gallery-list-card {
+    background: rgba(26, 26, 26, 0.8);
+    backdrop-filter: blur(20px);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.gallery-list-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.gallery-list-header {
+    padding: 1.5rem 1.5rem 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.gallery-list-title {
+    color: var(--text-primary);
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: -0.01em;
+}
+
+.gallery-list-items {
+    padding: 0.5rem 0;
+}
+
+.gallery-list-item {
+    display: block;
+    padding: 1.25rem 1.5rem;
+    text-decoration: none;
+    color: var(--text-primary);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    position: relative;
+}
+
+.gallery-list-item:last-child {
+    border-bottom: none;
+}
+
+.gallery-list-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--accent-color);
+    transform: scaleY(0);
+    transition: transform 0.3s ease;
+}
+
+.gallery-list-item:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    transform: translateX(4px);
+}
+
+.gallery-list-item:hover::before {
+    transform: scaleY(1);
+}
+
+.gallery-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.5rem;
+}
+
+.gallery-item-title {
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+    flex: 1;
+    letter-spacing: -0.01em;
+}
+
+.gallery-item-date {
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    font-weight: 400;
+    margin-left: 1rem;
+    white-space: nowrap;
+}
+
+.gallery-item-content {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    margin: 0.5rem 0;
+    line-height: 1.5;
+}
+
+.gallery-item-author {
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    display: block;
+    margin-top: 0.5rem;
+}
+
+.gallery-list-empty {
+    padding: 3rem 1.5rem;
+    text-align: center;
+    color: var(--text-secondary);
+}
+
 @media (max-width: 768px) {
     .latest-post-image-wrapper {
         display: none;
@@ -399,6 +548,10 @@ body {
     
     .sidebar.expanded ~ .main-content-index {
         margin-left: 0;
+    }
+    
+    .gallery-list-card {
+        border-radius: 8px;
     }
 }
 

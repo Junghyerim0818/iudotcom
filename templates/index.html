@@ -33,34 +33,34 @@
 <div class="container-fluid px-3">
     <div class="row">
         <div class="col-lg-4 offset-lg-0">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-white border-0 pb-0">
-                    <h5 class="mb-0">갤러리</h5>
+            <div class="gallery-list-card">
+                <div class="gallery-list-header">
+                    <h5 class="gallery-list-title">갤러리</h5>
                 </div>
-                <div class="list-group list-group-flush border-0">
+                <div class="gallery-list-items">
                     {% if latest_post %}
-                        <a href="{{ url_for('main.gallery_detail', post_id=latest_post.id) }}" class="list-group-item list-group-item-action border-0">
-                            <div class="d-flex w-100 justify-content-between">
-                                <h6 class="mb-1">{{ latest_post.title }}</h6>
-                                <small>{{ latest_post.created_at.strftime('%m/%d') }}</small>
+                        <a href="{{ url_for('main.gallery_detail', post_id=latest_post.id) }}" class="gallery-list-item">
+                            <div class="gallery-item-header">
+                                <h6 class="gallery-item-title">{{ latest_post.title }}</h6>
+                                <span class="gallery-item-date">{{ latest_post.created_at.strftime('%m/%d') }}</span>
                             </div>
-                            <p class="mb-1 text-muted small">{{ latest_post.content[:50] }}{% if latest_post.content|length > 50 %}...{% endif %}</p>
-                            <small class="text-muted">{{ latest_post.author.name }}</small>
+                            <p class="gallery-item-content">{{ latest_post.content[:50] }}{% if latest_post.content|length > 50 %}...{% endif %}</p>
+                            <span class="gallery-item-author">{{ latest_post.author.name }}</span>
                         </a>
                     {% endif %}
                     {% for post in other_posts %}
-                        <a href="{{ url_for('main.gallery_detail', post_id=post.id) }}" class="list-group-item list-group-item-action border-0">
-                            <div class="d-flex w-100 justify-content-between">
-                                <h6 class="mb-1">{{ post.title }}</h6>
-                                <small>{{ post.created_at.strftime('%m/%d') }}</small>
+                        <a href="{{ url_for('main.gallery_detail', post_id=post.id) }}" class="gallery-list-item">
+                            <div class="gallery-item-header">
+                                <h6 class="gallery-item-title">{{ post.title }}</h6>
+                                <span class="gallery-item-date">{{ post.created_at.strftime('%m/%d') }}</span>
                             </div>
-                            <p class="mb-1 text-muted small">{{ post.content[:50] }}{% if post.content|length > 50 %}...{% endif %}</p>
-                            <small class="text-muted">{{ post.author.name }}</small>
+                            <p class="gallery-item-content">{{ post.content[:50] }}{% if post.content|length > 50 %}...{% endif %}</p>
+                            <span class="gallery-item-author">{{ post.author.name }}</span>
                         </a>
                     {% endfor %}
                     {% if not latest_post and not other_posts %}
-                        <div class="list-group-item text-center text-muted py-4">
-                            <p class="mb-0">갤러리에 글이 없습니다.</p>
+                        <div class="gallery-list-empty">
+                            <p>갤러리에 글이 없습니다.</p>
                         </div>
                     {% endif %}
                 </div>
