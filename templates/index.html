@@ -16,8 +16,8 @@
         <div class="gallery-slider-track" id="gallerySliderTrack">
             {% if gallery_posts %}
                 {% for post in gallery_posts %}
-                    <div class="gallery-card-item" data-index="{{ loop.index0 }}" data-post-id="{{ post.id }}">
-                        <a href="{{ url_for('main.gallery_detail', post_id=post.id) }}" class="gallery-card-link">
+                    <div class="gallery-card-item" data-index="{{ loop.index0 }}" data-post-id="{{ post.id }}" data-card-index="{{ loop.index0 }}">
+                        <a href="{{ url_for('main.gallery_detail', post_id=post.id) }}" class="gallery-card-link" data-card-index="{{ loop.index0 }}">
                             <div class="gallery-card-image-wrapper">
                                 {% if post.has_image_data() or post.image_filename or post.image_url %}
                                     <img src="{% if post.image_url %}{{ post.image_url }}{% elif post.has_image_data() %}{{ url_for('main.get_image', post_id=post.id) }}{% elif post.image_filename %}{{ url_for('static', filename='uploads/' + post.image_filename) }}{% endif %}" 
@@ -52,7 +52,6 @@
     {% if gallery_posts %}
     <div class="gallery-slider-controls">
         <button class="gallery-home-btn" id="galleryHomeBtn" aria-label="최신 글로 이동">
-            <i class="bi bi-house-fill"></i>
             <span>{% if current_lang == 'en' %}Home{% else %}홈{% endif %}</span>
         </button>
     </div>

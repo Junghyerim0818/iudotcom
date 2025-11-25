@@ -134,9 +134,31 @@ document.addEventListener('DOMContentLoaded', function() {
     const gallerySliderNext = document.getElementById('gallerySliderNext');
     const galleryHomeBtn = document.getElementById('galleryHomeBtn');
     
+    let currentIndex = 0;
+    let cardItems = [];
+    
     if (gallerySliderWrapper && gallerySliderTrack) {
-        const cardItems = gallerySliderTrack.querySelectorAll('.gallery-card-item');
-        let currentIndex = 0;
+        cardItems = gallerySliderTrack.querySelectorAll('.gallery-card-item');
+        
+        // 카드 클릭 이벤트 리스너 추가 (Stack Overflow 예제처럼 중앙으로 이동)
+        cardItems.forEach((card, index) => {
+            const cardLink = card.querySelector('.gallery-card-link');
+            if (cardLink) {
+                cardLink.addEventListener('click', function(e) {
+                    // 이미 중앙에 있는 카드면 상세 페이지로 이동
+                    if (currentIndex === index && card.classList.contains('active')) {
+                        return; // 기본 링크 동작 허용
+                    }
+                    
+                    // 중앙에 없는 카드면 중앙으로 이동
+                    e.preventDefault();
+                    const cardIndex = parseInt(this.getAttribute('data-card-index') || index);
+                    currentIndex = cardIndex;
+                    scrollToCard(cardIndex);
+                    updateActiveCard(cardIndex);
+                });
+            }
+        });
         
         // 카드 너비 계산 (반응형 대응)
         function getCardWidth() {
@@ -178,19 +200,37 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
         
-        // 카드로 스크롤하는 함수
+        // 활성 카드 업데이트
+        function updateActiveCard(index) {
+            cardItems.forEach((card, i) => {
+                if (i === index) {
+                    card.classList.add('active');
+                } else {
+                    card.classList.remove('active');
+                }
+            });
+        }
+        
+        // 카드로 스크롤하는 함수 (클릭한 카드가 중앙에 오도록)
         function scrollToCard(index) {
             if (cardItems[index]) {
                 const card = cardItems[index];
-                const cardLeft = card.offsetLeft;
                 const wrapperWidth = gallerySliderWrapper.offsetWidth;
                 const cardDimensions = getCardWidth();
-                const scrollPosition = cardLeft - (wrapperWidth / 2) + (cardDimensions.width / 2);
+                
+                // 카드의 중앙을 화면 중앙에 맞춤
+                const cardLeft = card.offsetLeft;
+                const cardCenter = cardLeft + cardDimensions.width / 2;
+                const wrapperCenter = wrapperWidth / 2;
+                const scrollPosition = cardCenter - wrapperCenter;
                 
                 gallerySliderWrapper.scrollTo({
                     left: Math.max(0, scrollPosition),
                     behavior: 'smooth'
                 });
+                
+                // 활성 카드 업데이트
+                updateActiveCard(index);
             }
         }
         
@@ -223,7 +263,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
             
-            currentIndex = closestIndex;
+            if (currentIndex !== closestIndex) {
+                currentIndex = closestIndex;
+                updateActiveCard(currentIndex);
+            }
         }
         
         // 휠 이벤트로 가로 스크롤 (선택사항)
@@ -236,6 +279,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // 초기 인덱스 설정
         updateCurrentIndex();
+        updateActiveCard(0); // 첫 번째 카드를 활성화
     }
 });
 

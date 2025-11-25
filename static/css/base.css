@@ -367,6 +367,9 @@ a:hover {
     scrollbar-color: var(--border-color) transparent;
     scroll-behavior: smooth;
     padding: 2rem 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .gallery-slider-wrapper::-webkit-scrollbar {
@@ -385,10 +388,12 @@ a:hover {
 .gallery-slider-track {
     display: flex;
     gap: 0;
-    padding: 0 calc(var(--sidebar-width) + 2rem) 0 2rem;
+    padding: 0;
     transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     align-items: center;
-    justify-content: flex-start;
+    justify-content: center;
+    min-height: 500px;
+    position: relative;
 }
 
 .gallery-card-item {
@@ -397,13 +402,15 @@ a:hover {
     position: relative;
     cursor: pointer;
     transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-    margin-left: -280px;
+    margin-left: -200px;
     z-index: 1;
-    filter: blur(3px);
-    opacity: 0.7;
-    transform: scale(0.9);
+    filter: blur(4px);
+    opacity: 0.6;
+    transform: scale(0.85);
+    pointer-events: auto;
 }
 
+/* 첫 번째 카드 (최신글) - 중앙 배치 */
 .gallery-card-item:first-child {
     margin-left: 0;
     filter: blur(0);
@@ -412,32 +419,59 @@ a:hover {
     z-index: 10;
 }
 
+/* 두 번째 카드부터 오른쪽으로 순서대로 배치 - 간격 좁게 */
 .gallery-card-item:nth-child(2) {
-    margin-left: -280px;
-    filter: blur(2px);
-    opacity: 0.85;
-    transform: scale(0.95);
+    margin-left: -200px;
+    filter: blur(3px);
+    opacity: 0.7;
+    transform: scale(0.9);
     z-index: 9;
 }
 
 .gallery-card-item:nth-child(3) {
-    margin-left: -280px;
-    filter: blur(2.5px);
-    opacity: 0.8;
-    transform: scale(0.92);
+    margin-left: -200px;
+    filter: blur(3.5px);
+    opacity: 0.65;
+    transform: scale(0.88);
     z-index: 8;
 }
 
-.gallery-card-item:hover {
-    z-index: 100;
+.gallery-card-item:nth-child(4) {
+    margin-left: -200px;
+    filter: blur(4px);
+    opacity: 0.6;
+    transform: scale(0.85);
+    z-index: 7;
+}
+
+.gallery-card-item:nth-child(n+5) {
+    margin-left: -200px;
+    filter: blur(4px);
+    opacity: 0.55;
+    transform: scale(0.85);
+    z-index: 6;
+}
+
+/* 활성 카드 (중앙에 있는 카드) */
+.gallery-card-item.active {
+    margin-left: 0;
     filter: blur(0);
     opacity: 1;
-    transform: translateY(-30px) scale(1.05);
-    margin-left: -200px;
+    transform: scale(1);
+    z-index: 100;
+}
+
+/* 호버 효과 - 튀어나오는 정도 줄임 */
+.gallery-card-item:hover:not(.active) {
+    z-index: 50;
+    filter: blur(2px);
+    opacity: 0.85;
+    transform: translateY(-10px) scale(0.95);
+    margin-left: -180px;
 }
 
 .gallery-card-item:hover ~ .gallery-card-item {
-    margin-left: -280px;
+    margin-left: -200px;
 }
 
 .gallery-card-link {
@@ -452,7 +486,7 @@ a:hover {
 }
 
 .gallery-card-item:hover .gallery-card-link {
-    transform: rotateY(-8deg) rotateX(5deg);
+    transform: rotateY(-5deg) rotateX(3deg);
 }
 
 .gallery-card-image-wrapper {
@@ -633,7 +667,7 @@ a:hover {
 .gallery-home-btn {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    justify-content: center;
     padding: 0.75rem 1.5rem;
     background-color: rgba(255, 255, 255, 0.95);
     border: 1px solid var(--border-color);
@@ -653,10 +687,6 @@ a:hover {
     box-shadow: var(--shadow-lg);
     transform: translateY(-2px);
     color: var(--accent-color);
-}
-
-.gallery-home-btn i {
-    font-size: 1.125rem;
 }
 
 @media (max-width: 1200px) {
@@ -693,33 +723,32 @@ a:hover {
 
 @media (max-width: 768px) {
     .gallery-slider-track {
-        padding: 0 4rem 0 1rem;
+        padding: 0;
     }
     
     .gallery-card-item {
         flex: 0 0 280px;
         height: 400px;
-        margin-left: -200px;
-    }
-    
-    .gallery-card-item:first-child {
-        margin-left: 0;
-    }
-    
-    .gallery-card-item:nth-child(2) {
-        margin-left: -200px;
-    }
-    
-    .gallery-card-item:nth-child(3) {
-        margin-left: -200px;
-    }
-    
-    .gallery-card-item:hover {
         margin-left: -140px;
     }
     
+    .gallery-card-item:first-child,
+    .gallery-card-item.active {
+        margin-left: 0;
+    }
+    
+    .gallery-card-item:nth-child(2),
+    .gallery-card-item:nth-child(3),
+    .gallery-card-item:nth-child(n+4) {
+        margin-left: -140px;
+    }
+    
+    .gallery-card-item:hover:not(.active) {
+        margin-left: -120px;
+    }
+    
     .gallery-card-item:hover ~ .gallery-card-item {
-        margin-left: -200px;
+        margin-left: -140px;
     }
     
     .gallery-slider-nav {
