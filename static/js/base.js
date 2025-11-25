@@ -21,39 +21,107 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// 사이드바는 항상 펼쳐진 상태로 유지
+// 사이드바 및 모바일 메뉴 관리
 document.addEventListener('DOMContentLoaded', function() {
     const sidebar = document.getElementById('sidebar');
-    if (sidebar) {
-        sidebar.classList.add('expanded');
+    const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+    const mobileOverlay = document.getElementById('mobileOverlay');
+    
+    // 데스크톱에서는 항상 펼쳐진 상태
+    if (window.innerWidth > 768) {
+        if (sidebar) {
+            sidebar.classList.add('expanded');
+        }
+    }
+    
+    // 모바일 메뉴 토글
+    if (mobileMenuToggle && mobileOverlay) {
+        mobileMenuToggle.addEventListener('click', function() {
+            sidebar.classList.toggle('mobile-open');
+            mobileOverlay.classList.toggle('active');
+            
+            // 아이콘 변경
+            const icon = this.querySelector('i');
+            if (sidebar.classList.contains('mobile-open')) {
+                icon.classList.remove('bi-list');
+                icon.classList.add('bi-x-lg');
+            } else {
+                icon.classList.remove('bi-x-lg');
+                icon.classList.add('bi-list');
+            }
+        });
+        
+        // 오버레이 클릭 시 메뉴 닫기
+        mobileOverlay.addEventListener('click', function() {
+            sidebar.classList.remove('mobile-open');
+            mobileOverlay.classList.remove('active');
+            
+            const icon = mobileMenuToggle.querySelector('i');
+            if (icon) {
+                icon.classList.remove('bi-x-lg');
+                icon.classList.add('bi-list');
+            }
+        });
+        
+        // 메뉴 링크 클릭 시 메뉴 닫기
+        const menuLinks = sidebar.querySelectorAll('.sidebar-menu-link');
+        menuLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                if (window.innerWidth <= 768) {
+                    sidebar.classList.remove('mobile-open');
+                    mobileOverlay.classList.remove('active');
+                    
+                    const icon = mobileMenuToggle.querySelector('i');
+                    if (icon) {
+                        icon.classList.remove('bi-x-lg');
+                        icon.classList.add('bi-list');
+                    }
+                }
+            });
+        });
     }
 
     // 로그인 모달에서 Google 로그인 버튼 클릭 시 팝업 열기
     const googleLoginBtn = document.getElementById('googleLoginBtn');
     if (googleLoginBtn) {
+        // 기본 링크 동작 방지
+        googleLoginBtn.setAttribute('href', 'javascript:void(0)');
+        
         googleLoginBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            const loginUrl = this.getAttribute('href');
-            const popup = window.open(loginUrl, 'GoogleLogin', 'width=500,height=600,scrollbars=yes,resizable=yes');
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            
+            // 실제 로그인 URL 가져오기
+            const actualLoginUrl = this.getAttribute('data-login-url') || '/login';
+            const popup = window.open(actualLoginUrl, 'GoogleLogin', 'width=500,height=600,scrollbars=yes,resizable=yes');
+            
+            if (!popup) {
+                alert('팝업이 차단되었습니다. 팝업 차단을 해제해주세요.');
+                return;
+            }
             
             // 팝업에서 로그인 완료 메시지 수신
-            window.addEventListener('message', function(event) {
+            const messageHandler = function(event) {
                 if (event.data && event.data.type === 'login') {
                     if (event.data.success) {
                         // 로그인 성공 시 모달 닫고 페이지 새로고침
                         const modal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
                         if (modal) modal.hide();
+                        window.removeEventListener('message', messageHandler);
                         window.location.reload();
                     } else {
                         alert(event.data.message || '로그인에 실패했습니다.');
                     }
                 }
-            });
+            };
+            window.addEventListener('message', messageHandler);
             
             // 팝업이 닫혔는지 확인
             const checkInterval = setInterval(function() {
                 if (popup.closed) {
                     clearInterval(checkInterval);
+                    window.removeEventListener('message', messageHandler);
                 }
             }, 500);
         });

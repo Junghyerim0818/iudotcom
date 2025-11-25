@@ -24,6 +24,28 @@
     </script>
 </head>
 <body>
+    <!-- 모바일 헤더 -->
+    <header class="mobile-header" id="mobileHeader">
+        <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="메뉴">
+            <i class="bi bi-list"></i>
+        </button>
+        <span class="mobile-header-brand">IU DOTCOM</span>
+        {% if current_user.is_authenticated %}
+            <div class="mobile-profile-icon">
+                {% if current_user.profile_pic %}
+                    <img src="{{ url_for('static', filename='uploads/profiles/' + current_user.profile_pic) if current_user.profile_pic.startswith('profile_') else current_user.profile_pic }}" alt="프로필" class="mobile-profile-avatar">
+                {% else %}
+                    <div class="mobile-profile-avatar bg-secondary d-flex align-items-center justify-content-center">
+                        <i class="bi bi-person-fill text-white"></i>
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+    </header>
+    
+    <!-- 모바일 오버레이 -->
+    <div class="mobile-overlay" id="mobileOverlay"></div>
+    
     <!-- 사이드바 -->
     <aside class="sidebar expanded" id="sidebar">
         <div class="sidebar-header">
@@ -111,8 +133,6 @@
                     {% endif %}
                 {% endif %}
 
-                <li class="sidebar-menu-item"><div class="sidebar-divider"></div></li>
-
                 <!-- 설정 섹션 -->
                 {% if current_user.is_authenticated %}
                     <li class="sidebar-menu-item">
@@ -121,8 +141,6 @@
                         </a>
                     </li>
                 {% endif %}
-                
-                <li class="sidebar-menu-item"><div class="sidebar-divider"></div></li>
                 
                 <!-- 언어 변경 섹션 -->
                 <li class="sidebar-menu-item sidebar-language-section">
@@ -166,7 +184,7 @@
                 </div>
                 <div class="modal-body text-center">
                     <p class="mb-4">{% if current_lang == 'en' %}Sign in with your Google account{% else %}Google 계정으로 로그인하세요{% endif %}</p>
-                    <a href="{{ url_for('main.login') }}" class="btn btn-primary" id="googleLoginBtn">
+                    <a href="javascript:void(0)" class="btn btn-primary" id="googleLoginBtn" data-login-url="{{ url_for('main.login') }}">
                         <i class="bi bi-google me-2"></i>{% if current_lang == 'en' %}Sign in with Google{% else %}Google로 로그인{% endif %}
                     </a>
                 </div>
