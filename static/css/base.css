@@ -21,7 +21,7 @@
 
 /* 관리자 페이지 테이블 스타일 */
 .table-no-stripe {
-    background-color: transparent !important;
+    background-color: #ffffff !important;
 }
 
 /* 부드러운 스크롤 */
@@ -1223,4 +1223,5 @@ a:hover {
         padding-top: calc(60px + 1rem);
     }
 }
+
 
