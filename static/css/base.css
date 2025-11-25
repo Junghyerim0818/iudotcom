@@ -503,7 +503,7 @@ a:hover {
     transform: rotateY(-3deg) rotateX(2deg);
 }
 
-/* 배경 이미지 */
+/* 배경 이미지 - 카드 링크와 동일한 애니메이션 */
 .gallery-card-background {
     position: absolute;
     top: 0;
@@ -515,10 +515,11 @@ a:hover {
     background-repeat: no-repeat;
     transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 1;
+    transform-style: preserve-3d;
 }
 
 .gallery-card-item:hover .gallery-card-background {
-    transform: scale(1.05);
+    transform: rotateY(-3deg) rotateX(2deg) scale(1.05);
 }
 
 .gallery-card-placeholder-bg {
