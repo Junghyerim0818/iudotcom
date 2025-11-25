@@ -19,6 +19,11 @@
     --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
+/* 관리자 페이지 테이블 스타일 */
+.table-no-stripe {
+    background-color: transparent !important;
+}
+
 /* 부드러운 스크롤 */
 html {
     scroll-behavior: smooth;

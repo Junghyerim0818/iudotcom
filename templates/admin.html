@@ -15,7 +15,7 @@
         </thead>
         <tbody>
             {% for user in users %}
-            <tr>
+            <tr {% if user.role == 'admin' %}class="table-no-stripe"{% endif %}>
                 <td>
                     {% if user.profile_pic %}
                     <img src="{{ user.profile_pic }}" alt="Profile" class="rounded-circle" width="40">

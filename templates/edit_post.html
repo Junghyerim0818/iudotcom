@@ -1,0 +1,44 @@
+<form id="editPostForm" method="POST" enctype="multipart/form-data" action="{{ url_for('main.edit_post', post_id=post.id) }}">
+    <div class="modal-body">
+        {{ form.hidden_tag() }}
+        <div class="mb-3">
+            {{ form.title.label(class="form-label") }}
+            {{ form.title(class="form-control") }}
+        </div>
+        <div class="mb-3">
+            {{ form.category.label(class="form-label") }}
+            {{ form.category(class="form-select") }}
+        </div>
+        <div class="mb-3">
+            {{ form.image.label(class="form-label") }}
+            {{ form.image(class="form-control") }}
+            <div class="form-text">새 이미지를 업로드하면 기존 이미지가 교체됩니다. 갤러리 선택 시 이미지는 필수입니다.</div>
+            {% if post.has_image_data() or post.image_url %}
+            <div class="mt-2">
+                <small class="text-muted">현재 이미지:</small>
+                {% if post.image_url %}
+                    <a href="{{ post.image_url }}" target="_blank" class="ms-2">이미지 보기</a>
+                {% elif post.has_image_data() %}
+                    <img src="{{ url_for('main.get_image', post_id=post.id) }}" alt="현재 이미지" style="max-height: 100px; margin-top: 0.5rem; display: block;">
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+        {% if current_user.is_admin() %}
+        <div class="mb-3">
+            {{ form.image_url.label(class="form-label") }}
+            {{ form.image_url(class="form-control", placeholder="https://example.com/image.jpg") }}
+            <div class="form-text">티스토리 등 외부 이미지 URL을 입력하세요. 파일 업로드보다 우선합니다.</div>
+        </div>
+        {% endif %}
+        <div class="mb-3">
+            {{ form.content.label(class="form-label") }}
+            {{ form.content(class="form-control", rows=5) }}
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+        <button type="submit" class="btn btn-primary">수정하기</button>
+    </div>
+</form>
+

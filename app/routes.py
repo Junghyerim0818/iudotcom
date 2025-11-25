@@ -368,4 +368,72 @@ def update_user_role(user_id):
         
     return redirect(url_for('main.admin'))
 
+@bp.route('/post/<int:post_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_post(post_id):
+    if not current_user.is_admin():
+        abort(403)
+    
+    post = Post.query.get_or_404(post_id)
+    form = PostForm(obj=post)
+    
+    # AJAX 요청인 경우 폼만 반환
+    if request.method == 'GET' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        # 폼에 기존 이미지 URL 설정
+        if post.image_url:
+            form.image_url.data = post.image_url
+        return render_template('edit_post.html', form=form, post=post)
+    
+    if form.validate_on_submit():
+        image_data = post.image_data
+        image_mimetype = post.image_mimetype
+        image_url = post.image_url
+        
+        # 관리자인 경우 티스토리 이미지 URL 사용 가능
+        if form.image_url.data:
+            image_url = form.image_url.data.strip()
+            # URL이 변경되면 기존 이미지 데이터는 유지하지 않음
+            if image_url:
+                image_data = None
+                image_mimetype = None
+        
+        # 새 이미지 파일이 업로드된 경우
+        if form.image.data:
+            image_data, image_mimetype = save_picture(form.image.data)
+            # 파일 업로드 시 URL은 무시
+            image_url = None
+        
+        # 갤러리 카테고리인 경우 이미지 필수 체크
+        if form.category.data == 'gallery':
+            if not image_url and not image_data and not post.image_data:
+                flash('갤러리에는 이미지가 필수입니다.', 'danger')
+                return render_template('edit_post.html', form=form, post=post)
+        
+        post.title = form.title.data
+        post.content = form.content.data
+        post.category = form.category.data
+        if image_data is not None:
+            post.image_data = image_data
+        if image_mimetype is not None:
+            post.image_mimetype = image_mimetype
+        if image_url is not None:
+            post.image_url = image_url
+        
+        db.session.commit()
+        flash('글이 수정되었습니다!', 'success')
+        
+        # 카테고리에 따라 리다이렉트
+        if post.category == 'gallery':
+            return redirect(url_for('main.gallery_detail', post_id=post.id))
+        elif post.category in ['archive_1', 'archive_2']:
+            return redirect(url_for('main.archive', type_name=post.category))
+        else:
+            return redirect(url_for('main.index'))
+    
+    # 폼에 기존 이미지 URL 설정
+    if post.image_url:
+        form.image_url.data = post.image_url
+    
+    return render_template('edit_post.html', form=form, post=post)
+
 

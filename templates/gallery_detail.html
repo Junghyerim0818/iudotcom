@@ -42,6 +42,13 @@
                             </small>
                         </p>
                     </div>
+                    {% if current_user.is_authenticated and current_user.is_admin() %}
+                    <div>
+                        <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editPostModal" data-post-id="{{ post.id }}">
+                            <i class="bi bi-pencil"></i> {% if current_lang == 'en' %}Edit{% else %}수정{% endif %}
+                        </button>
+                    </div>
+                    {% endif %}
                 </div>
                 {% if post.content %}
                 <div class="gallery-detail-content">

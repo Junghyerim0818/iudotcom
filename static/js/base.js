@@ -195,6 +195,71 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
+    // 글 수정 모달 처리
+    const editPostModal = document.getElementById('editPostModal');
+    if (editPostModal) {
+        editPostModal.addEventListener('show.bs.modal', function(event) {
+            const button = event.relatedTarget;
+            const postId = button.getAttribute('data-post-id');
+            const modalBody = document.getElementById('editPostModalBody');
+            
+            if (postId) {
+                fetch(`/post/${postId}/edit`, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const form = doc.querySelector('form');
+                    if (form) {
+                        modalBody.innerHTML = form.outerHTML;
+                        // 폼 제출 이벤트 리스너 추가
+                        const editPostForm = document.getElementById('editPostForm');
+                        if (editPostForm) {
+                            editPostForm.addEventListener('submit', function(e) {
+                                e.preventDefault();
+                                const formData = new FormData(this);
+                                
+                                fetch(this.action, {
+                                    method: 'POST',
+                                    body: formData,
+                                    headers: {
+                                        'X-Requested-With': 'XMLHttpRequest'
+                                    }
+                                })
+                                .then(response => {
+                                    if (response.redirected) {
+                                        window.location.href = response.url;
+                                    } else {
+                                        return response.text().then(html => {
+                                            // 성공 시 모달 닫고 페이지 새로고침
+                                            const modal = bootstrap.Modal.getInstance(editPostModal);
+                                            modal.hide();
+                                            window.location.reload();
+                                        });
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Error:', error);
+                                    this.submit();
+                                });
+                            });
+                        }
+                    } else {
+                        modalBody.innerHTML = '<div class="alert alert-danger">폼을 불러올 수 없습니다.</div>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    modalBody.innerHTML = '<div class="alert alert-danger">폼을 불러올 수 없습니다.</div>';
+                });
+            }
+        });
+    }
+    
     // 갤러리 카드 슬라이더 기능
     const gallerySliderWrapper = document.getElementById('gallerySliderWrapper');
     const gallerySliderTrack = document.getElementById('gallerySliderTrack');

@@ -192,26 +192,47 @@
         </div>
     </div>
 
-    <!-- 글쓰기 모달 -->
-    {% if current_user.is_authenticated and current_user.is_writer() %}
-    <div class="modal fade" id="newPostModal" tabindex="-1" aria-labelledby="newPostModalLabel" aria-hidden="true" data-form-url="{{ url_for('main.new_post') }}">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="newPostModalLabel">{% if current_lang == 'en' %}New Post{% else %}새 글 작성{% endif %}</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div id="newPostModalBody">
-                    <div class="text-center p-4">
-                        <div class="spinner-border text-light" role="status">
-                            <span class="visually-hidden">로딩 중...</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% endif %}
+           <!-- 글쓰기 모달 -->
+           {% if current_user.is_authenticated and current_user.is_writer() %}
+           <div class="modal fade" id="newPostModal" tabindex="-1" aria-labelledby="newPostModalLabel" aria-hidden="true" data-form-url="{{ url_for('main.new_post') }}">
+               <div class="modal-dialog modal-lg modal-dialog-centered">
+                   <div class="modal-content">
+                       <div class="modal-header">
+                           <h5 class="modal-title" id="newPostModalLabel">{% if current_lang == 'en' %}New Post{% else %}새 글 작성{% endif %}</h5>
+                           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                       </div>
+                       <div id="newPostModalBody">
+                           <div class="text-center p-4">
+                               <div class="spinner-border text-light" role="status">
+                                   <span class="visually-hidden">로딩 중...</span>
+                               </div>
+                           </div>
+                       </div>
+                   </div>
+               </div>
+           </div>
+           {% endif %}
+
+           <!-- 글 수정 모달 -->
+           {% if current_user.is_authenticated and current_user.is_admin() %}
+           <div class="modal fade" id="editPostModal" tabindex="-1" aria-labelledby="editPostModalLabel" aria-hidden="true">
+               <div class="modal-dialog modal-lg modal-dialog-centered">
+                   <div class="modal-content">
+                       <div class="modal-header">
+                           <h5 class="modal-title" id="editPostModalLabel">{% if current_lang == 'en' %}Edit Post{% else %}글 수정{% endif %}</h5>
+                           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                       </div>
+                       <div id="editPostModalBody">
+                           <div class="text-center p-4">
+                               <div class="spinner-border text-light" role="status">
+                                   <span class="visually-hidden">로딩 중...</span>
+                               </div>
+                           </div>
+                       </div>
+                   </div>
+               </div>
+           </div>
+           {% endif %}
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ url_for('static', filename='js/base.js') }}"></script>
