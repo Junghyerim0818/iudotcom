@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="gallery-detail-container">
+    <div class="gallery-detail-header mb-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <a href="{{ url_for('main.archive', type_name=type_name) }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> {% if current_lang == 'en' %}Back to {{ title }}{% else %}{{ title }}로 돌아가기{% endif %}
+            </a>
+            <h2 class="mb-0">{{ post.title }}</h2>
+            <div style="width: 120px;"></div> <!-- 공간 맞추기용 -->
+        </div>
+    </div>
+
+    <div class="gallery-detail-image-wrapper mb-4">
+        {% if post.has_image_data() or post.image_filename or post.image_url %}
+            <img src="{% if post.image_url %}{{ post.image_url }}{% elif post.has_image_data() %}{{ url_for('main.get_image', post_id=post.id) }}{% elif post.image_filename %}{{ url_for('static', filename='uploads/' + post.image_filename) }}{% endif %}" 
+                 class="gallery-detail-image" 
+                 alt="{{ post.title }}"
+                 id="archiveDetailImage">
+        {% else %}
+            <div class="gallery-detail-placeholder">
+                <i class="bi bi-image text-muted" style="font-size: 4rem;"></i>
+                <p class="text-muted mt-3">{% if current_lang == 'en' %}No image available{% else %}이미지가 없습니다{% endif %}</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="gallery-detail-info">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <h5 class="card-title mb-2">{{ post.title }}</h5>
+                        <p class="card-text text-muted mb-0">
+                            <small>
+                                {% if current_lang == 'en' %}
+                                    By {% if post.author.is_admin() %}Admin{% else %}{{ post.author.name }}{% endif %} on {{ post.created_at.strftime('%B %d, %Y') }}
+                                {% else %}
+                                    {% if post.author.is_admin() %}관리자{% else %}{{ post.author.name }}{% endif %} · {{ post.created_at.strftime('%Y년 %m월 %d일') }}
+                                {% endif %}
+                            </small>
+                        </p>
+                    </div>
+                    {% if current_user.is_authenticated and current_user.is_admin() %}
+                    <div>
+                        <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editPostModal" data-post-id="{{ post.id }}">
+                            <i class="bi bi-pencil"></i> {% if current_lang == 'en' %}Edit{% else %}수정{% endif %}
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
+                {% if post.content %}
+                <div class="gallery-detail-content">
+                    <p class="card-text">{{ post.content }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- 이전/다음 네비게이션 -->
+    <div class="gallery-detail-navigation mt-4">
+        <div class="row g-3">
+            <div class="col-md-6">
+                {% if prev_post %}
+                <a href="{{ url_for('main.archive_detail', type_name=type_name, post_id=prev_post.id) }}" class="card text-decoration-none h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-chevron-left me-2"></i>
+                            <div>
+                                <small class="text-muted d-block">{% if current_lang == 'en' %}Previous{% else %}이전{% endif %}</small>
+                                <strong>{{ prev_post.title }}</strong>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                {% else %}
+                <div class="card text-muted h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-chevron-left me-2"></i>
+                            <div>
+                                <small class="d-block">{% if current_lang == 'en' %}Previous{% else %}이전{% endif %}</small>
+                                <strong>{% if current_lang == 'en' %}No more posts{% else %}더 이상 없습니다{% endif %}</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            <div class="col-md-6">
+                {% if next_post %}
+                <a href="{{ url_for('main.archive_detail', type_name=type_name, post_id=next_post.id) }}" class="card text-decoration-none h-100 text-end">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-end">
+                            <div>
+                                <small class="text-muted d-block">{% if current_lang == 'en' %}Next{% else %}다음{% endif %}</small>
+                                <strong>{{ next_post.title }}</strong>
+                            </div>
+                            <i class="bi bi-chevron-right ms-2"></i>
+                        </div>
+                    </div>
+                </a>
+                {% else %}
+                <div class="card text-muted h-100 text-end">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-end">
+                            <div>
+                                <small class="d-block">{% if current_lang == 'en' %}Next{% else %}다음{% endif %}</small>
+                                <strong>{% if current_lang == 'en' %}No more posts{% else %}더 이상 없습니다{% endif %}</strong>
+                            </div>
+                            <i class="bi bi-chevron-right ms-2"></i>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_css %}
+<style>
+.gallery-detail-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.gallery-detail-image-wrapper {
+    text-align: center;
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 2rem;
+    min-height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.gallery-detail-image {
+    max-width: 100%;
+    max-height: 80vh;
+    object-fit: contain;
+    border-radius: 4px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.gallery-detail-placeholder {
+    text-align: center;
+    padding: 4rem 2rem;
+}
+
+.gallery-detail-info {
+    margin-top: 2rem;
+}
+
+.gallery-detail-content {
+    margin-top: 1rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+}
+
+.gallery-detail-navigation .card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.gallery-detail-navigation .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 768px) {
+    .gallery-detail-image-wrapper {
+        padding: 1rem;
+        min-height: 300px;
+    }
+    
+    .gallery-detail-image {
+        max-height: 60vh;
+    }
+    
+    .gallery-detail-header h2 {
+        font-size: 1.25rem;
+    }
+}
+</style>
+{% endblock %}
+{% endblock %}
+

@@ -331,7 +331,7 @@ def archive(type_name):
             title = 'IU Verification' if current_lang == 'en' else '아이유 인증 글'
         else:
             title = 'Support Verification' if current_lang == 'en' else '서포트 인증 글'
-        return render_template('archive.html', posts=posts, title=title)
+        return render_template('archive.html', posts=posts, title=title, type_name=type_name)
     except Exception as e:
         current_app.logger.error(f"Error in archive route: {str(e)}")
         from flask import session
@@ -340,7 +340,41 @@ def archive(type_name):
             title = 'IU Verification' if current_lang == 'en' else '아이유 인증 글'
         else:
             title = 'Support Verification' if current_lang == 'en' else '서포트 인증 글'
-        return render_template('archive.html', posts=[], title=title)
+        return render_template('archive.html', posts=[], title=title, type_name=type_name)
+
+@bp.route('/archive/<type_name>/<int:post_id>')
+def archive_detail(type_name, post_id):
+    """아카이브 상세 페이지 - 원본 이미지 보기"""
+    if type_name not in ['archive_1', 'archive_2']:
+        abort(404)
+    try:
+        post = Post.query.get_or_404(post_id)
+        if post.category != type_name:
+            abort(404)
+        
+        # 이전/다음 포스트 가져오기
+        prev_post = Post.query.filter(
+            Post.category == type_name,
+            Post.id < post_id
+        ).order_by(Post.id.desc()).first()
+        
+        next_post = Post.query.filter(
+            Post.category == type_name,
+            Post.id > post_id
+        ).order_by(Post.id.asc()).first()
+        
+        # 언어에 따라 제목 설정
+        from flask import session
+        current_lang = session.get('language', 'ko')
+        if type_name == 'archive_1':
+            title = 'IU Verification' if current_lang == 'en' else '아이유 인증 글'
+        else:
+            title = 'Support Verification' if current_lang == 'en' else '서포트 인증 글'
+        
+        return render_template('archive_detail.html', post=post, prev_post=prev_post, next_post=next_post, type_name=type_name, title=title)
+    except Exception as e:
+        current_app.logger.error(f"Error in archive_detail route: {str(e)}")
+        abort(404)
 
 @bp.route('/admin', methods=['GET', 'POST'])
 @login_required

@@ -32,7 +32,7 @@
                 </td>
                 <td>
                     <form action="{{ url_for('main.update_user_role', user_id=user.id) }}" method="POST" class="d-flex">
-                        <select name="role" class="form-select form-select-sm me-2" style="width: auto;">
+                        <select name="role" class="form-select form-select-sm me-2 admin-role-select">
                             <option value="user" {% if user.role == 'user' %}selected{% endif %}>일반 사용자</option>
                             <option value="writer" {% if user.role == 'writer' %}selected{% endif %}>글쓰기 권한</option>
                             <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>관리자</option>

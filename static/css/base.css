@@ -24,6 +24,12 @@
     background-color: #ffffff !important;
 }
 
+/* 관리자 페이지 권한 수정 드롭박스 너비 */
+.admin-role-select {
+    width: 150px !important;
+    min-width: 150px;
+}
+
 /* 부드러운 스크롤 */
 html {
     scroll-behavior: smooth;
@@ -243,6 +249,16 @@ a:hover {
 .main-content-archive,
 .main-content-admin {
     padding: 1.5rem 1.5rem 1.5rem 1.5rem;
+    background-color: #ffffff;
+}
+
+/* 관리자 페이지 테이블 전체 배경 흰색 */
+.main-content-admin .table tbody tr {
+    background-color: #ffffff !important;
+}
+
+.main-content-admin .table tbody tr:hover {
+    background-color: #f8f9fa !important;
 }
 
 .sidebar.expanded ~ .main-content-index,
@@ -1223,5 +1239,4 @@ a:hover {
         padding-top: calc(60px + 1rem);
     }
 }
-
 
