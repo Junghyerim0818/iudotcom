@@ -67,7 +67,6 @@
                             </div>
                         </div>
                         <a href="#" class="sidebar-menu-link" data-bs-toggle="modal" data-bs-target="#loginModal">
-                            <i class="bi bi-box-arrow-in-right sidebar-menu-icon"></i>
                             <span class="sidebar-menu-text">{% if current_lang == 'en' %}Login{% else %}로그인{% endif %}</span>
                         </a>
                     {% endif %}
@@ -81,25 +80,21 @@
                 </li>
                 <li class="sidebar-menu-item">
                     <a href="{{ url_for('main.index') }}" class="sidebar-menu-link {% if request.endpoint == 'main.index' %}active{% endif %}">
-                        <i class="bi bi-house-door sidebar-menu-icon"></i>
                         <span class="sidebar-menu-text">{% if current_lang == 'en' %}Home{% else %}홈{% endif %}</span>
                     </a>
                 </li>
                 <li class="sidebar-menu-item">
                     <a href="{{ url_for('main.gallery') }}" class="sidebar-menu-link {% if request.endpoint == 'main.gallery' %}active{% endif %}">
-                        <i class="bi bi-images sidebar-menu-icon"></i>
                         <span class="sidebar-menu-text">{% if current_lang == 'en' %}Gallery{% else %}갤러리{% endif %}</span>
                     </a>
                 </li>
                 <li class="sidebar-menu-item">
                     <a href="{{ url_for('main.archive', type_name='archive_1') }}" class="sidebar-menu-link {% if request.endpoint == 'main.archive' and request.view_args.type_name == 'archive_1' %}active{% endif %}">
-                        <i class="bi bi-archive sidebar-menu-icon"></i>
                         <span class="sidebar-menu-text">{% if current_lang == 'en' %}IU Verification{% else %}아이유 인증 글{% endif %}</span>
                     </a>
                 </li>
                 <li class="sidebar-menu-item">
                     <a href="{{ url_for('main.archive', type_name='archive_2') }}" class="sidebar-menu-link {% if request.endpoint == 'main.archive' and request.view_args.type_name == 'archive_2' %}active{% endif %}">
-                        <i class="bi bi-archive-fill sidebar-menu-icon"></i>
                         <span class="sidebar-menu-text">{% if current_lang == 'en' %}Support Verification{% else %}서포트 인증 글{% endif %}</span>
                     </a>
                 </li>
@@ -108,7 +103,6 @@
                     {% if current_user.is_writer() %}
                         <li class="sidebar-menu-item">
                             <a href="#" class="sidebar-menu-link" data-bs-toggle="modal" data-bs-target="#newPostModal">
-                                <i class="bi bi-pencil-square sidebar-menu-icon"></i>
                                 <span class="sidebar-menu-text">{% if current_lang == 'en' %}Write{% else %}글쓰기{% endif %}</span>
                             </a>
                         </li>
@@ -116,7 +110,6 @@
                     {% if current_user.is_admin() %}
                         <li class="sidebar-menu-item">
                             <a href="{{ url_for('main.admin') }}" class="sidebar-menu-link {% if request.endpoint == 'main.admin' %}active{% endif %}">
-                                <i class="bi bi-shield-check sidebar-menu-icon"></i>
                                 <span class="sidebar-menu-text">{% if current_lang == 'en' %}Admin{% else %}관리자{% endif %}</span>
                             </a>
                         </li>
@@ -129,7 +122,6 @@
                 {% if current_user.is_authenticated %}
                     <li class="sidebar-menu-item">
                         <a href="{{ url_for('main.logout') }}" class="sidebar-menu-link">
-                            <i class="bi bi-box-arrow-right sidebar-menu-icon"></i>
                             <span class="sidebar-menu-text">{% if current_lang == 'en' %}Logout{% else %}로그아웃{% endif %}</span>
                         </a>
                     </li>

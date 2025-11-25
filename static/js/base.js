@@ -1,3 +1,38 @@
+// 페이지 이동 속도 최적화
+document.addEventListener('DOMContentLoaded', function() {
+    // 모든 내부 링크에 즉시 이동 처리
+    const links = document.querySelectorAll('a[href^="/"]');
+    links.forEach(link => {
+        link.addEventListener('click', function(e) {
+            // 모달이나 외부 링크는 제외
+            if (this.getAttribute('data-bs-toggle') || 
+                this.getAttribute('target') === '_blank' ||
+                (this.href && this.href.startsWith('http') && !this.href.includes(window.location.hostname))) {
+                return;
+            }
+            
+            // 즉시 페이지 이동 (애니메이션 없이)
+            const href = this.getAttribute('href');
+            if (href && href !== '#' && !href.includes('javascript:') && href.startsWith('/')) {
+                // 사이드바가 열려있으면 닫기
+                const sidebar = document.getElementById('sidebar');
+                if (sidebar && sidebar.classList.contains('expanded')) {
+                    sidebar.classList.remove('expanded');
+                    const sidebarIcon = document.getElementById('sidebarToggleIcon');
+                    if (sidebarIcon) {
+                        sidebarIcon.classList.remove('bi-x-lg');
+                        sidebarIcon.classList.add('bi-list');
+                    }
+                    localStorage.setItem('sidebarExpanded', 'false');
+                }
+                
+                // 즉시 이동
+                window.location.href = href;
+            }
+        });
+    });
+});
+
 // 사이드바 토글 기능
 document.addEventListener('DOMContentLoaded', function() {
     const sidebar = document.getElementById('sidebar');

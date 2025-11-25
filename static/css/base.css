@@ -4,7 +4,7 @@
     --sidebar-bg: #0f0f0f;
     --sidebar-text: #ffffff;
     --sidebar-hover: rgba(255, 255, 255, 0.08);
-    --transition-speed: 0.4s;
+    --transition-speed: 0.25s;
     --transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
     --bg-primary: #000000;
     --bg-secondary: #0f0f0f;
@@ -219,18 +219,7 @@ a:hover {
     border-radius: 0 2px 2px 0;
 }
 
-.sidebar-menu-icon {
-    font-size: 1.25rem;
-    width: 24px;
-    margin-right: 1rem;
-    text-align: center;
-    flex-shrink: 0;
-}
-
-.sidebar:not(.expanded) .sidebar-menu-icon {
-    margin-right: 0;
-    width: auto;
-}
+/* 아이콘 제거됨 */
 
 .sidebar-menu-text {
     opacity: 1;
