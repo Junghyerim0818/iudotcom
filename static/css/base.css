@@ -757,6 +757,10 @@ a:hover {
     min-height: auto;
     z-index: 1;
     background-color: #ffffff;
+    /* 메인 콘텐츠의 좌우 패딩과 상관없이, 카드 스택 영역만은 화면 전체 폭을 흰색으로 채우기 */
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
 }
 
 /* 배경 이미지가 있을 때 */
@@ -1146,6 +1150,16 @@ a:hover {
         width: 40px;
         height: 40px;
         font-size: 1.25rem;
+    }
+
+    /* 모바일에서는 버튼이 화면 밖으로 나가지 않도록 고정 위치 사용 */
+    .gallery-slider-prev {
+        left: 6%;
+    }
+
+    .gallery-slider-next {
+        right: 6%;
+        left: auto;
     }
 
     .gallery-home-btn {
