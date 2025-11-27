@@ -46,6 +46,69 @@
     <!-- 모바일 오버레이 -->
     <div class="mobile-overlay" id="mobileOverlay"></div>
     
+    <!-- 모바일 메뉴 -->
+    <nav class="mobile-menu" id="mobileMenu">
+        <ul class="mobile-menu-list">
+            <li class="mobile-menu-item">
+                <a href="{{ url_for('main.index') }}" class="mobile-menu-link {% if request.endpoint == 'main.index' %}active{% endif %}">
+                    {% if current_lang == 'en' %}Home{% else %}홈{% endif %}
+                </a>
+            </li>
+            <li class="mobile-menu-item">
+                <a href="{{ url_for('main.gallery') }}" class="mobile-menu-link {% if request.endpoint == 'main.gallery' %}active{% endif %}">
+                    {% if current_lang == 'en' %}Gallery{% else %}갤러리{% endif %}
+                </a>
+            </li>
+            <li class="mobile-menu-item">
+                <a href="{{ url_for('main.archive', type_name='archive_1') }}" class="mobile-menu-link {% if request.endpoint == 'main.archive' and request.view_args.type_name == 'archive_1' %}active{% endif %}">
+                    {% if current_lang == 'en' %}IU Verification{% else %}아이유 인증 글{% endif %}
+                </a>
+            </li>
+            <li class="mobile-menu-item">
+                <a href="{{ url_for('main.archive', type_name='archive_2') }}" class="mobile-menu-link {% if request.endpoint == 'main.archive' and request.view_args.type_name == 'archive_2' %}active{% endif %}">
+                    {% if current_lang == 'en' %}Support Verification{% else %}서포트 인증 글{% endif %}
+                </a>
+            </li>
+            {% if current_user.is_authenticated %}
+                {% if current_user.is_writer() %}
+                    <li class="mobile-menu-item">
+                        <a href="#" class="mobile-menu-link" data-bs-toggle="modal" data-bs-target="#newPostModal">
+                            {% if current_lang == 'en' %}Write{% else %}글쓰기{% endif %}
+                        </a>
+                    </li>
+                {% endif %}
+                {% if current_user.is_admin() %}
+                    <li class="mobile-menu-item">
+                        <a href="{{ url_for('main.admin') }}" class="mobile-menu-link {% if request.endpoint == 'main.admin' %}active{% endif %}">
+                            {% if current_lang == 'en' %}Admin{% else %}관리자{% endif %}
+                        </a>
+                    </li>
+                {% endif %}
+                <li class="mobile-menu-divider"></li>
+                <li class="mobile-menu-item">
+                    <a href="{{ url_for('main.logout') }}" class="mobile-menu-link">
+                        {% if current_lang == 'en' %}Logout{% else %}로그아웃{% endif %}
+                    </a>
+                </li>
+            {% else %}
+                <li class="mobile-menu-divider"></li>
+                <li class="mobile-menu-item">
+                    <a href="#" class="mobile-login-link" data-bs-toggle="modal" data-bs-target="#loginModal">
+                        {% if current_lang == 'en' %}Login{% else %}로그인{% endif %}
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+        <div class="mobile-menu-footer">
+            <div class="top-language-select">
+                <select id="mobileLanguageSelect" class="form-select form-select-sm top-language-dropdown">
+                    <option value="ko" {% if current_lang == 'ko' %}selected{% endif %}>한국어</option>
+                    <option value="en" {% if current_lang == 'en' %}selected{% endif %}>English</option>
+                </select>
+            </div>
+        </div>
+    </nav>
+    
     <!-- 상단 헤더 네비게이션 -->
     <header class="top-header" id="topHeader">
         <div class="top-header-container">
@@ -159,7 +222,7 @@
                 </div>
                 <div class="modal-body text-center">
                     <p class="mb-4">{% if current_lang == 'en' %}Sign in with your Google account{% else %}Google 계정으로 로그인하세요{% endif %}</p>
-                    <a href="javascript:void(0)" class="btn btn-primary" id="googleLoginBtn" data-login-url="{{ url_for('main.login') }}">
+                    <a href="#" class="btn btn-primary" id="googleLoginBtn" data-login-url="{{ url_for('main.login') }}">
                         <i class="bi bi-google me-2"></i>{% if current_lang == 'en' %}Sign in with Google{% else %}Google로 로그인{% endif %}
                     </a>
                 </div>

@@ -44,11 +44,11 @@ class Config:
     CACHE_DEFAULT_TIMEOUT = 300  # 5분
     
     # 티스토리 RSS 연동 설정
-    TISTORY_RSS_URL = os.environ.get('TISTORY_RSS_URL', '')  # 예: https://yourblog.tistory.com/rss
+    TISTORY_RSS_URL = os.environ.get('https://selfiepod.tistory.com/rss', '')  # 예: https://yourblog.tistory.com/rss
     TISTORY_AUTO_SYNC_ENABLED = os.environ.get('TISTORY_AUTO_SYNC_ENABLED', 'False').lower() == 'true'
     TISTORY_SYNC_INTERVAL = int(os.environ.get('TISTORY_SYNC_INTERVAL', '15'))  # 분 단위 (기본 15분)
     TISTORY_DEFAULT_CATEGORY = os.environ.get('TISTORY_DEFAULT_CATEGORY', 'gallery')  # 기본 카테고리
-    TISTORY_AUTO_AUTHOR_ID = os.environ.get('TISTORY_AUTO_AUTHOR_ID', '')  # 자동 게시글 작성자 ID (관리자)
+    TISTORY_AUTO_AUTHOR_ID = os.environ.get('thsehddnr68@gmail.com', '')  # 자동 게시글 작성자 ID (관리자)
     
     # Google OAuth Config
     GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')

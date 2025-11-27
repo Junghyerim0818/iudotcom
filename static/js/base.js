@@ -37,18 +37,22 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             if (skipTransition) {
-                // 초기 로드 시 transition 일시적으로 비활성화
+                // 초기 로드 시 transition 일시적으로 비활성화하고 위치 설정
                 topMenu.style.setProperty('--active-menu-left', left + 'px');
                 topMenu.style.setProperty('--active-menu-width', width + 'px');
-                // 다음 프레임에서 transition 활성화
+                // 다음 프레임에서 transition 활성화 및 표시
                 requestAnimationFrame(() => {
                     topMenu.classList.add('menu-initialized');
                 });
             } else {
                 // 메뉴 변경 시 부드럽게 이동
+                // 먼저 위치를 설정하고, 그 다음 transition 활성화
                 topMenu.style.setProperty('--active-menu-left', left + 'px');
                 topMenu.style.setProperty('--active-menu-width', width + 'px');
-                topMenu.classList.add('menu-initialized');
+                // transition이 활성화되도록 클래스 추가
+                if (!topMenu.classList.contains('menu-initialized')) {
+                    topMenu.classList.add('menu-initialized');
+                }
             }
         }
     }
@@ -157,13 +161,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // 페이지 이동 속도 최적화
 document.addEventListener('DOMContentLoaded', function() {
-    // 모든 내부 링크에 즉시 이동 처리 (메뉴 링크는 제외)
-    const links = document.querySelectorAll('a[href^="/"]:not(.top-menu-link)');
+    // 모든 내부 링크에 즉시 이동 처리 (메뉴 링크와 구글 로그인 버튼은 제외)
+    const links = document.querySelectorAll('a[href^="/"]:not(.top-menu-link):not(#googleLoginBtn)');
     links.forEach(link => {
         link.addEventListener('click', function(e) {
             // 모달이나 외부 링크는 제외
             if (this.getAttribute('data-bs-toggle') || 
                 this.getAttribute('target') === '_blank' ||
+                this.id === 'googleLoginBtn' ||
                 (this.href && this.href.startsWith('http') && !this.href.includes(window.location.hostname))) {
                 return;
             }
@@ -178,28 +183,24 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// 사이드바 및 모바일 메뉴 관리
+// 모바일 메뉴 관리
 document.addEventListener('DOMContentLoaded', function() {
-    const sidebar = document.getElementById('sidebar');
+    const mobileMenu = document.getElementById('mobileMenu');
     const mobileMenuToggle = document.getElementById('mobileMenuToggle');
     const mobileOverlay = document.getElementById('mobileOverlay');
     
-    // 데스크톱에서는 항상 펼쳐진 상태
-    if (window.innerWidth > 768) {
-        if (sidebar) {
-            sidebar.classList.add('expanded');
-        }
-    }
-    
     // 모바일 메뉴 토글
-    if (mobileMenuToggle && mobileOverlay) {
-        mobileMenuToggle.addEventListener('click', function() {
-            sidebar.classList.toggle('mobile-open');
+    if (mobileMenuToggle && mobileMenu && mobileOverlay) {
+        mobileMenuToggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            mobileMenu.classList.toggle('mobile-open');
             mobileOverlay.classList.toggle('active');
             
             // 아이콘 변경
             const icon = this.querySelector('i');
-            if (sidebar.classList.contains('mobile-open')) {
+            if (mobileMenu.classList.contains('mobile-open')) {
                 icon.classList.remove('bi-list');
                 icon.classList.add('bi-x-lg');
             } else {
@@ -210,7 +211,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // 오버레이 클릭 시 메뉴 닫기
         mobileOverlay.addEventListener('click', function() {
-            sidebar.classList.remove('mobile-open');
+            mobileMenu.classList.remove('mobile-open');
             mobileOverlay.classList.remove('active');
             
             const icon = mobileMenuToggle.querySelector('i');
@@ -220,46 +221,67 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         
-        // 메뉴 링크 클릭 시 메뉴 닫기
-        const menuLinks = sidebar.querySelectorAll('.sidebar-menu-link');
-        menuLinks.forEach(link => {
+        // 모바일 메뉴 링크 클릭 시 메뉴 닫기
+        const mobileMenuLinks = mobileMenu.querySelectorAll('.mobile-menu-link');
+        mobileMenuLinks.forEach(link => {
             link.addEventListener('click', function() {
-                if (window.innerWidth <= 768) {
-                    sidebar.classList.remove('mobile-open');
-                    mobileOverlay.classList.remove('active');
-                    
-                    const icon = mobileMenuToggle.querySelector('i');
-                    if (icon) {
-                        icon.classList.remove('bi-x-lg');
-                        icon.classList.add('bi-list');
-                    }
+                // 모달 열기 링크는 제외
+                if (this.getAttribute('data-bs-toggle')) {
+                    return;
+                }
+                
+                mobileMenu.classList.remove('mobile-open');
+                mobileOverlay.classList.remove('active');
+                
+                const icon = mobileMenuToggle.querySelector('i');
+                if (icon) {
+                    icon.classList.remove('bi-x-lg');
+                    icon.classList.add('bi-list');
                 }
             });
         });
     }
+    
+    // 모바일 언어 선택
+    const mobileLanguageSelect = document.getElementById('mobileLanguageSelect');
+    if (mobileLanguageSelect) {
+        mobileLanguageSelect.addEventListener('change', function(e) {
+            const langCode = this.value;
+            if (langCode && (langCode === 'ko' || langCode === 'en')) {
+                window.location.href = '/lang/' + langCode;
+            }
+        });
+    }
 
     // 로그인 모달에서 Google 로그인 버튼 클릭 시 팝업 열기
-    const googleLoginBtn = document.getElementById('googleLoginBtn');
-    if (googleLoginBtn) {
-        // 기본 링크 동작 방지
-        googleLoginBtn.setAttribute('href', 'javascript:void(0)');
-        
-        googleLoginBtn.addEventListener('click', function(e) {
+    // 이벤트 위임 방식 사용 (모달이 동적으로 로드되어도 작동)
+    // capture phase에서 실행하여 다른 이벤트보다 먼저 처리
+    document.addEventListener('click', function(e) {
+        // 버튼 자체 또는 내부 아이콘/텍스트 클릭 시
+        const googleLoginBtn = e.target.closest('#googleLoginBtn');
+        if (googleLoginBtn) {
             e.preventDefault();
             e.stopPropagation();
             e.stopImmediatePropagation();
             
+            console.log('Google 로그인 버튼 클릭됨');
+            
             // 실제 로그인 URL 가져오기
-            const actualLoginUrl = this.getAttribute('data-login-url') || '/login';
+            const actualLoginUrl = googleLoginBtn.getAttribute('data-login-url') || '/login';
+            console.log('로그인 URL:', actualLoginUrl);
+            
             const popup = window.open(actualLoginUrl, 'GoogleLogin', 'width=500,height=600,scrollbars=yes,resizable=yes');
             
-            if (!popup) {
+            if (!popup || popup.closed || typeof popup.closed == 'undefined') {
                 alert('팝업이 차단되었습니다. 팝업 차단을 해제해주세요.');
                 return;
             }
             
+            console.log('팝업 열림');
+            
             // 팝업에서 로그인 완료 메시지 수신
             const messageHandler = function(event) {
+                console.log('메시지 수신:', event.data);
                 if (event.data && event.data.type === 'login') {
                     if (event.data.success) {
                         // 로그인 성공 시 모달 닫고 페이지 새로고침
@@ -281,6 +303,59 @@ document.addEventListener('DOMContentLoaded', function() {
                     window.removeEventListener('message', messageHandler);
                 }
             }, 500);
+            
+            return false; // 추가 안전장치
+        }
+    }, true); // capture phase에서 실행
+    
+    // 모달이 열릴 때도 직접 이벤트 리스너 추가 (이중 안전장치)
+    const loginModal = document.getElementById('loginModal');
+    if (loginModal) {
+        loginModal.addEventListener('shown.bs.modal', function() {
+            console.log('로그인 모달이 열림');
+            const googleLoginBtn = document.getElementById('googleLoginBtn');
+            if (googleLoginBtn) {
+                // 기존 이벤트 리스너 제거 후 재등록
+                const newBtn = googleLoginBtn.cloneNode(true);
+                googleLoginBtn.parentNode.replaceChild(newBtn, googleLoginBtn);
+                
+                newBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                    
+                    console.log('Google 로그인 버튼 클릭됨 (모달 이벤트)');
+                    
+                    const actualLoginUrl = this.getAttribute('data-login-url') || '/login';
+                    const popup = window.open(actualLoginUrl, 'GoogleLogin', 'width=500,height=600,scrollbars=yes,resizable=yes');
+                    
+                    if (!popup || popup.closed || typeof popup.closed == 'undefined') {
+                        alert('팝업이 차단되었습니다. 팝업 차단을 해제해주세요.');
+                        return;
+                    }
+                    
+                    const messageHandler = function(event) {
+                        if (event.data && event.data.type === 'login') {
+                            if (event.data.success) {
+                                const modal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
+                                if (modal) modal.hide();
+                                window.removeEventListener('message', messageHandler);
+                                window.location.reload();
+                            } else {
+                                alert(event.data.message || '로그인에 실패했습니다.');
+                            }
+                        }
+                    };
+                    window.addEventListener('message', messageHandler);
+                    
+                    const checkInterval = setInterval(function() {
+                        if (popup.closed) {
+                            clearInterval(checkInterval);
+                            window.removeEventListener('message', messageHandler);
+                        }
+                    }, 500);
+                });
+            }
         });
     }
 

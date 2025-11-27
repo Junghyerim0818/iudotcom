@@ -172,7 +172,7 @@ def authorize():
             error_details.append(f"Traceback: {traceback.format_exc()}")
             return f"<pre>{chr(10).join(error_details)}</pre>", 500
         
-        # 7. 템플릿 렌더링
+        # 7. 템플릿 렌더링 (팝업용)
         error_details.append("Step 7: Rendering template")
         try:
             return render_template('login_callback.html', success=True, message='로그인되었습니다.')

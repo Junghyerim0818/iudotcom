@@ -12,11 +12,22 @@
         <p>잠시 후 창이 닫힙니다...</p>
     </div>
     <script>
-        // 템플릿 변수를 JavaScript로 안전하게 전달
-        window.loginCallbackSuccess = {{ success|tojson }};
-        window.loginCallbackMessage = {{ message|tojson }};
+        // 팝업에서 부모 창에 메시지 전송
+        if (window.opener) {
+            window.opener.postMessage({
+                type: 'login',
+                success: {{ success|tojson }},
+                message: {{ message|tojson }}
+            }, window.location.origin);
+            // 팝업 닫기
+            setTimeout(function() {
+                window.close();
+            }, 100);
+        } else {
+            // 팝업이 아닌 경우 메인 페이지로 리다이렉트
+            window.location.href = '/';
+        }
     </script>
-    <script src="{{ url_for('static', filename='js/login_callback.js') }}"></script>
 </body>
 </html>
 
