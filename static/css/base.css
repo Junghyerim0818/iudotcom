@@ -705,6 +705,7 @@ a:hover {
     margin-left: 0;
     position: relative;
     overflow-x: hidden;
+    z-index: 0; /* 고정 배경보다 위에 오도록 별도 스택 생성 */
 }
 
 /* 홈 화면 히어로 배경 */
@@ -717,7 +718,7 @@ a:hover {
     background-size: cover;
     background-position: center center;
     background-repeat: no-repeat;
-    z-index: 0;
+    z-index: -1; /* 메인 콘텐츠 뒤에 깔리도록 조정 */
     transition: transform 0.1s ease-out;
     will-change: transform;
 }
@@ -1092,88 +1093,61 @@ a:hover {
 }
 
 @media (max-width: 1200px) {
+    /* 새 카드 스택 레이아웃에 맞게 크기만 조정 */
     .gallery-card-item {
-        flex: 0 0 420px;
-        height: 550px;
-        margin-left: -260px;
+        width: min(45vw, 420px);
+        height: min(70vh, 550px);
     }
-    
-    .gallery-card-item:first-child {
-        margin-left: 0;
-    }
-    
-    .gallery-card-item:nth-child(2),
-    .gallery-card-item:nth-child(3),
-    .gallery-card-item:nth-child(n+4) {
-        margin-left: -260px;
-    }
-    
-    .gallery-card-item:hover:not(.active) {
-        margin-left: -220px;
-    }
-    
-    .gallery-card-item:hover ~ .gallery-card-item {
-        margin-left: -260px;
-    }
-    
+
     .gallery-slider-track {
-        min-height: 550px;
-    }
-    
-    .gallery-slider-prev {
-        left: calc(50% - 210px - 60px); /* 태블릿 카드 너비 기준 */
-    }
-    
-    .gallery-slider-next {
-        left: calc(50% + 210px + 10px);
+        min-height: min(70vh, 550px);
     }
 }
 
 @media (max-width: 768px) {
+    .gallery-slider-container {
+        height: auto;
+        min-height: 420px;
+        padding: 1.5rem 0 2rem;
+    }
+
+    .gallery-slider-wrapper {
+        height: 420px;
+    }
+
     .gallery-slider-track {
-        padding: 0;
-        min-height: 450px;
+        min-height: 100%;
     }
     
     .gallery-card-item {
-        flex: 0 0 350px;
-        height: 450px;
-        margin-left: -200px;
+        top: 55%;
+        width: min(82vw, 360px);
+        height: min(65vh, 420px);
     }
-    
-    .gallery-card-item:first-child,
-    .gallery-card-item.active {
-        margin-left: 0;
+
+    /* 좌우 카드 이동 거리를 줄여 프레임 밖으로 덜 나가게 */
+    .gallery-card-item[data-pos="-1"] {
+        transform: translate(-50%, -50%) translateX(-35%) scale(0.95);
     }
-    
-    .gallery-card-item:nth-child(2),
-    .gallery-card-item:nth-child(3),
-    .gallery-card-item:nth-child(n+4) {
-        margin-left: -200px;
+
+    .gallery-card-item[data-pos="1"] {
+        transform: translate(-50%, -50%) translateX(35%) scale(0.95);
     }
-    
-    .gallery-card-item:hover:not(.active) {
-        margin-left: -160px;
+
+    .gallery-card-item[data-pos="-2"] {
+        transform: translate(-50%, -50%) translateX(-60%) scale(0.9);
     }
-    
-    .gallery-card-item:hover ~ .gallery-card-item {
-        margin-left: -200px;
+
+    .gallery-card-item[data-pos="2"] {
+        transform: translate(-50%, -50%) translateX(60%) scale(0.9);
     }
-    
+
     .gallery-slider-nav {
         width: 40px;
         height: 40px;
         font-size: 1.25rem;
     }
-    
-    .gallery-slider-prev {
-        left: calc(50% - 175px - 80px); /* 모바일 카드 너비 기준 (간격 증가) */
-    }
-    
-    .gallery-slider-next {
-        left: calc(50% + 175px + 40px); /* 간격 증가 */
-    }
-    
+
     .gallery-home-btn {
         padding: 0.625rem 1.25rem;
         font-size: 0.875rem;
