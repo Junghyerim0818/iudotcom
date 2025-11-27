@@ -1469,7 +1469,16 @@ a:hover {
 }
 
 /* 모바일 헤더 */
+/* 데스크톱에서 모바일 헤더와 메뉴 숨김 */
 .mobile-header {
+    display: none;
+}
+
+.mobile-menu {
+    display: none;
+}
+
+.mobile-overlay {
     display: none;
 }
 
@@ -1535,7 +1544,7 @@ a:hover {
 @media (max-width: 768px) {
     /* 모바일 헤더 표시 */
     .mobile-header {
-        display: flex;
+        display: flex !important;
         align-items: center;
         gap: 1rem;
         position: fixed;
@@ -1552,15 +1561,16 @@ a:hover {
     
     /* 모바일에서 상단 헤더 숨김 */
     .top-header {
-        display: none;
+        display: none !important;
     }
     
     .mobile-overlay {
-        display: block;
+        display: block !important;
     }
     
     /* 모바일 메뉴 (드롭다운) */
     .mobile-menu {
+        display: block !important;
         position: fixed;
         top: 60px;
         left: 0;
