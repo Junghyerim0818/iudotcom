@@ -57,7 +57,7 @@
                 </div>
                 {% if post.content %}
                 <div class="gallery-detail-content">
-                    <p class="card-text">{{ post.content }}</p>
+                    {{ post.content|safe }}
                 </div>
                 {% endif %}
             </div>

@@ -12,7 +12,6 @@
                 {% endif %}
                 <div class="card-body">
                     <h5 class="card-title text-dark">{{ post.title }}</h5>
-                    <p class="card-text text-dark">{{ post.content }}</p>
                     <p class="card-text"><small class="text-muted">By {% if post.author.is_admin() %}관리자{% else %}{{ post.author.name }}{% endif %} on {{ post.created_at.strftime('%Y-%m-%d') }}</small></p>
                 </div>
             </div>

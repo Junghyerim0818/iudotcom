@@ -159,9 +159,6 @@
                                 <i class="bi bi-person-fill text-white"></i>
                             </div>
                         {% endif %}
-                        <div class="top-profile-info">
-                            <div class="top-profile-name">{{ current_user.name or 'Guest' }}</div>
-                        </div>
                         <div class="top-profile-dropdown">
                             <a href="{{ url_for('main.logout') }}" class="top-dropdown-link">
                                 <span>{% if current_lang == 'en' %}Logout{% else %}로그아웃{% endif %}</span>
@@ -196,7 +193,7 @@
         {% block content %}{% endblock %}
     </div>
 
-    {# 하단 고정 관리자/글쓰기 네비게이션 (로그인 시에만 표시) #}
+    {# 하단 고정 관리자/글쓰기 네비게이션 (로그인 시에만 표시, 로그아웃은 상단 메뉴에서만) #}
     {% if current_user.is_authenticated and (current_user.is_writer() or current_user.is_admin()) %}
     <nav class="floating-admin-nav">
         {% if current_user.is_writer() %}
@@ -211,10 +208,6 @@
             <span>{% if current_lang == 'en' %}Admin{% else %}관리자{% endif %}</span>
         </a>
         {% endif %}
-        <a href="{{ url_for('main.logout') }}" class="floating-nav-btn floating-nav-btn-logout">
-            <i class="bi bi-box-arrow-right"></i>
-            <span>{% if current_lang == 'en' %}Logout{% else %}로그아웃{% endif %}</span>
-        </a>
     </nav>
     {% endif %}
 
