@@ -39,6 +39,10 @@ class Config:
         'pool_recycle': 300,     # 연결 재사용 시간
     }
     
+    # 정적 파일( CSS / JS / 이미지 ) 브라우저 캐싱 강화
+    # 한 번 받아온 후에는 1년 동안 다시 받지 않도록 해 로딩 체감 속도를 개선
+    SEND_FILE_MAX_AGE_DEFAULT = 31536000  # 초 단위 (365일)
+    
     # 캐싱 설정
     CACHE_TYPE = 'SimpleCache'  # 로컬 메모리 캐시 (프로덕션에서는 Redis 권장)
     CACHE_DEFAULT_TIMEOUT = 300  # 5분
