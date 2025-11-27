@@ -4,7 +4,9 @@ import base64
 from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app, abort, Response, session
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.utils import secure_filename
-from . import db, oauth, login_manager
+from sqlalchemy.orm import joinedload
+from sqlalchemy import func
+from . import db, oauth, login_manager, cache
 from .models import User, Post
 from .forms import PostForm, AdminUserForm
 
@@ -53,10 +55,15 @@ def load_user(user_id):
     return User.query.get(user_id)
 
 @bp.route('/')
+@cache.cached(timeout=60, key_prefix='index_gallery_posts')  # 1분 캐싱
 def index():
     try:
         # 최근 갤러리 글들 가져오기 (날짜순 정렬 - 최신이 맨 앞)
-        gallery_posts = Post.query.filter_by(category='gallery').order_by(Post.created_at.desc()).all()
+        # 이미지 데이터는 제외하고 메타데이터만 가져오기 (성능 최적화)
+        # 최대 20개만 가져오기 (페이지네이션)
+        gallery_posts = db.session.query(Post).options(
+            joinedload(Post.author)
+        ).filter_by(category='gallery').order_by(Post.created_at.desc()).limit(20).all()
         return render_template('index.html', gallery_posts=gallery_posts)
     except Exception as e:
         current_app.logger.error(f"Error in index route: {str(e)}")
@@ -192,7 +199,18 @@ def change_language(lang_code):
     """언어 변경"""
     if lang_code in ['ko', 'en']:
         session['language'] = lang_code
-    return redirect(request.referrer or url_for('main.index'))
+        session.permanent = True  # 세션을 영구적으로 저장
+        session.modified = True  # 세션 수정 표시
+    # 리다이렉트할 때 현재 페이지로 돌아가거나 홈으로
+    referrer = request.referrer
+    if referrer:
+        # 같은 호스트인지 확인
+        from urllib.parse import urlparse
+        referrer_host = urlparse(referrer).netloc
+        current_host = request.host
+        if referrer_host == current_host or referrer_host == '':
+            return redirect(referrer)
+    return redirect(url_for('main.index'))
 
 @bp.route('/image/<int:post_id>')
 def get_image(post_id):
@@ -267,6 +285,16 @@ def new_post():
         )
         db.session.add(post)
         db.session.commit()
+        
+        # 캐시 무효화 (모든 관련 캐시 삭제)
+        cache.delete('index_gallery_posts')
+        # 갤러리 캐시 삭제 (모든 페이지)
+        for i in range(1, 11):  # 최대 10페이지까지
+            cache.delete(f'gallery_posts_page_{i}')
+        if form.category.data in ['archive_1', 'archive_2']:
+            for i in range(1, 11):  # 최대 10페이지까지
+                cache.delete(f'archive_{form.category.data}_page_{i}')
+        
         flash('글이 작성되었습니다!', 'success')
         
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -288,27 +316,48 @@ def new_post():
 @bp.route('/gallery')
 def gallery():
     try:
-        posts = Post.query.filter_by(category='gallery').order_by(Post.created_at.desc()).all()
-        return render_template('gallery.html', posts=posts)
+        # 페이지네이션 추가 (페이지당 30개)
+        page = request.args.get('page', 1, type=int)
+        per_page = 30
+        
+        # 캐시 키 생성 (페이지 포함)
+        cache_key = f'gallery_posts_page_{page}'
+        cached_result = cache.get(cache_key)
+        if cached_result:
+            return cached_result
+        
+        # 이미지 데이터는 제외하고 메타데이터만 가져오기
+        posts_query = db.session.query(Post).options(
+            joinedload(Post.author)
+        ).filter_by(category='gallery').order_by(Post.created_at.desc())
+        
+        posts = posts_query.paginate(page=page, per_page=per_page, error_out=False)
+        result = render_template('gallery.html', posts=posts.items, pagination=posts)
+        cache.set(cache_key, result, timeout=120)  # 2분 캐싱
+        return result
     except Exception as e:
         current_app.logger.error(f"Error in gallery route: {str(e)}")
-        return render_template('gallery.html', posts=[])
+        return render_template('gallery.html', posts=[], pagination=None)
 
 @bp.route('/gallery/<int:post_id>')
 def gallery_detail(post_id):
     """갤러리 상세 페이지 - 원본 이미지 보기"""
     try:
-        post = Post.query.get_or_404(post_id)
+        # Eager loading으로 author 정보도 함께 가져오기
+        post = db.session.query(Post).options(
+            joinedload(Post.author)
+        ).filter_by(id=post_id).first_or_404()
+        
         if post.category != 'gallery':
             abort(404)
         
-        # 이전/다음 포스트 가져오기
-        prev_post = Post.query.filter(
+        # 이전/다음 포스트 가져오기 (인덱스 활용)
+        prev_post = db.session.query(Post).filter(
             Post.category == 'gallery',
             Post.id < post_id
         ).order_by(Post.id.desc()).first()
         
-        next_post = Post.query.filter(
+        next_post = db.session.query(Post).filter(
             Post.category == 'gallery',
             Post.id > post_id
         ).order_by(Post.id.asc()).first()
@@ -323,7 +372,22 @@ def archive(type_name):
     if type_name not in ['archive_1', 'archive_2']:
         abort(404)
     try:
-        posts = Post.query.filter_by(category=type_name).order_by(Post.created_at.desc()).all()
+        # 페이지네이션 추가
+        page = request.args.get('page', 1, type=int)
+        per_page = 30
+        
+        # 캐시 키 생성 (페이지 포함)
+        cache_key = f'archive_{type_name}_page_{page}'
+        cached_result = cache.get(cache_key)
+        if cached_result:
+            return cached_result
+        
+        posts_query = db.session.query(Post).options(
+            joinedload(Post.author)
+        ).filter_by(category=type_name).order_by(Post.created_at.desc())
+        
+        posts = posts_query.paginate(page=page, per_page=per_page, error_out=False)
+        
         # 언어에 따라 제목 설정
         from flask import session
         current_lang = session.get('language', 'ko')
@@ -331,7 +395,10 @@ def archive(type_name):
             title = 'IU Verification' if current_lang == 'en' else '아이유 인증 글'
         else:
             title = 'Support Verification' if current_lang == 'en' else '서포트 인증 글'
-        return render_template('archive.html', posts=posts, title=title, type_name=type_name)
+        
+        result = render_template('archive.html', posts=posts.items, pagination=posts, title=title, type_name=type_name)
+        cache.set(cache_key, result, timeout=120)  # 2분 캐싱
+        return result
     except Exception as e:
         current_app.logger.error(f"Error in archive route: {str(e)}")
         from flask import session
@@ -340,7 +407,7 @@ def archive(type_name):
             title = 'IU Verification' if current_lang == 'en' else '아이유 인증 글'
         else:
             title = 'Support Verification' if current_lang == 'en' else '서포트 인증 글'
-        return render_template('archive.html', posts=[], title=title, type_name=type_name)
+        return render_template('archive.html', posts=[], pagination=None, title=title, type_name=type_name)
 
 @bp.route('/archive/<type_name>/<int:post_id>')
 def archive_detail(type_name, post_id):
@@ -348,17 +415,21 @@ def archive_detail(type_name, post_id):
     if type_name not in ['archive_1', 'archive_2']:
         abort(404)
     try:
-        post = Post.query.get_or_404(post_id)
+        # Eager loading으로 author 정보도 함께 가져오기
+        post = db.session.query(Post).options(
+            joinedload(Post.author)
+        ).filter_by(id=post_id).first_or_404()
+        
         if post.category != type_name:
             abort(404)
         
-        # 이전/다음 포스트 가져오기
-        prev_post = Post.query.filter(
+        # 이전/다음 포스트 가져오기 (인덱스 활용)
+        prev_post = db.session.query(Post).filter(
             Post.category == type_name,
             Post.id < post_id
         ).order_by(Post.id.desc()).first()
         
-        next_post = Post.query.filter(
+        next_post = db.session.query(Post).filter(
             Post.category == type_name,
             Post.id > post_id
         ).order_by(Post.id.asc()).first()
@@ -383,7 +454,7 @@ def admin():
         abort(403)
     
     users = User.query.all()
-    return render_template('admin.html', users=users)
+    return render_template('admin.html', users=users, config=current_app.config)
 
 @bp.route('/admin/user/<user_id>', methods=['POST'])
 @login_required
@@ -454,6 +525,16 @@ def edit_post(post_id):
             post.image_url = image_url
         
         db.session.commit()
+        
+        # 캐시 무효화 (모든 관련 캐시 삭제)
+        cache.delete('index_gallery_posts')
+        if post.category == 'gallery':
+            for i in range(1, 11):  # 최대 10페이지까지
+                cache.delete(f'gallery_posts_page_{i}')
+        elif post.category in ['archive_1', 'archive_2']:
+            for i in range(1, 11):  # 최대 10페이지까지
+                cache.delete(f'archive_{post.category}_page_{i}')
+        
         flash('글이 수정되었습니다!', 'success')
         
         # 카테고리에 따라 리다이렉트
@@ -481,6 +562,16 @@ def delete_post(post_id):
     
     db.session.delete(post)
     db.session.commit()
+    
+    # 캐시 무효화 (모든 관련 캐시 삭제)
+    cache.delete('index_gallery_posts')
+    if category == 'gallery':
+        for i in range(1, 11):  # 최대 10페이지까지
+            cache.delete(f'gallery_posts_page_{i}')
+    elif category in ['archive_1', 'archive_2']:
+        for i in range(1, 11):  # 최대 10페이지까지
+            cache.delete(f'archive_{category}_page_{i}')
+    
     flash('글이 삭제되었습니다.', 'success')
     
     # 카테고리에 따라 리다이렉트
@@ -490,5 +581,30 @@ def delete_post(post_id):
         return redirect(url_for('main.archive', type_name=category))
     else:
         return redirect(url_for('main.index'))
+
+@bp.route('/admin/tistory/sync', methods=['POST'])
+@login_required
+def manual_tistory_sync():
+    """수동 티스토리 동기화 (관리자 전용)"""
+    if not current_user.is_admin():
+        abort(403)
+    
+    rss_url = current_app.config.get('TISTORY_RSS_URL')
+    if not rss_url:
+        flash('티스토리 RSS URL이 설정되지 않았습니다.', 'danger')
+        return redirect(url_for('main.admin'))
+    
+    default_category = current_app.config.get('TISTORY_DEFAULT_CATEGORY', 'gallery')
+    author_id = current_app.config.get('TISTORY_AUTO_AUTHOR_ID')
+    
+    try:
+        from .tistory_sync import sync_tistory_posts
+        sync_tistory_posts(current_app, rss_url, default_category, author_id)
+        flash('티스토리 동기화가 완료되었습니다.', 'success')
+    except Exception as e:
+        current_app.logger.error(f"티스토리 동기화 오류: {str(e)}")
+        flash(f'티스토리 동기화 중 오류가 발생했습니다: {str(e)}', 'danger')
+    
+    return redirect(url_for('main.admin'))
 
 

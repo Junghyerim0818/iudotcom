@@ -46,117 +46,92 @@
     <!-- 모바일 오버레이 -->
     <div class="mobile-overlay" id="mobileOverlay"></div>
     
-    <!-- 사이드바 -->
-    <aside class="sidebar expanded" id="sidebar">
-        <div class="sidebar-header">
-            <span class="sidebar-brand">IU DOTCOM</span>
-        </div>
+    <!-- 상단 헤더 네비게이션 -->
+    <header class="top-header" id="topHeader">
+        <div class="top-header-container">
+            <!-- 왼쪽: 언어 선택 -->
+            <div class="top-header-left">
+                <div class="top-language-select">
+                    <select id="languageSelect" class="form-select form-select-sm top-language-dropdown">
+                        <option value="ko" {% if current_lang == 'ko' %}selected{% endif %}>한국어</option>
+                        <option value="en" {% if current_lang == 'en' %}selected{% endif %}>English</option>
+                    </select>
+                </div>
+            </div>
 
-        <nav>
-            <ul class="sidebar-menu">
-                <!-- 프로필/로그인 섹션 -->
-                <li class="sidebar-menu-item">
-                    {% if current_user.is_authenticated %}
-                        <div class="sidebar-profile">
-                            <div class="sidebar-profile-content">
-                                {% if current_user.profile_pic %}
-                                    <img src="{{ url_for('static', filename='uploads/profiles/' + current_user.profile_pic) if current_user.profile_pic.startswith('profile_') else current_user.profile_pic }}" alt="프로필" class="sidebar-profile-avatar">
-                                {% else %}
-                                    <div class="sidebar-profile-avatar bg-secondary d-flex align-items-center justify-content-center">
-                                        <i class="bi bi-person-fill text-white"></i>
-                                    </div>
-                                {% endif %}
-                                <div class="sidebar-profile-info">
-                                    <div class="sidebar-profile-name">{{ current_user.name or 'Guest' }}</div>
-                                    <div class="sidebar-profile-email">{{ current_user.email }}</div>
-                                </div>
-                            </div>
-                        </div>
-                    {% else %}
-                        <div class="sidebar-profile">
-                            <div class="sidebar-profile-content">
-                                <div class="sidebar-profile-avatar bg-secondary d-flex align-items-center justify-content-center">
-                                    <i class="bi bi-person-fill text-white"></i>
-                                </div>
-                                <div class="sidebar-profile-info">
-                                    <div class="sidebar-profile-name">Guest</div>
-                                </div>
-                            </div>
-                        </div>
-                        <a href="#" class="sidebar-menu-link" data-bs-toggle="modal" data-bs-target="#loginModal">
-                            <span class="sidebar-menu-text">{% if current_lang == 'en' %}Login{% else %}로그인{% endif %}</span>
-                        </a>
-                    {% endif %}
-                </li>
-
-                <li class="sidebar-menu-item"><div class="sidebar-divider"></div></li>
-
-                <!-- 이동 메뉴 섹션 -->
-                <li class="sidebar-menu-item">
-                    <div class="sidebar-section-title">{% if current_lang == 'en' %}Menu{% else %}메뉴{% endif %}</div>
-                </li>
-                <li class="sidebar-menu-item">
-                    <a href="{{ url_for('main.index') }}" class="sidebar-menu-link {% if request.endpoint == 'main.index' %}active{% endif %}">
-                        <span class="sidebar-menu-text">{% if current_lang == 'en' %}Home{% else %}홈{% endif %}</span>
-                    </a>
-                </li>
-                <li class="sidebar-menu-item">
-                    <a href="{{ url_for('main.gallery') }}" class="sidebar-menu-link {% if request.endpoint == 'main.gallery' %}active{% endif %}">
-                        <span class="sidebar-menu-text">{% if current_lang == 'en' %}Gallery{% else %}갤러리{% endif %}</span>
-                    </a>
-                </li>
-                <li class="sidebar-menu-item">
-                    <a href="{{ url_for('main.archive', type_name='archive_1') }}" class="sidebar-menu-link {% if request.endpoint == 'main.archive' and request.view_args.type_name == 'archive_1' %}active{% endif %}">
-                        <span class="sidebar-menu-text">{% if current_lang == 'en' %}IU Verification{% else %}아이유 인증 글{% endif %}</span>
-                    </a>
-                </li>
-                <li class="sidebar-menu-item">
-                    <a href="{{ url_for('main.archive', type_name='archive_2') }}" class="sidebar-menu-link {% if request.endpoint == 'main.archive' and request.view_args.type_name == 'archive_2' %}active{% endif %}">
-                        <span class="sidebar-menu-text">{% if current_lang == 'en' %}Support Verification{% else %}서포트 인증 글{% endif %}</span>
-                    </a>
-                </li>
-
-                {% if current_user.is_authenticated %}
-                    {% if current_user.is_writer() %}
-                        <li class="sidebar-menu-item">
-                            <a href="#" class="sidebar-menu-link" data-bs-toggle="modal" data-bs-target="#newPostModal">
-                                <span class="sidebar-menu-text">{% if current_lang == 'en' %}Write{% else %}글쓰기{% endif %}</span>
-                            </a>
-                        </li>
-                    {% endif %}
-                    {% if current_user.is_admin() %}
-                        <li class="sidebar-menu-item">
-                            <a href="{{ url_for('main.admin') }}" class="sidebar-menu-link {% if request.endpoint == 'main.admin' %}active{% endif %}">
-                                <span class="sidebar-menu-text">{% if current_lang == 'en' %}Admin{% else %}관리자{% endif %}</span>
-                            </a>
-                        </li>
-                    {% endif %}
-                {% endif %}
-
-                <!-- 설정 섹션 -->
-                {% if current_user.is_authenticated %}
-                    <li class="sidebar-menu-item">
-                        <a href="{{ url_for('main.logout') }}" class="sidebar-menu-link">
-                            <span class="sidebar-menu-text">{% if current_lang == 'en' %}Logout{% else %}로그아웃{% endif %}</span>
+            <!-- 중앙: 메뉴 -->
+            <nav class="top-header-center">
+                <ul class="top-menu">
+                    <li class="top-menu-item">
+                        <a href="{{ url_for('main.index') }}" class="top-menu-link {% if request.endpoint == 'main.index' %}active{% endif %}">
+                            <span class="top-menu-text">{% if current_lang == 'en' %}Home{% else %}홈{% endif %}</span>
                         </a>
                     </li>
-                {% endif %}
-                
-                <!-- 언어 변경 섹션 -->
-                <li class="sidebar-menu-item sidebar-language-section">
-                    <div class="sidebar-section-title">{% if current_lang == 'en' %}Language{% else %}언어{% endif %}</div>
-                </li>
-                <li class="sidebar-menu-item sidebar-language-section">
-                    <div class="sidebar-language-select">
-                        <select id="languageSelect" class="form-select form-select-sm sidebar-language-dropdown" onchange="window.location.href='/lang/' + this.value">
-                            <option value="ko" {% if current_lang == 'ko' %}selected{% endif %}>한국어</option>
-                            <option value="en" {% if current_lang == 'en' %}selected{% endif %}>English</option>
-                        </select>
+                    <li class="top-menu-item">
+                        <a href="{{ url_for('main.gallery') }}" class="top-menu-link {% if request.endpoint == 'main.gallery' %}active{% endif %}">
+                            <span class="top-menu-text">{% if current_lang == 'en' %}Gallery{% else %}갤러리{% endif %}</span>
+                        </a>
+                    </li>
+                    <li class="top-menu-item">
+                        <a href="{{ url_for('main.archive', type_name='archive_1') }}" class="top-menu-link {% if request.endpoint == 'main.archive' and request.view_args.type_name == 'archive_1' %}active{% endif %}">
+                            <span class="top-menu-text">{% if current_lang == 'en' %}IU Verification{% else %}아이유 인증 글{% endif %}</span>
+                        </a>
+                    </li>
+                    <li class="top-menu-item">
+                        <a href="{{ url_for('main.archive', type_name='archive_2') }}" class="top-menu-link {% if request.endpoint == 'main.archive' and request.view_args.type_name == 'archive_2' %}active{% endif %}">
+                            <span class="top-menu-text">{% if current_lang == 'en' %}Support Verification{% else %}서포트 인증 글{% endif %}</span>
+                        </a>
+                    </li>
+                    {% if current_user.is_authenticated %}
+                        {% if current_user.is_writer() %}
+                            <li class="top-menu-item">
+                                <a href="#" class="top-menu-link" data-bs-toggle="modal" data-bs-target="#newPostModal">
+                                    <span class="top-menu-text">{% if current_lang == 'en' %}Write{% else %}글쓰기{% endif %}</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                        {% if current_user.is_admin() %}
+                            <li class="top-menu-item">
+                                <a href="{{ url_for('main.admin') }}" class="top-menu-link {% if request.endpoint == 'main.admin' %}active{% endif %}">
+                                    <span class="top-menu-text">{% if current_lang == 'en' %}Admin{% else %}관리자{% endif %}</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                    {% endif %}
+                </ul>
+            </nav>
+
+            <!-- 오른쪽: 로그인/프로필 -->
+            <div class="top-header-right">
+                {% if current_user.is_authenticated %}
+                    <div class="top-profile">
+                        {% if current_user.profile_pic %}
+                            <img src="{{ url_for('static', filename='uploads/profiles/' + current_user.profile_pic) if current_user.profile_pic.startswith('profile_') else current_user.profile_pic }}" alt="프로필" class="top-profile-avatar">
+                        {% else %}
+                            <div class="top-profile-avatar bg-secondary d-flex align-items-center justify-content-center">
+                                <i class="bi bi-person-fill text-white"></i>
+                            </div>
+                        {% endif %}
+                        <div class="top-profile-info">
+                            <div class="top-profile-name">{{ current_user.name or 'Guest' }}</div>
+                        </div>
+                        <div class="top-profile-dropdown">
+                            <a href="{{ url_for('main.logout') }}" class="top-dropdown-link">
+                                <span>{% if current_lang == 'en' %}Logout{% else %}로그아웃{% endif %}</span>
+                            </a>
+                        </div>
                     </div>
-                </li>
-            </ul>
-        </nav>
-    </aside>
+                {% else %}
+                    <a href="#" class="top-login-link" data-bs-toggle="modal" data-bs-target="#loginModal">
+                        <span>{% if current_lang == 'en' %}Login{% else %}로그인{% endif %}</span>
+                    </a>
+                {% endif %}
+                <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" class="top-social-link" aria-label="Twitter">
+                    <i class="bi bi-twitter-x"></i>
+                </a>
+            </div>
+        </div>
+    </header>
 
     <!-- 메인 콘텐츠 -->
     <div class="main-content {% if request.endpoint == 'main.gallery' or request.endpoint == 'main.gallery_detail' %}main-content-gallery{% elif request.endpoint == 'main.archive' %}main-content-archive{% elif request.endpoint == 'main.index' %}main-content-index{% elif request.endpoint == 'main.admin' %}main-content-admin{% endif %}">

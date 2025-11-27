@@ -34,6 +34,21 @@ class Config:
     SQLALCHEMY_DATABASE_URI = os.environ.get('POSTGRES_URL') or os.environ.get('DATABASE_URL') or \
         'sqlite:///' + os.path.join(os.path.abspath(os.path.dirname(__file__)), 'app.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        'pool_pre_ping': True,  # 연결 유효성 검사
+        'pool_recycle': 300,     # 연결 재사용 시간
+    }
+    
+    # 캐싱 설정
+    CACHE_TYPE = 'SimpleCache'  # 로컬 메모리 캐시 (프로덕션에서는 Redis 권장)
+    CACHE_DEFAULT_TIMEOUT = 300  # 5분
+    
+    # 티스토리 RSS 연동 설정
+    TISTORY_RSS_URL = os.environ.get('TISTORY_RSS_URL', '')  # 예: https://yourblog.tistory.com/rss
+    TISTORY_AUTO_SYNC_ENABLED = os.environ.get('TISTORY_AUTO_SYNC_ENABLED', 'False').lower() == 'true'
+    TISTORY_SYNC_INTERVAL = int(os.environ.get('TISTORY_SYNC_INTERVAL', '15'))  # 분 단위 (기본 15분)
+    TISTORY_DEFAULT_CATEGORY = os.environ.get('TISTORY_DEFAULT_CATEGORY', 'gallery')  # 기본 카테고리
+    TISTORY_AUTO_AUTHOR_ID = os.environ.get('TISTORY_AUTO_AUTHOR_ID', '')  # 자동 게시글 작성자 ID (관리자)
     
     # Google OAuth Config
     GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')

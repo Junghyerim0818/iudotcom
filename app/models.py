@@ -1,5 +1,6 @@
 from datetime import datetime
 from flask_login import UserMixin
+from sqlalchemy import Index
 from . import db
 
 class User(UserMixin, db.Model):
@@ -28,12 +29,22 @@ class Post(db.Model):
     # Category: 'gallery', 'archive_tech', 'archive_daily' (example names for the two archive types)
     # User asked for "two types of archive". Let's name them 'archive_1', 'archive_2' for now or allow user to rename.
     # Let's use 'gallery', 'archive_1', 'archive_2'
-    category = db.Column(db.String(50), nullable=False) 
+    category = db.Column(db.String(50), nullable=False, index=True) 
     
     user_id = db.Column(db.String(100), db.ForeignKey('user.id'), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
     
-    author = db.relationship('User', backref=db.backref('posts', lazy=True))
+    # 티스토리 연동용 필드
+    tistory_post_id = db.Column(db.String(100), nullable=True, unique=True) # 티스토리 글 ID (중복 방지)
+    tistory_link = db.Column(db.String(500), nullable=True) # 티스토리 원본 링크
+    
+    # 복합 인덱스 추가 (category와 created_at 조합 쿼리 최적화)
+    __table_args__ = (
+        Index('idx_category_created_at', 'category', 'created_at'),
+    )
+    
+    # Eager loading을 위한 관계 설정
+    author = db.relationship('User', backref=db.backref('posts', lazy='dynamic'))
     
     def has_image_data(self):
         """이미지 데이터가 있는지 안전하게 체크"""

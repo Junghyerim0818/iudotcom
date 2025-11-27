@@ -1,7 +1,164 @@
+// 언어 선택 드롭다운 처리
+document.addEventListener('DOMContentLoaded', function() {
+    const languageSelect = document.getElementById('languageSelect');
+    if (languageSelect) {
+        languageSelect.addEventListener('change', function(e) {
+            const langCode = this.value;
+            if (langCode && (langCode === 'ko' || langCode === 'en')) {
+                window.location.href = '/lang/' + langCode;
+            }
+        });
+    }
+    
+    // 활성 메뉴 배경 사각형 위치 업데이트
+    function updateActiveMenuBackground(skipTransition = false, targetLeft = null, targetWidth = null) {
+        const topMenu = document.querySelector('.top-menu');
+        const activeLink = document.querySelector('.top-menu-link.active');
+        
+        if (topMenu) {
+            let left, width;
+            
+            if (targetLeft !== null && targetWidth !== null) {
+                // 저장된 위치 사용
+                left = targetLeft;
+                width = targetWidth;
+            } else if (activeLink) {
+                // 활성 메뉴 위치 계산
+                const menuRect = topMenu.getBoundingClientRect();
+                const linkRect = activeLink.getBoundingClientRect();
+                left = linkRect.left - menuRect.left;
+                width = linkRect.width;
+            } else {
+                // 활성 메뉴가 없으면 숨김
+                topMenu.style.setProperty('--active-menu-left', '0px');
+                topMenu.style.setProperty('--active-menu-width', '0px');
+                topMenu.classList.remove('menu-initialized');
+                return;
+            }
+            
+            if (skipTransition) {
+                // 초기 로드 시 transition 일시적으로 비활성화
+                topMenu.style.setProperty('--active-menu-left', left + 'px');
+                topMenu.style.setProperty('--active-menu-width', width + 'px');
+                // 다음 프레임에서 transition 활성화
+                requestAnimationFrame(() => {
+                    topMenu.classList.add('menu-initialized');
+                });
+            } else {
+                // 메뉴 변경 시 부드럽게 이동
+                topMenu.style.setProperty('--active-menu-left', left + 'px');
+                topMenu.style.setProperty('--active-menu-width', width + 'px');
+                topMenu.classList.add('menu-initialized');
+            }
+        }
+    }
+    
+    // 페이지 전환 시 저장된 위치 확인
+    const savedLeft = sessionStorage.getItem('menu-background-left');
+    const savedWidth = sessionStorage.getItem('menu-background-width');
+    
+    if (savedLeft && savedWidth) {
+        // 저장된 위치에서 시작 (transition 없이)
+        const savedLeftNum = parseFloat(savedLeft);
+        const savedWidthNum = parseFloat(savedWidth);
+        updateActiveMenuBackground(true, savedLeftNum, savedWidthNum);
+        
+        // sessionStorage 정리
+        sessionStorage.removeItem('menu-background-left');
+        sessionStorage.removeItem('menu-background-width');
+        
+        // 올바른 활성 메뉴 위치 확인
+        const topMenu = document.querySelector('.top-menu');
+        const activeLink = document.querySelector('.top-menu-link.active');
+        
+        if (topMenu && activeLink) {
+            const menuRect = topMenu.getBoundingClientRect();
+            const linkRect = activeLink.getBoundingClientRect();
+            const correctLeft = linkRect.left - menuRect.left;
+            const correctWidth = linkRect.width;
+            
+            // 저장된 위치와 올바른 위치가 다르면 이동
+            if (Math.abs(savedLeftNum - correctLeft) > 1 || Math.abs(savedWidthNum - correctWidth) > 1) {
+                // 다음 프레임에서 올바른 위치로 이동 (transition 있이)
+                requestAnimationFrame(() => {
+                    setTimeout(() => {
+                        updateActiveMenuBackground(false);
+                    }, 50);
+                });
+            } else {
+                // 위치가 같으면 transition만 활성화
+                requestAnimationFrame(() => {
+                    topMenu.classList.add('menu-initialized');
+                });
+            }
+        }
+    } else {
+        // 초기 위치 설정 (transition 없이)
+        updateActiveMenuBackground(true);
+    }
+    
+    // 리사이즈 시 위치 업데이트
+    let resizeTimeout;
+    window.addEventListener('resize', function() {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+            updateActiveMenuBackground(false);
+        }, 100);
+    });
+    
+    // 메뉴 링크 클릭 시 배경 이동 (페이지 전환 전에 애니메이션 시작)
+    const menuLinks = document.querySelectorAll('.top-menu-link');
+    menuLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            // 모달이나 외부 링크는 제외
+            if (this.getAttribute('data-bs-toggle') || 
+                this.getAttribute('target') === '_blank') {
+                return;
+            }
+            
+            // 같은 페이지 내 링크가 아니면 처리하지 않음
+            const href = this.getAttribute('href');
+            if (!href || href === '#' || !href.startsWith('/')) {
+                return;
+            }
+            
+            // 현재 페이지와 같은 링크면 처리하지 않음
+            if (this.classList.contains('active')) {
+                return;
+            }
+            
+            const topMenu = document.querySelector('.top-menu');
+            if (topMenu && topMenu.classList.contains('menu-initialized')) {
+                const menuRect = topMenu.getBoundingClientRect();
+                const linkRect = this.getBoundingClientRect();
+                
+                const left = linkRect.left - menuRect.left;
+                const width = linkRect.width;
+                
+                // 목적지 위치를 sessionStorage에 저장 (새 페이지에서 사용)
+                sessionStorage.setItem('menu-background-left', left);
+                sessionStorage.setItem('menu-background-width', width);
+                
+                // 페이지 전환을 잠시 막고 애니메이션 시작
+                e.preventDefault();
+                
+                // 클릭한 메뉴 위치로 배경 이동 (애니메이션 시작)
+                topMenu.style.setProperty('--active-menu-left', left + 'px');
+                topMenu.style.setProperty('--active-menu-width', width + 'px');
+                
+                // 애니메이션이 시작된 후 페이지 이동
+                setTimeout(() => {
+                    window.location.href = href;
+                }, 250); // 애니메이션이 보이도록 적절한 딜레이
+            }
+        });
+    });
+});
+
 // 페이지 이동 속도 최적화
 document.addEventListener('DOMContentLoaded', function() {
-    // 모든 내부 링크에 즉시 이동 처리
-    const links = document.querySelectorAll('a[href^="/"]');
+    // 모든 내부 링크에 즉시 이동 처리 (메뉴 링크는 제외)
+    const links = document.querySelectorAll('a[href^="/"]:not(.top-menu-link)');
     links.forEach(link => {
         link.addEventListener('click', function(e) {
             // 모달이나 외부 링크는 제외
@@ -258,6 +415,79 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             }
         });
+    }
+    
+    // 홈 화면 배경 이미지 및 스크롤 효과
+    const indexHeroBackground = document.getElementById('indexHeroBackground');
+    const indexHeroGradient = document.getElementById('indexHeroGradient');
+    const gallerySliderContainer = document.getElementById('gallerySliderContainer');
+    
+    // 배경 이미지가 있는지 확인
+    const hasBackground = indexHeroBackground !== null;
+    
+    if (gallerySliderContainer) {
+        if (hasBackground && indexHeroGradient) {
+            // 배경 이미지가 있는 경우
+            gallerySliderContainer.classList.add('has-background');
+            
+            const bgImageUrl = indexHeroBackground.getAttribute('data-bg-image');
+            if (bgImageUrl) {
+                indexHeroBackground.style.backgroundImage = `url('${bgImageUrl}')`;
+            }
+            
+            let ticking = false;
+            const scrollHandler = function() {
+                if (!ticking) {
+                    window.requestAnimationFrame(function() {
+                        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                        const windowHeight = window.innerHeight;
+                        const headerHeight = 70;
+                        const availableHeight = windowHeight - headerHeight;
+                        
+                        // 배경 이미지 parallax 효과 (스크롤에 따라 내려감)
+                        if (indexHeroBackground) {
+                            const parallaxOffset = scrollTop * 0.4; // 40% 속도로 따라감
+                            indexHeroBackground.style.transform = `translateY(${parallaxOffset}px)`;
+                        }
+                        
+                        // 그라데이션 오버레이 표시 (스크롤이 화면의 20% 이상일 때)
+                        if (indexHeroGradient) {
+                            if (scrollTop > availableHeight * 0.2) {
+                                indexHeroGradient.classList.add('scrolled');
+                            } else {
+                                indexHeroGradient.classList.remove('scrolled');
+                            }
+                        }
+                        
+                        // 카드 컨테이너 표시 (스크롤이 화면의 30% 이상일 때 - 더 빨리 나타나도록)
+                        if (scrollTop > availableHeight * 0.3) {
+                            gallerySliderContainer.classList.add('visible');
+                        } else {
+                            gallerySliderContainer.classList.remove('visible');
+                        }
+                        
+                        ticking = false;
+                    });
+                    ticking = true;
+                }
+            };
+            
+            // 초기 상태 설정
+            scrollHandler();
+            
+            // 스크롤 이벤트 리스너 (throttled)
+            window.addEventListener('scroll', scrollHandler, { passive: true });
+            
+            // 리사이즈 이벤트
+            window.addEventListener('resize', scrollHandler, { passive: true });
+        } else {
+            // 배경 이미지가 없는 경우 - 카드를 바로 표시
+            gallerySliderContainer.classList.remove('has-background');
+            gallerySliderContainer.style.opacity = '1';
+            gallerySliderContainer.style.transform = 'translateY(0)';
+            gallerySliderContainer.style.pointerEvents = 'auto';
+            gallerySliderContainer.style.marginTop = '0';
+        }
     }
     
     // 갤러리 카드 슬라이더 기능

@@ -2,6 +2,7 @@ import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
+from flask_caching import Cache
 from config import Config
 
 # authlib OAuth import
@@ -10,6 +11,7 @@ from authlib.integrations.flask_client import OAuth
 db = SQLAlchemy()
 login_manager = LoginManager()
 oauth = OAuth()
+cache = Cache()
 
 def create_app(config_class=Config):
     # static과 templates 폴더를 명시적으로 지정 (루트 폴더 기준)
@@ -24,6 +26,7 @@ def create_app(config_class=Config):
     db.init_app(app)
     login_manager.init_app(app)
     oauth.init_app(app)
+    cache.init_app(app)
 
     login_manager.login_view = 'main.login'
     login_manager.login_message_category = 'info'
@@ -31,11 +34,40 @@ def create_app(config_class=Config):
     from .routes import bp as main_bp
     app.register_blueprint(main_bp)
     
+    # 인덱스 생성 (Postgres용)
+    with app.app_context():
+        try:
+            from sqlalchemy import text
+            # category와 created_at 복합 인덱스 생성
+            db.session.execute(text("""
+                CREATE INDEX IF NOT EXISTS idx_category_created_at 
+                ON post (category, created_at DESC);
+            """))
+            # category 단일 인덱스 (이미 모델에 있지만 확실히)
+            db.session.execute(text("""
+                CREATE INDEX IF NOT EXISTS idx_post_category 
+                ON post (category);
+            """))
+            # created_at 인덱스
+            db.session.execute(text("""
+                CREATE INDEX IF NOT EXISTS idx_post_created_at 
+                ON post (created_at DESC);
+            """))
+            db.session.commit()
+        except Exception as idx_error:
+            db.session.rollback()
+            import sys
+            print(f"Info: Index creation check: {str(idx_error)}", file=sys.stderr)
+    
     # 언어 설정을 템플릿에 전달하는 컨텍스트 프로세서
     @app.context_processor
     def inject_language():
         from flask import session
-        lang = session.get('language', 'ko')  # 기본값: 한국어
+        # 세션에서 언어 가져오기, 없으면 기본값 'ko' (한국어)
+        lang = session.get('language')
+        if not lang or lang not in ['ko', 'en']:
+            lang = 'ko'  # 기본값: 한국어
+            session['language'] = lang
         return dict(current_lang=lang)
 
     # Create DB tables and add missing columns
@@ -85,6 +117,36 @@ def create_app(config_class=Config):
                         END IF;
                     END $$;
                 """))
+                # tistory_post_id 컬럼이 없으면 추가
+                db.session.execute(text("""
+                    DO $$ 
+                    BEGIN 
+                        IF NOT EXISTS (
+                            SELECT 1 FROM information_schema.columns 
+                            WHERE table_name='post' AND column_name='tistory_post_id'
+                        ) THEN
+                            ALTER TABLE post ADD COLUMN tistory_post_id VARCHAR(100);
+                        END IF;
+                    END $$;
+                """))
+                # tistory_link 컬럼이 없으면 추가
+                db.session.execute(text("""
+                    DO $$ 
+                    BEGIN 
+                        IF NOT EXISTS (
+                            SELECT 1 FROM information_schema.columns 
+                            WHERE table_name='post' AND column_name='tistory_link'
+                        ) THEN
+                            ALTER TABLE post ADD COLUMN tistory_link VARCHAR(500);
+                        END IF;
+                    END $$;
+                """))
+                # tistory_post_id에 유니크 인덱스 추가
+                db.session.execute(text("""
+                    CREATE UNIQUE INDEX IF NOT EXISTS idx_post_tistory_post_id 
+                    ON post (tistory_post_id) 
+                    WHERE tistory_post_id IS NOT NULL;
+                """))
                 db.session.commit()
             except Exception as col_error:
                 # 컬럼 추가 실패 시 롤백 (이미 존재하거나 다른 이유)
@@ -97,6 +159,41 @@ def create_app(config_class=Config):
             import sys
             print(f"Warning: Could not create database tables: {str(e)}", file=sys.stderr)
             # 앱은 계속 실행됨 (테이블이 이미 존재하거나 다른 이유일 수 있음)
+
+    # 티스토리 RSS 자동 동기화 스케줄러 설정
+    if app.config.get('TISTORY_AUTO_SYNC_ENABLED') and app.config.get('TISTORY_RSS_URL'):
+        try:
+            from apscheduler.schedulers.background import BackgroundScheduler
+            from apscheduler.triggers.interval import IntervalTrigger
+            from .tistory_sync import sync_tistory_posts
+            
+            scheduler = BackgroundScheduler()
+            scheduler.start()
+            
+            rss_url = app.config['TISTORY_RSS_URL']
+            default_category = app.config.get('TISTORY_DEFAULT_CATEGORY', 'gallery')
+            author_id = app.config.get('TISTORY_AUTO_AUTHOR_ID')
+            interval_minutes = app.config.get('TISTORY_SYNC_INTERVAL', 15)
+            
+            # 주기적 동기화 작업 추가
+            scheduler.add_job(
+                func=sync_tistory_posts,
+                trigger=IntervalTrigger(minutes=interval_minutes),
+                args=[app, rss_url, default_category, author_id],
+                id='tistory_sync',
+                name='티스토리 RSS 동기화',
+                replace_existing=True
+            )
+            
+            # 앱 종료 시 스케줄러 종료
+            import atexit
+            atexit.register(lambda: scheduler.shutdown())
+            
+            app.logger.info(f"티스토리 RSS 자동 동기화가 활성화되었습니다. (간격: {interval_minutes}분)")
+        except Exception as e:
+            import sys
+            print(f"Warning: 티스토리 스케줄러 설정 실패: {str(e)}", file=sys.stderr)
+            app.logger.warning(f"티스토리 스케줄러 설정 실패: {str(e)}")
 
     return app
 
