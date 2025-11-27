@@ -783,7 +783,8 @@ a:hover {
 
 .gallery-slider-wrapper {
     overflow: hidden;
-    padding: 2rem 0;
+    height: 100%;              /* 컨테이너 높이를 그대로 사용 */
+    padding: 0;                /* 세로 패딩은 제거해서 중앙 정렬에 영향 없게 */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -800,7 +801,7 @@ a:hover {
 
 .gallery-card-item {
     position: absolute;
-    top: 50%;
+    top: 55%; /* 화면 중앙보다 살짝 아래에 위치시켜 자연스럽게 보이도록 조정 */
     left: 50%;
     width: min(35vw, 500px);
     height: min(70vh, 600px);
