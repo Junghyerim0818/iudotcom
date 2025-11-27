@@ -3,6 +3,31 @@ from flask_login import UserMixin
 from sqlalchemy import Index
 from . import db
 
+class Setting(db.Model):
+    """애플리케이션 설정 저장"""
+    key = db.Column(db.String(100), primary_key=True)
+    value = db.Column(db.Text)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    @staticmethod
+    def get(key, default=None):
+        """설정 값 가져오기"""
+        setting = Setting.query.get(key)
+        return setting.value if setting else default
+    
+    @staticmethod
+    def set(key, value):
+        """설정 값 저장"""
+        setting = Setting.query.get(key)
+        if setting:
+            setting.value = value
+            setting.updated_at = datetime.utcnow()
+        else:
+            setting = Setting(key=key, value=value)
+            db.session.add(setting)
+        db.session.commit()
+        return setting
+
 class User(UserMixin, db.Model):
     id = db.Column(db.String(100), primary_key=True) # Google ID
     email = db.Column(db.String(100), unique=True, nullable=False)

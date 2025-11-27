@@ -145,22 +145,6 @@
                             <span class="top-menu-text">{% if current_lang == 'en' %}Support Verification{% else %}서포트 인증 글{% endif %}</span>
                         </a>
                     </li>
-                    {% if current_user.is_authenticated %}
-                        {% if current_user.is_writer() %}
-                            <li class="top-menu-item">
-                                <a href="#" class="top-menu-link" data-bs-toggle="modal" data-bs-target="#newPostModal">
-                                    <span class="top-menu-text">{% if current_lang == 'en' %}Write{% else %}글쓰기{% endif %}</span>
-                                </a>
-                            </li>
-                        {% endif %}
-                        {% if current_user.is_admin() %}
-                            <li class="top-menu-item">
-                                <a href="{{ url_for('main.admin') }}" class="top-menu-link {% if request.endpoint == 'main.admin' %}active{% endif %}">
-                                    <span class="top-menu-text">{% if current_lang == 'en' %}Admin{% else %}관리자{% endif %}</span>
-                                </a>
-                            </li>
-                        {% endif %}
-                    {% endif %}
                 </ul>
             </nav>
 
@@ -211,6 +195,28 @@
         
         {% block content %}{% endblock %}
     </div>
+
+    {# 하단 고정 관리자/글쓰기 네비게이션 (로그인 시에만 표시) #}
+    {% if current_user.is_authenticated and (current_user.is_writer() or current_user.is_admin()) %}
+    <nav class="floating-admin-nav">
+        {% if current_user.is_writer() %}
+        <a href="#" class="floating-nav-btn floating-nav-btn-write" data-bs-toggle="modal" data-bs-target="#newPostModal">
+            <i class="bi bi-pencil-square"></i>
+            <span>{% if current_lang == 'en' %}Write{% else %}글쓰기{% endif %}</span>
+        </a>
+        {% endif %}
+        {% if current_user.is_admin() %}
+        <a href="{{ url_for('main.admin') }}" class="floating-nav-btn floating-nav-btn-admin">
+            <i class="bi bi-gear-fill"></i>
+            <span>{% if current_lang == 'en' %}Admin{% else %}관리자{% endif %}</span>
+        </a>
+        {% endif %}
+        <a href="{{ url_for('main.logout') }}" class="floating-nav-btn floating-nav-btn-logout">
+            <i class="bi bi-box-arrow-right"></i>
+            <span>{% if current_lang == 'en' %}Logout{% else %}로그아웃{% endif %}</span>
+        </a>
+    </nav>
+    {% endif %}
 
     <!-- 로그인 모달 -->
     <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">

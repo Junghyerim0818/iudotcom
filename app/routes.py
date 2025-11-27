@@ -7,7 +7,7 @@ from werkzeug.utils import secure_filename
 from sqlalchemy.orm import joinedload
 from sqlalchemy import func
 from . import db, oauth, login_manager, cache
-from .models import User, Post
+from .models import User, Post, Setting
 from .forms import PostForm, AdminUserForm
 
 bp = Blueprint('main', __name__)
@@ -454,7 +454,20 @@ def admin():
         abort(403)
     
     users = User.query.all()
-    return render_template('admin.html', users=users, config=current_app.config)
+    
+    # 티스토리 설정 가져오기 (데이터베이스 우선, 없으면 환경 변수)
+    tistory_rss_url = Setting.get('TISTORY_RSS_URL') or current_app.config.get('TISTORY_RSS_URL', '')
+    tistory_auto_sync = Setting.get('TISTORY_AUTO_SYNC_ENABLED', 'false').lower() == 'true' or current_app.config.get('TISTORY_AUTO_SYNC_ENABLED', False)
+    tistory_sync_interval = int(Setting.get('TISTORY_SYNC_INTERVAL') or current_app.config.get('TISTORY_SYNC_INTERVAL', 15))
+    tistory_default_category = Setting.get('TISTORY_DEFAULT_CATEGORY') or current_app.config.get('TISTORY_DEFAULT_CATEGORY', 'gallery')
+    
+    return render_template('admin.html', 
+                         users=users, 
+                         config=current_app.config,
+                         tistory_rss_url=tistory_rss_url,
+                         tistory_auto_sync=tistory_auto_sync,
+                         tistory_sync_interval=tistory_sync_interval,
+                         tistory_default_category=tistory_default_category)
 
 @bp.route('/admin/user/<user_id>', methods=['POST'])
 @login_required
@@ -589,13 +602,14 @@ def manual_tistory_sync():
     if not current_user.is_admin():
         abort(403)
     
-    rss_url = current_app.config.get('TISTORY_RSS_URL')
+    # 데이터베이스에서 설정 가져오기 (없으면 환경 변수 사용)
+    rss_url = Setting.get('TISTORY_RSS_URL') or current_app.config.get('TISTORY_RSS_URL')
     if not rss_url:
         flash('티스토리 RSS URL이 설정되지 않았습니다.', 'danger')
         return redirect(url_for('main.admin'))
     
-    default_category = current_app.config.get('TISTORY_DEFAULT_CATEGORY', 'gallery')
-    author_id = current_app.config.get('TISTORY_AUTO_AUTHOR_ID')
+    default_category = Setting.get('TISTORY_DEFAULT_CATEGORY') or current_app.config.get('TISTORY_DEFAULT_CATEGORY', 'gallery')
+    author_id = Setting.get('TISTORY_AUTO_AUTHOR_ID') or current_app.config.get('TISTORY_AUTO_AUTHOR_ID')
     
     try:
         from .tistory_sync import sync_tistory_posts
@@ -605,6 +619,31 @@ def manual_tistory_sync():
         current_app.logger.error(f"티스토리 동기화 오류: {str(e)}")
         flash(f'티스토리 동기화 중 오류가 발생했습니다: {str(e)}', 'danger')
     
+    return redirect(url_for('main.admin'))
+
+@bp.route('/admin/tistory/settings', methods=['POST'])
+@login_required
+def update_tistory_settings():
+    """티스토리 설정 업데이트 (관리자 전용)"""
+    if not current_user.is_admin():
+        abort(403)
+    
+    rss_url = request.form.get('rss_url', '').strip()
+    auto_sync_enabled = request.form.get('auto_sync_enabled') == 'on'
+    sync_interval = int(request.form.get('sync_interval', 15))
+    default_category = request.form.get('default_category', 'gallery').strip()
+    
+    # 설정 저장
+    if rss_url:
+        Setting.set('TISTORY_RSS_URL', rss_url)
+    else:
+        Setting.set('TISTORY_RSS_URL', '')
+    
+    Setting.set('TISTORY_AUTO_SYNC_ENABLED', 'true' if auto_sync_enabled else 'false')
+    Setting.set('TISTORY_SYNC_INTERVAL', str(sync_interval))
+    Setting.set('TISTORY_DEFAULT_CATEGORY', default_category)
+    
+    flash('티스토리 설정이 저장되었습니다.', 'success')
     return redirect(url_for('main.admin'))
 
 

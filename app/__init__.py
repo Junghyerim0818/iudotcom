@@ -161,39 +161,55 @@ def create_app(config_class=Config):
             # 앱은 계속 실행됨 (테이블이 이미 존재하거나 다른 이유일 수 있음)
 
     # 티스토리 RSS 자동 동기화 스케줄러 설정
-    if app.config.get('TISTORY_AUTO_SYNC_ENABLED') and app.config.get('TISTORY_RSS_URL'):
+    # 데이터베이스 설정 우선, 없으면 환경 변수 사용
+    with app.app_context():
+        from .models import Setting
         try:
-            from apscheduler.schedulers.background import BackgroundScheduler
-            from apscheduler.triggers.interval import IntervalTrigger
-            from .tistory_sync import sync_tistory_posts
+            # 데이터베이스에서 설정 가져오기
+            tistory_auto_sync = Setting.get('TISTORY_AUTO_SYNC_ENABLED', 'false').lower() == 'true'
+            tistory_rss_url = Setting.get('TISTORY_RSS_URL') or app.config.get('TISTORY_RSS_URL')
             
-            scheduler = BackgroundScheduler()
-            scheduler.start()
+            # 환경 변수도 확인
+            if not tistory_auto_sync:
+                tistory_auto_sync = app.config.get('TISTORY_AUTO_SYNC_ENABLED', False)
+            if not tistory_rss_url:
+                tistory_rss_url = app.config.get('TISTORY_RSS_URL')
             
-            rss_url = app.config['TISTORY_RSS_URL']
-            default_category = app.config.get('TISTORY_DEFAULT_CATEGORY', 'gallery')
-            author_id = app.config.get('TISTORY_AUTO_AUTHOR_ID')
-            interval_minutes = app.config.get('TISTORY_SYNC_INTERVAL', 15)
-            
-            # 주기적 동기화 작업 추가
-            scheduler.add_job(
-                func=sync_tistory_posts,
-                trigger=IntervalTrigger(minutes=interval_minutes),
-                args=[app, rss_url, default_category, author_id],
-                id='tistory_sync',
-                name='티스토리 RSS 동기화',
-                replace_existing=True
-            )
-            
-            # 앱 종료 시 스케줄러 종료
-            import atexit
-            atexit.register(lambda: scheduler.shutdown())
-            
-            app.logger.info(f"티스토리 RSS 자동 동기화가 활성화되었습니다. (간격: {interval_minutes}분)")
+            if tistory_auto_sync and tistory_rss_url:
+                try:
+                    from apscheduler.schedulers.background import BackgroundScheduler
+                    from apscheduler.triggers.interval import IntervalTrigger
+                    from .tistory_sync import sync_tistory_posts
+                    
+                    scheduler = BackgroundScheduler()
+                    scheduler.start()
+                    
+                    default_category = Setting.get('TISTORY_DEFAULT_CATEGORY') or app.config.get('TISTORY_DEFAULT_CATEGORY', 'gallery')
+                    author_id = Setting.get('TISTORY_AUTO_AUTHOR_ID') or app.config.get('TISTORY_AUTO_AUTHOR_ID')
+                    interval_minutes = int(Setting.get('TISTORY_SYNC_INTERVAL') or app.config.get('TISTORY_SYNC_INTERVAL', 15))
+                    
+                    # 주기적 동기화 작업 추가
+                    scheduler.add_job(
+                        func=sync_tistory_posts,
+                        trigger=IntervalTrigger(minutes=interval_minutes),
+                        args=[app, tistory_rss_url, default_category, author_id],
+                        id='tistory_sync',
+                        name='티스토리 RSS 동기화',
+                        replace_existing=True
+                    )
+                    
+                    # 앱 종료 시 스케줄러 종료
+                    import atexit
+                    atexit.register(lambda: scheduler.shutdown())
+                    
+                    app.logger.info(f"티스토리 RSS 자동 동기화가 활성화되었습니다. (간격: {interval_minutes}분)")
+                except Exception as e:
+                    import sys
+                    print(f"Warning: 티스토리 스케줄러 설정 실패: {str(e)}", file=sys.stderr)
+                    app.logger.warning(f"티스토리 스케줄러 설정 실패: {str(e)}")
         except Exception as e:
-            import sys
-            print(f"Warning: 티스토리 스케줄러 설정 실패: {str(e)}", file=sys.stderr)
-            app.logger.warning(f"티스토리 스케줄러 설정 실패: {str(e)}")
+            # Setting 테이블이 아직 생성되지 않았을 수 있음 (첫 실행)
+            app.logger.debug(f"Setting 테이블 확인 중 오류 (무시 가능): {str(e)}")
 
     return app
 
