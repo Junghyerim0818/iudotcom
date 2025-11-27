@@ -7,7 +7,7 @@
             <a href="{{ url_for('main.archive', type_name=type_name) }}" class="btn btn-outline-secondary">
                 <i class="bi bi-arrow-left"></i> {% if current_lang == 'en' %}Back to {{ title }}{% else %}{{ title }}로 돌아가기{% endif %}
             </a>
-            <h2 class="mb-0">{{ post.title }}</h2>
+            <h2 class="mb-0">{{ post.title|safe }}</h2>
             <div style="width: 120px;"></div> <!-- 공간 맞추기용 -->
         </div>
     </div>
@@ -31,7 +31,7 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-start mb-3">
                     <div>
-                        <h5 class="card-title mb-2">{{ post.title }}</h5>
+                        <h5 class="card-title mb-2">{{ post.title|safe }}</h5>
                         <p class="card-text text-muted mb-0">
                             <small>
                                 {% if current_lang == 'en' %}

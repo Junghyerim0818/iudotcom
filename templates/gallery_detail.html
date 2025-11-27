@@ -7,11 +7,15 @@
             <a href="{{ url_for('main.gallery') }}" class="btn btn-outline-secondary">
                 <i class="bi bi-arrow-left"></i> {% if current_lang == 'en' %}Back to Gallery{% else %}갤러리로 돌아가기{% endif %}
             </a>
-            <h2 class="mb-0">{{ post.title }}</h2>
+            <h2 class="mb-0">{{ post.title|safe }}</h2>
             <div style="width: 120px;"></div> <!-- 공간 맞추기용 -->
         </div>
     </div>
 
+    {# 티스토리에서 넘어온 글(post.tistory_link가 있는 경우)는 본문 안에 이미지가 포함되므로
+       상단 썸네일 이미지는 중복 표시를 피하기 위해 숨기고,
+       수동 작성 글만 상단 이미지 박스를 보여준다. #}
+    {% if not post.tistory_link %}
     <div class="gallery-detail-image-wrapper mb-4">
         {% if post.has_image_data() or post.image_filename or post.image_url %}
             <img src="{% if post.image_url %}{{ post.image_url }}{% elif post.has_image_data() %}{{ url_for('main.get_image', post_id=post.id) }}{% elif post.image_filename %}{{ url_for('static', filename='uploads/' + post.image_filename) }}{% endif %}" 
@@ -25,13 +29,14 @@
             </div>
         {% endif %}
     </div>
+    {% endif %}
 
     <div class="gallery-detail-info">
         <div class="card">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-start mb-3">
                     <div>
-                        <h5 class="card-title mb-2">{{ post.title }}</h5>
+                        <h5 class="card-title mb-2">{{ post.title|safe }}</h5>
                         <p class="card-text text-muted mb-0">
                             <small>
                                 {% if current_lang == 'en' %}
@@ -128,7 +133,7 @@
 {% block extra_css %}
 <style>
 .gallery-detail-container {
-    max-width: 1200px;
+    max-width: 1280px;
     margin: 0 auto;
 }
 
@@ -144,7 +149,9 @@
 }
 
 .gallery-detail-image {
-    max-width: 100%;
+    max-width: min(100%, 1280px);
+    width: 100%;
+    height: auto;
     max-height: 80vh;
     object-fit: contain;
     border-radius: 4px;
@@ -164,6 +171,14 @@
     margin-top: 1rem;
     line-height: 1.6;
     white-space: pre-wrap;
+}
+
+/* 본문 내 이미지도 최대 1280px까지만, 반응형으로 표시 */
+.gallery-detail-content img {
+    max-width: min(100%, 1280px);
+    height: auto;
+    display: block;
+    margin: 1rem auto;
 }
 
 .gallery-detail-navigation .card {

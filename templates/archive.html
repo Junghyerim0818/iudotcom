@@ -6,7 +6,7 @@
     {% for post in posts %}
     <a href="{{ url_for('main.archive_detail', type_name=type_name, post_id=post.id) }}" class="list-group-item list-group-item-action" aria-current="true">
         <div class="d-flex w-100 justify-content-between">
-            <h5 class="mb-1">{{ post.title }}</h5>
+            <h5 class="mb-1">{{ post.title|safe }}</h5>
             <small>{{ post.created_at.strftime('%Y-%m-%d') }}</small>
         </div>
         <small>By {% if post.author.is_admin() %}관리자{% else %}{{ post.author.name }}{% endif %}</small>

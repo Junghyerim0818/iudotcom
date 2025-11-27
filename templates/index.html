@@ -38,7 +38,7 @@
                                 </div>
                             {% endif %}
                             <div class="gallery-card-overlay">
-                                <h3 class="gallery-card-title">{{ post.title }}</h3>
+                                <h3 class="gallery-card-title">{{ post.title|safe }}</h3>
                                 <div class="gallery-card-meta">
                                     <span class="gallery-card-author">{% if post.author.is_admin() %}관리자{% else %}{{ post.author.name }}{% endif %}</span>
                                     <span class="gallery-card-date">{{ post.created_at.strftime('%Y.%m.%d') }}</span>
