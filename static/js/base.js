@@ -159,27 +159,93 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// 페이지 이동 속도 최적화
+// 페이지 이동 속도 최적화: 내부 링크를 부분 전환(Partial Navigation)으로 처리
 document.addEventListener('DOMContentLoaded', function() {
-    // 모든 내부 링크에 즉시 이동 처리 (메뉴 링크와 구글 로그인 버튼은 제외)
-    const links = document.querySelectorAll('a[href^="/"]:not(.top-menu-link):not(#googleLoginBtn)');
-    links.forEach(link => {
-        link.addEventListener('click', function(e) {
-            // 모달이나 외부 링크는 제외
-            if (this.getAttribute('data-bs-toggle') || 
-                this.getAttribute('target') === '_blank' ||
-                this.id === 'googleLoginBtn' ||
-                (this.href && this.href.startsWith('http') && !this.href.includes(window.location.hostname))) {
+    /**
+     * 주어진 URL의 전체 HTML을 가져와서 .main-content 내부만 교체하는 함수
+     * - 상단 헤더/메뉴/모달 구조는 그대로 유지
+     * - 브라우저 history는 pushState/popstate로 관리
+     */
+    function loadPagePartial(url, options) {
+        const opts = Object.assign({ push: true }, options || {});
+        const mainContent = document.querySelector('.main-content');
+        if (!mainContent) {
+            window.location.href = url;
+            return;
+        }
+
+        fetch(url, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const newMain = doc.querySelector('.main-content');
+            const newTitle = doc.querySelector('title');
+
+            if (newMain) {
+                mainContent.innerHTML = newMain.innerHTML;
+            } else {
+                // 예상치 못한 경우에는 전체 이동으로 폴백
+                window.location.href = url;
                 return;
             }
-            
-            // 즉시 페이지 이동 (애니메이션 없이)
-            const href = this.getAttribute('href');
-            if (href && href !== '#' && !href.includes('javascript:') && href.startsWith('/')) {
-                // 즉시 이동
-                window.location.href = href;
+
+            if (newTitle) {
+                document.title = newTitle.textContent;
             }
+
+            if (opts.push) {
+                history.pushState({}, '', url);
+            }
+
+            // 스크롤 맨 위로
+            window.scrollTo({ top: 0, behavior: 'auto' });
+        })
+        .catch(() => {
+            // 에러 시에는 일반 페이지 이동으로 폴백
+            window.location.href = url;
         });
+    }
+
+    // 링크 클릭을 가로채는 전역 이벤트 (캡처 단계 사용)
+    document.addEventListener('click', function(e) {
+        const link = e.target.closest('a[href]');
+        if (!link) return;
+
+        const href = link.getAttribute('href');
+
+        // 외부 링크, 해시, 자바스크립트 링크, 빈 링크는 무시
+        if (!href || href === '#' || href.startsWith('javascript:')) return;
+        if (link.getAttribute('target') === '_blank') return;
+        if (link.id === 'googleLoginBtn') return;
+        if (link.classList.contains('top-menu-link')) return; // 상단 메뉴는 기존 애니메이션/이동 로직 유지
+        if (link.getAttribute('data-bs-toggle')) return; // 모달/드롭다운 등 부트스트랩 트리거는 그대로 둠
+
+        // 외부 도메인은 건드리지 않음
+        if (link.href && link.href.startsWith('http') && !link.href.includes(window.location.hostname)) {
+            return;
+        }
+
+        // 루트로 가는 링크 (메인 홈)는 아직 전체 새로고침 사용 (갤러리 카드 스택 초기화 이슈 방지)
+        if (href === '/' || href.startsWith('/?')) {
+            return;
+        }
+
+        // 여기까지 왔다면 내부 페이지 이동이므로 부분 전환 사용
+        if (href.startsWith('/')) {
+            e.preventDefault();
+            loadPagePartial(href, { push: true });
+        }
+    }, true);
+
+    // 브라우저 뒤로가기/앞으로가기 처리
+    window.addEventListener('popstate', function() {
+        // 현재 URL 기준으로 다시 부분 로딩 시도
+        loadPagePartial(window.location.pathname + window.location.search, { push: false });
     });
 });
 
