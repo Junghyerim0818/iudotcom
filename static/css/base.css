@@ -795,9 +795,25 @@ a:hover {
     text-shadow: none !important;
 }
 
-/* 더 뒤에 있는 카드 - 완전히 숨김 */
+/* 더 뒤에 있는 카드 - data-pos="2"까지는 보이도록 */
 .gallery-card-item[data-pos="-2"],
-.gallery-card-item[data-pos="2"],
+.gallery-card-item[data-pos="2"] {
+    opacity: 0.75 !important;
+    filter: blur(2px);
+    transform: translate(-50%, -50%) scale(0.9);
+    z-index: 3;
+    pointer-events: none;
+}
+
+.gallery-card-item[data-pos="-2"] {
+    transform: translate(-50%, -50%) translateX(-70%) scale(0.9);
+}
+
+.gallery-card-item[data-pos="2"] {
+    transform: translate(-50%, -50%) translateX(70%) scale(0.9);
+}
+
+/* data-pos="3" 이상은 완전히 숨김 */
 .gallery-card-item[data-pos="-3"],
 .gallery-card-item[data-pos="3"] {
     opacity: 0 !important;
@@ -851,6 +867,7 @@ a:hover {
 /* 카드 호버 시 3D 회전 효과 제거 (투명해지는 느낌 방지) */
 .gallery-card-item:hover .gallery-card-link {
     transform: none;
+    opacity: 1 !important; /* 호버 시에도 불투명도 100% 유지 */
 }
 
 /* 배경 이미지 - 카드 링크와 동일한 애니메이션 */
@@ -923,7 +940,16 @@ a:hover {
 /* 배경 이미지는 살짝 확대만 (투명도 변경 없음) */
 .gallery-card-item:hover .gallery-card-background {
     transform: scale(1.03);
-    opacity: 1; /* 호버 시에도 투명도 유지 */
+    opacity: 1 !important; /* 호버 시에도 불투명도 100% 유지 */
+}
+
+/* 메인 카드 호버 시 모든 요소의 불투명도 100% 고정 */
+.gallery-card-item[data-pos="0"]:hover,
+.gallery-card-item[data-pos="0"]:hover *,
+.gallery-card-item[data-pos="0"]:hover .gallery-card-link,
+.gallery-card-item[data-pos="0"]:hover .gallery-card-background,
+.gallery-card-item[data-pos="0"]:hover .gallery-card-overlay {
+    opacity: 1 !important; /* 모든 요소 불투명도 100% 고정 */
 }
 
 /* 다음 카드의 배경 이미지 위에 어두운 오버레이 추가 (G 글자 가리기) */
