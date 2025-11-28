@@ -317,7 +317,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Google 로그인 버튼 클릭 처리 (이벤트 위임, capture phase)
+    // Google 로그인 버튼 클릭 처리 함수
     function handleGoogleLogin(btn) {
         const actualLoginUrl = btn.getAttribute('data-login-url') || '/login';
         const popup = window.open(actualLoginUrl, 'GoogleLogin', 'width=500,height=600,scrollbars=yes,resizable=yes');
@@ -349,6 +349,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 500);
     }
     
+    // 전역 클릭 이벤트 (capture phase) - 모달이 열리기 전에도 작동
     document.addEventListener('click', function(e) {
         const googleLoginBtn = e.target.closest('#googleLoginBtn');
         if (googleLoginBtn) {
@@ -359,6 +360,24 @@ document.addEventListener('DOMContentLoaded', function() {
             return false;
         }
     }, true);
+    
+    // 로그인 모달이 열릴 때 이벤트 리스너 추가 (이중 안전장치)
+    const loginModal = document.getElementById('loginModal');
+    if (loginModal) {
+        loginModal.addEventListener('shown.bs.modal', function() {
+            const googleLoginBtn = document.getElementById('googleLoginBtn');
+            if (googleLoginBtn) {
+                // 기존 이벤트 리스너가 있더라도 다시 등록
+                googleLoginBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                    handleGoogleLogin(this);
+                    return false;
+                });
+            }
+        });
+    }
 
     // 글쓰기 모달이 열릴 때 폼 로드
     const newPostModal = document.getElementById('newPostModal');
