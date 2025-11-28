@@ -222,7 +222,7 @@
                 </div>
                 <div class="modal-body text-center">
                     <p class="mb-4">{% if current_lang == 'en' %}Sign in with your Google account{% else %}Google 계정으로 로그인하세요{% endif %}</p>
-                    <a href="#" class="btn btn-primary" id="googleLoginBtn" data-login-url="{{ url_for('main.login') }}">
+                    <a href="javascript:void(0)" class="btn btn-primary" id="googleLoginBtn" data-login-url="{{ url_for('main.login') }}" role="button">
                         <i class="bi bi-google me-2"></i>{% if current_lang == 'en' %}Sign in with Google{% else %}Google로 로그인{% endif %}
                     </a>
                 </div>

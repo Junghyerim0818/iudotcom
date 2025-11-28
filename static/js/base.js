@@ -270,6 +270,11 @@ document.addEventListener('DOMContentLoaded', function() {
         const link = e.target.closest('a[href]');
         if (!link) return;
 
+        // 구글 로그인 버튼 ID 확인 (추가 안전장치)
+        if (link.id === 'googleLoginBtn') {
+            return;
+        }
+
         const href = link.getAttribute('href');
 
         // 외부 링크, 해시, 자바스크립트 링크, 빈 링크는 무시
@@ -376,14 +381,12 @@ document.addEventListener('DOMContentLoaded', function() {
         loginModal.addEventListener('shown.bs.modal', function() {
             const googleLoginBtn = document.getElementById('googleLoginBtn');
             if (googleLoginBtn) {
-                // 기존 이벤트 리스너 제거 후 재등록
-                const newBtn = googleLoginBtn.cloneNode(true);
-                googleLoginBtn.parentNode.replaceChild(newBtn, googleLoginBtn);
-                
-                newBtn.addEventListener('click', function(e) {
+                // 직접 이벤트 리스너 추가 (이미 전역 핸들러가 있지만 추가 안전장치)
+                googleLoginBtn.addEventListener('click', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
                     e.stopImmediatePropagation();
+                    console.log('모달 내 구글 로그인 버튼 클릭');
                     handleGoogleLogin(this);
                     return false;
                 }, true);
