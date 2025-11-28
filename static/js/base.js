@@ -635,9 +635,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 const offset = index - activeIndex;
                 card.dataset.pos = String(offset);
                 
-                // z-index를 실제 인덱스 기반으로 설정 (나중에 오는 카드가 위에)
-                // 최대 10개이므로 z-index는 1~10 범위
-                card.style.zIndex = String(10 - index);
+                // z-index를 data-pos의 절댓값 기반으로 설정
+                // data-pos="0": z-index 10 (최고)
+                // data-pos="-1", "1": z-index 9 (같은 레벨)
+                // data-pos="-2", "2": z-index 8 (같은 레벨)
+                const absOffset = Math.abs(offset);
+                card.style.zIndex = String(10 - absOffset);
             });
         }
 
