@@ -738,8 +738,8 @@ a:hover {
     max-width: 500px;
     max-height: 600px;
     cursor: pointer;
-    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), filter 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-    /* opacity는 transition에서 제외하여 항상 고정 */
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), filter 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    /* opacity는 transition에서 완전히 제외 */
     z-index: 1;
     filter: blur(4px);
     opacity: 0;
@@ -763,9 +763,12 @@ a:hover {
 /* 중앙 카드 호버 시에도 불투명도 100% 유지 */
 .gallery-card-item[data-pos="0"]:hover {
     opacity: 1 !important; /* 불투명도 100% 고정 */
-    transform: translate(-50%, -50%) scale(1.02);
+    transform: translate(-50%, -50%) scale(1.02) !important;
     filter: blur(0) !important;
     z-index: 10 !important; /* 호버 시에도 최상위 유지 */
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), filter 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    /* opacity transition 완전히 제거 */
+    transition-property: transform, filter !important;
 }
 
 /* 양 옆 카드 */
@@ -801,8 +804,10 @@ a:hover {
     opacity: 0.75 !important;
     filter: blur(2px);
     transform: translate(-50%, -50%) scale(0.9);
-    z-index: 3;
+    z-index: 3 !important; /* 보이도록 z-index 설정 */
     pointer-events: none;
+    visibility: visible !important; /* 보이도록 설정 */
+    display: block !important; /* 표시되도록 설정 */
 }
 
 .gallery-card-item[data-pos="-2"] {
@@ -829,14 +834,40 @@ a:hover {
 .gallery-card-item {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     border-radius: 16px;
-    transition: box-shadow 0.3s ease, filter 0.3s ease;
+    transition: box-shadow 0.3s ease, filter 0.3s ease !important;
     overflow: hidden;
     isolation: isolate; /* 새로운 스택 컨텍스트 생성으로 자식 요소가 다른 카드 위에 올라가지 않도록 */
     will-change: transform; /* opacity는 will-change에서 제외 */
+    /* opacity transition 완전히 제거 */
+    transition-property: box-shadow, filter !important;
+}
+
+/* 현재 카드와 다음 카드 사이에 흰색 배경 추가 */
+.gallery-card-item[data-pos="0"]::before {
+    content: '' !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    background-color: #ffffff !important;
+    opacity: 1 !important;
+    z-index: 9 !important; /* 현재 카드(z-index: 10)보다 뒤, 다음 카드(z-index: 8)보다 앞 */
+    pointer-events: none !important;
+    border-radius: 16px !important;
+    /* 현재 카드와 동일한 크기와 위치 */
+    width: min(35vw, 500px) !important;
+    height: min(70vh, 600px) !important;
+    max-width: 500px !important;
+    max-height: 600px !important;
+    transform: translate(-50%, -50%) scale(1) !important;
+    left: 50% !important;
+    top: 55% !important;
 }
 
 .gallery-card-item:hover {
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+    border-radius: 16px; /* 호버 시에도 라운드 처리 유지 */
 }
 
 /* 모든 호버 상태에서 opacity 고정 */
@@ -858,10 +889,12 @@ a:hover {
     color: inherit;
     position: relative;
     transform-style: preserve-3d;
-    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1) !important;
     border-radius: 16px;
     overflow: hidden;
     isolation: isolate; /* 새로운 스택 컨텍스트 생성 */
+    transition-property: transform !important; /* opacity transition 완전히 제외 */
+    opacity: 1 !important; /* 불투명도 100% 고정 */
 }
 
 /* 카드 호버 시 3D 회전 효과 제거 (투명해지는 느낌 방지) */
@@ -880,11 +913,12 @@ a:hover {
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1) !important;
     z-index: 1;
     transform-style: preserve-3d;
-    opacity: 1; /* 투명도 고정 */
+    opacity: 1 !important; /* 불투명도 100% 고정 */
     image-rendering: auto; /* 이미지 렌더링 최적화 */
+    transition-property: transform !important; /* opacity transition 완전히 제외 */
 }
 
 /* 각 카드 뒤에 흰색 불투명도 100% 배경 추가 (뒤 카드의 G 글자 가리기) */
@@ -950,6 +984,17 @@ a:hover {
 .gallery-card-item[data-pos="0"]:hover .gallery-card-background,
 .gallery-card-item[data-pos="0"]:hover .gallery-card-overlay {
     opacity: 1 !important; /* 모든 요소 불투명도 100% 고정 */
+    transition: none !important; /* 호버 시 모든 transition 제거 */
+}
+
+/* 메인 카드의 모든 transition에서 opacity 제외 */
+.gallery-card-item[data-pos="0"],
+.gallery-card-item[data-pos="0"] *,
+.gallery-card-item[data-pos="0"] .gallery-card-link,
+.gallery-card-item[data-pos="0"] .gallery-card-background,
+.gallery-card-item[data-pos="0"] .gallery-card-overlay {
+    transition-property: transform, filter, box-shadow !important;
+    /* opacity는 transition에서 완전히 제외 */
 }
 
 /* 다음 카드의 배경 이미지 위에 어두운 오버레이 추가 (G 글자 가리기) */
