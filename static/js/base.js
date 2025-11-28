@@ -349,8 +349,38 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 500);
     }
     
-    // 전역 클릭 이벤트 (capture phase) - 모달이 열리기 전에도 작동
+    // 구글 로그인 버튼 이벤트 설정 함수
+    function setupGoogleLoginButton() {
+        const googleLoginBtn = document.getElementById('googleLoginBtn');
+        if (googleLoginBtn) {
+            // 기존 이벤트 리스너 제거 후 재등록
+            const newBtn = googleLoginBtn.cloneNode(true);
+            googleLoginBtn.parentNode.replaceChild(newBtn, googleLoginBtn);
+            
+            newBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                handleGoogleLogin(this);
+                return false;
+            }, true); // capture phase에서 실행
+        }
+    }
+    
+    // 초기 로드 시 버튼 설정
+    setupGoogleLoginButton();
+    
+    // 로그인 모달이 열릴 때 버튼 재설정
+    const loginModal = document.getElementById('loginModal');
+    if (loginModal) {
+        loginModal.addEventListener('shown.bs.modal', function() {
+            setupGoogleLoginButton();
+        });
+    }
+    
+    // 전역 클릭 이벤트 (capture phase) - 최우선 처리
     document.addEventListener('click', function(e) {
+        // 버튼 자체 또는 내부 요소 클릭 확인
         const googleLoginBtn = e.target.closest('#googleLoginBtn');
         if (googleLoginBtn) {
             e.preventDefault();
@@ -360,24 +390,6 @@ document.addEventListener('DOMContentLoaded', function() {
             return false;
         }
     }, true);
-    
-    // 로그인 모달이 열릴 때 이벤트 리스너 추가 (이중 안전장치)
-    const loginModal = document.getElementById('loginModal');
-    if (loginModal) {
-        loginModal.addEventListener('shown.bs.modal', function() {
-            const googleLoginBtn = document.getElementById('googleLoginBtn');
-            if (googleLoginBtn) {
-                // 기존 이벤트 리스너가 있더라도 다시 등록
-                googleLoginBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    e.stopImmediatePropagation();
-                    handleGoogleLogin(this);
-                    return false;
-                });
-            }
-        });
-    }
 
     // 글쓰기 모달이 열릴 때 폼 로드
     const newPostModal = document.getElementById('newPostModal');
