@@ -728,22 +728,24 @@ a:hover {
     transform: translate(-50%, -50%) scale(0.8);
     pointer-events: none;
     clip-path: inset(0); /* 모든 카드에 클리핑 적용 */
+    contain: strict; /* 완전한 격리 */
 }
 
 /* 중앙 카드 (active) */
 .gallery-card-item[data-pos="0"] {
-    opacity: 1;
+    opacity: 1 !important; /* 투명도 고정 */
     transform: translate(-50%, -50%) scale(1);
     filter: blur(0);
     z-index: 5;
     pointer-events: auto;
     clip-path: inset(0); /* 카드 경계를 넘어서는 내용 클리핑 */
+    contain: strict; /* 완전한 격리 */
 }
 
 /* 양 옆 카드 */
 .gallery-card-item[data-pos="-1"],
 .gallery-card-item[data-pos="1"] {
-    opacity: 0.9;
+    opacity: 0.9 !important; /* 투명도 고정 */
     filter: blur(1px);
     transform: translate(-50%, -50%) scale(0.95);
     z-index: 4;
@@ -758,6 +760,13 @@ a:hover {
 .gallery-card-item[data-pos="1"] {
     transform: translate(-50%, -50%) translateX(40%) scale(0.95);
     clip-path: inset(0); /* 카드 경계를 넘어서는 내용 클리핑 */
+    contain: strict; /* 완전한 격리 */
+    z-index: 1 !important; /* 현재 카드보다 확실히 낮은 z-index로 뒤에 배치 */
+}
+
+/* 다음 카드의 텍스트 오버레이가 현재 카드 영역에 보이지 않도록 */
+.gallery-card-item[data-pos="1"] .gallery-card-overlay {
+    display: none; /* 다음 카드의 텍스트 오버레이 완전히 숨김 */
 }
 
 /* 더 뒤에 있는 카드 */
@@ -782,6 +791,7 @@ a:hover {
 .gallery-card-item[data-pos="0"]:hover {
     transform: translate(-50%, -50%) scale(1.02);
     opacity: 1 !important; /* 호버 시에도 투명도 유지 */
+    filter: blur(0) !important; /* 호버 시에도 blur 유지 */
 }
 
 .gallery-card-item {
@@ -795,6 +805,17 @@ a:hover {
 
 .gallery-card-item:hover {
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+}
+
+/* 모든 호버 상태에서 opacity 고정 */
+.gallery-card-item[data-pos="-1"]:hover,
+.gallery-card-item[data-pos="1"]:hover {
+    opacity: 0.9 !important;
+}
+
+.gallery-card-item[data-pos="-2"]:hover,
+.gallery-card-item[data-pos="2"]:hover {
+    opacity: 0.75 !important;
 }
 
 .gallery-card-link {
@@ -868,7 +889,8 @@ a:hover {
     justify-content: flex-end;
     min-height: 40%;
     pointer-events: none; /* 다른 카드와 겹칠 때 클릭 이벤트 방지 */
-    contain: layout style paint; /* 다른 카드에 영향 주지 않도록 격리 */
+    contain: strict; /* 완전한 격리 */
+    clip-path: inset(0); /* 오버레이도 클리핑 */
 }
 
 .gallery-card-title {
