@@ -38,21 +38,13 @@ def create_app(config_class=Config):
     with app.app_context():
         try:
             from sqlalchemy import text
-            # category와 created_at 복합 인덱스 생성
-            db.session.execute(text("""
-                CREATE INDEX IF NOT EXISTS idx_category_created_at 
-                ON post (category, created_at DESC);
-            """))
-            # category 단일 인덱스 (이미 모델에 있지만 확실히)
-            db.session.execute(text("""
-                CREATE INDEX IF NOT EXISTS idx_post_category 
-                ON post (category);
-            """))
-            # created_at 인덱스
-            db.session.execute(text("""
-                CREATE INDEX IF NOT EXISTS idx_post_created_at 
-                ON post (created_at DESC);
-            """))
+            indexes = [
+                ("idx_category_created_at", "ON post (category, created_at DESC)"),
+                ("idx_post_category", "ON post (category)"),
+                ("idx_post_created_at", "ON post (created_at DESC)")
+            ]
+            for idx_name, idx_def in indexes:
+                db.session.execute(text(f"CREATE INDEX IF NOT EXISTS {idx_name} {idx_def};"))
             db.session.commit()
         except Exception as idx_error:
             db.session.rollback()
@@ -81,66 +73,25 @@ def create_app(config_class=Config):
             # 기존 테이블에 누락된 컬럼 추가 (Postgres용)
             try:
                 from sqlalchemy import text
-                # image_data 컬럼이 없으면 추가
-                db.session.execute(text("""
-                    DO $$ 
-                    BEGIN 
-                        IF NOT EXISTS (
-                            SELECT 1 FROM information_schema.columns 
-                            WHERE table_name='post' AND column_name='image_data'
-                        ) THEN
-                            ALTER TABLE post ADD COLUMN image_data BYTEA;
-                        END IF;
-                    END $$;
-                """))
-                # image_mimetype 컬럼이 없으면 추가
-                db.session.execute(text("""
-                    DO $$ 
-                    BEGIN 
-                        IF NOT EXISTS (
-                            SELECT 1 FROM information_schema.columns 
-                            WHERE table_name='post' AND column_name='image_mimetype'
-                        ) THEN
-                            ALTER TABLE post ADD COLUMN image_mimetype VARCHAR(50);
-                        END IF;
-                    END $$;
-                """))
-                # image_url 컬럼이 없으면 추가
-                db.session.execute(text("""
-                    DO $$ 
-                    BEGIN 
-                        IF NOT EXISTS (
-                            SELECT 1 FROM information_schema.columns 
-                            WHERE table_name='post' AND column_name='image_url'
-                        ) THEN
-                            ALTER TABLE post ADD COLUMN image_url VARCHAR(500);
-                        END IF;
-                    END $$;
-                """))
-                # tistory_post_id 컬럼이 없으면 추가
-                db.session.execute(text("""
-                    DO $$ 
-                    BEGIN 
-                        IF NOT EXISTS (
-                            SELECT 1 FROM information_schema.columns 
-                            WHERE table_name='post' AND column_name='tistory_post_id'
-                        ) THEN
-                            ALTER TABLE post ADD COLUMN tistory_post_id VARCHAR(100);
-                        END IF;
-                    END $$;
-                """))
-                # tistory_link 컬럼이 없으면 추가
-                db.session.execute(text("""
-                    DO $$ 
-                    BEGIN 
-                        IF NOT EXISTS (
-                            SELECT 1 FROM information_schema.columns 
-                            WHERE table_name='post' AND column_name='tistory_link'
-                        ) THEN
-                            ALTER TABLE post ADD COLUMN tistory_link VARCHAR(500);
-                        END IF;
-                    END $$;
-                """))
+                columns = [
+                    ("image_data", "BYTEA"),
+                    ("image_mimetype", "VARCHAR(50)"),
+                    ("image_url", "VARCHAR(500)"),
+                    ("tistory_post_id", "VARCHAR(100)"),
+                    ("tistory_link", "VARCHAR(500)")
+                ]
+                for col_name, col_type in columns:
+                    db.session.execute(text(f"""
+                        DO $$ 
+                        BEGIN 
+                            IF NOT EXISTS (
+                                SELECT 1 FROM information_schema.columns 
+                                WHERE table_name='post' AND column_name='{col_name}'
+                            ) THEN
+                                ALTER TABLE post ADD COLUMN {col_name} {col_type};
+                            END IF;
+                        END $$;
+                    """))
                 # tistory_post_id에 유니크 인덱스 추가
                 db.session.execute(text("""
                     CREATE UNIQUE INDEX IF NOT EXISTS idx_post_tistory_post_id 
@@ -149,7 +100,6 @@ def create_app(config_class=Config):
                 """))
                 db.session.commit()
             except Exception as col_error:
-                # 컬럼 추가 실패 시 롤백 (이미 존재하거나 다른 이유)
                 db.session.rollback()
                 import sys
                 print(f"Info: Column migration check: {str(col_error)}", file=sys.stderr)

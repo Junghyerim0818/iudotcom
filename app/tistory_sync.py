@@ -12,45 +12,40 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+def decode_tistory_image_url(img_url):
+    """티스토리 이미지 URL 디코딩 (daumcdn.net 링크 처리)"""
+    if 'daumcdn.net' in img_url and 'fname=' in img_url:
+        try:
+            from urllib.parse import unquote, urlparse, parse_qs
+            parsed = urlparse(img_url)
+            params = parse_qs(parsed.query)
+            if 'fname' in params and params['fname']:
+                encoded_url = params['fname'][0]
+                decoded_url = unquote(encoded_url)
+                if '%' in decoded_url:
+                    decoded_url = unquote(decoded_url)
+                logger.info(f"티스토리 이미지 URL 변환: {decoded_url}")
+                return decoded_url
+        except Exception as e:
+            logger.warning(f"티스토리 이미지 URL 변환 실패, 원본 사용: {str(e)}")
+    return img_url
+
 def extract_image_from_content(content_html):
-    """HTML 콘텐츠에서 첫 번째 이미지 URL 추출 (티스토리 이미지 URL 처리 포함)"""
+    """HTML 콘텐츠에서 첫 번째 이미지 URL 추출"""
     if not content_html:
         return None
     
     try:
-        from urllib.parse import unquote, urlparse, parse_qs
-        
         soup = BeautifulSoup(content_html, 'html.parser')
+        
         # img 태그 찾기
         img_tag = soup.find('img')
         if img_tag and img_tag.get('src'):
             img_url = img_tag.get('src')
+            img_url = decode_tistory_image_url(img_url)
             
-            # 티스토리 이미지 URL 처리 (daumcdn.net 링크)
-            if 'daumcdn.net' in img_url and 'fname=' in img_url:
-                try:
-                    # fname 파라미터 추출
-                    parsed = urlparse(img_url)
-                    params = parse_qs(parsed.query)
-                    if 'fname' in params and params['fname']:
-                        # URL 디코딩: %3A → :, %2F → /, %3F → ?, %26 → &, %253D → =
-                        encoded_url = params['fname'][0]
-                        # URL 디코딩 (여러 번 디코딩 필요할 수 있음)
-                        decoded_url = unquote(encoded_url)
-                        # 한 번 더 디코딩 (이중 인코딩된 경우)
-                        if '%' in decoded_url:
-                            decoded_url = unquote(decoded_url)
-                        img_url = decoded_url
-                        logger.info(f"티스토리 이미지 URL 변환: {decoded_url}")
-                except Exception as e:
-                    logger.warning(f"티스토리 이미지 URL 변환 실패, 원본 사용: {str(e)}")
-            
-            # 상대 경로를 절대 경로로 변환
             if img_url.startswith('//'):
                 img_url = 'https:' + img_url
-            elif img_url.startswith('/'):
-                # 티스토리 도메인 추출 필요 시 추가 처리
-                pass
             
             return img_url
         
@@ -61,23 +56,7 @@ def extract_image_from_content(content_html):
             match = re.search(r'url\(["\']?([^"\']+)["\']?\)', style)
             if match:
                 img_url = match.group(1)
-                
-                # 티스토리 이미지 URL 처리
-                if 'daumcdn.net' in img_url and 'fname=' in img_url:
-                    try:
-                        from urllib.parse import unquote, urlparse, parse_qs
-                        parsed = urlparse(img_url)
-                        params = parse_qs(parsed.query)
-                        if 'fname' in params and params['fname']:
-                            encoded_url = params['fname'][0]
-                            decoded_url = unquote(encoded_url)
-                            if '%' in decoded_url:
-                                decoded_url = unquote(decoded_url)
-                            img_url = decoded_url
-                            logger.info(f"티스토리 이미지 URL 변환 (스타일): {decoded_url}")
-                    except Exception as e:
-                        logger.warning(f"티스토리 이미지 URL 변환 실패: {str(e)}")
-                
+                img_url = decode_tistory_image_url(img_url)
                 return img_url
     except Exception as e:
         logger.error(f"이미지 추출 중 오류: {str(e)}")

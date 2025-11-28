@@ -21,12 +21,12 @@
 
 /* 관리자 페이지 테이블 스타일 */
 .table-no-stripe {
-    background-color: #ffffff !important;
+    background-color: #ffffff;
 }
 
 /* 관리자 페이지 권한 수정 드롭박스 너비 */
 .admin-role-select {
-    width: 150px !important;
+    width: 150px;
     min-width: 150px;
 }
 
@@ -267,58 +267,58 @@ a:hover {
 .top-language-select .form-select,
 .top-language-select select.top-language-dropdown,
 .top-language-dropdown {
-    background-color: #ffffff !important;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23212529' d='M6 9L1 4h10z'/%3E%3C/svg%3E") !important;
-    border: 1px solid rgba(0, 0, 0, 0.1) !important;
-    color: var(--sidebar-text) !important;
-    border-radius: 0.5rem !important;
-    padding: 0.5rem 1.25rem !important;
-    font-size: 0.875rem !important;
-    min-width: 140px !important;
-    width: auto !important;
-    appearance: none !important;
-    -webkit-appearance: none !important;
-    -moz-appearance: none !important;
-    background-repeat: no-repeat !important;
-    background-position: right 0.75rem center !important;
-    background-size: 12px !important;
-    padding-right: 2.5rem !important;
-    cursor: pointer !important;
+    background-color: #ffffff;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23212529' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    color: var(--sidebar-text);
+    border-radius: 0.5rem;
+    padding: 0.5rem 1.25rem;
+    font-size: 0.875rem;
+    min-width: 140px;
+    width: auto;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 12px;
+    padding-right: 2.5rem;
+    cursor: pointer;
 }
 
 .top-language-dropdown:hover,
 .top-language-select .form-select:hover {
-    background-color: #ffffff !important;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23212529' d='M6 9L1 4h10z'/%3E%3C/svg%3E") !important;
+    background-color: #ffffff;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23212529' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
 }
 
 .top-language-dropdown:focus,
 .top-language-select .form-select:focus {
-    background-color: #ffffff !important;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23212529' d='M6 9L1 4h10z'/%3E%3C/svg%3E") !important;
-    border-color: rgba(0, 0, 0, 0.2) !important;
-    box-shadow: 0 0 0 0.2rem rgba(0, 0, 0, 0.05) !important;
-    outline: none !important;
+    background-color: #ffffff;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23212529' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    border-color: rgba(0, 0, 0, 0.2);
+    box-shadow: 0 0 0 0.2rem rgba(0, 0, 0, 0.05);
+    outline: none;
 }
 
 .top-language-dropdown:active,
 .top-language-select .form-select:active {
-    background-color: #ffffff !important;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23212529' d='M6 9L1 4h10z'/%3E%3C/svg%3E") !important;
+    background-color: #ffffff;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23212529' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
 }
 
 /* 드롭다운 옵션 스타일링 */
 .top-language-dropdown option,
 .top-language-select .form-select option {
-    background-color: #ffffff !important;
-    color: var(--sidebar-text) !important;
-    padding: 0.75rem 1rem !important;
+    background-color: #ffffff;
+    color: var(--sidebar-text);
+    padding: 0.75rem 1rem;
 }
 
 /* 드롭다운이 열릴 때의 스타일 (브라우저 제한으로 완전한 제어는 어려움) */
 .top-language-dropdown:focus option:checked,
 .top-language-select .form-select:focus option:checked {
-    background-color: rgba(255, 107, 157, 0.1) !important;
+    background-color: rgba(255, 107, 157, 0.1);
 }
 
 /* Chrome/Safari용 */
@@ -330,9 +330,9 @@ a:hover {
 @-moz-document url-prefix() {
     .top-language-dropdown option,
     .top-language-select .form-select option {
-        background-color: #ffffff !important;
-        border-radius: 0.5rem !important;
-        margin: 0.25rem !important;
+        background-color: #ffffff;
+        border-radius: 0.5rem;
+        margin: 0.25rem;
     }
 }
 
@@ -599,11 +599,11 @@ a:hover {
 
 /* 관리자 페이지 테이블 전체 배경 흰색 */
 .main-content-admin .table tbody tr {
-    background-color: #ffffff !important;
+    background-color: #ffffff;
 }
 
 .main-content-admin .table tbody tr:hover {
-    background-color: #f8f9fa !important;
+    background-color: #f8f9fa;
 }
 
 /* 사이드바 관련 스타일 제거됨 */
@@ -656,24 +656,21 @@ a:hover {
     opacity: 1;
 }
 
-/* 갤러리 카드 슬라이더 컨테이너 */
 .gallery-slider-container {
     position: relative;
     padding: 2rem 0 2rem;
     overflow: hidden;
-    height: calc(100vh - 70px); /* 헤더를 제외한 브라우저 창 높이만 사용 */
+    height: calc(100vh - 70px);
     min-height: auto;
     z-index: 1;
     background-color: #ffffff;
-    /* 메인 콘텐츠의 좌우 패딩과 상관없이, 카드 스택 영역만은 화면 전체 폭을 흰색으로 채우기 */
     width: 100vw;
     margin-left: calc(50% - 50vw);
     margin-right: calc(50% - 50vw);
 }
 
-/* 배경 이미지가 있을 때 */
 .gallery-slider-container.has-background {
-    margin-top: calc(100vh - 70px); /* 배경 이미지 높이만큼 아래로 */
+    margin-top: calc(100vh - 70px);
     opacity: 0;
     transform: translateY(30px);
     transition: opacity 0.8s ease-out, transform 0.8s ease-out;
@@ -686,7 +683,6 @@ a:hover {
     pointer-events: auto;
 }
 
-/* 배경 이미지가 없을 때는 카드를 바로 표시 */
 .gallery-slider-container:not(.has-background) {
     margin-top: 0;
     opacity: 1;
@@ -696,8 +692,8 @@ a:hover {
 
 .gallery-slider-wrapper {
     overflow: hidden;
-    height: 100%;              /* 컨테이너 높이를 그대로 사용 */
-    padding: 0;                /* 세로 패딩은 제거해서 중앙 정렬에 영향 없게 */
+    height: 100%;
+    padding: 0;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -712,102 +708,87 @@ a:hover {
     justify-content: center;
 }
 
-/* 슬라이더 트랙의 모든 pseudo-element 숨김 (G 글자 제거) */
 .gallery-slider-track::before,
-.gallery-slider-track::after {
-    content: none !important;
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-}
-
+.gallery-slider-track::after,
 .gallery-slider-wrapper::before,
 .gallery-slider-wrapper::after {
-    content: none !important;
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
+    content: none;
+    display: none;
 }
 
 .gallery-card-item {
     position: absolute;
-    top: 55%; /* 화면 중앙보다 살짝 아래에 위치시켜 자연스럽게 보이도록 조정 */
+    top: 55%;
     left: 50%;
     width: min(35vw, 500px);
     height: min(70vh, 600px);
     max-width: 500px;
     max-height: 600px;
     cursor: pointer;
-    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), filter 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    /* opacity는 transition에서 완전히 제외 */
     z-index: 1;
     filter: blur(4px);
     opacity: 0;
     transform: translate(-50%, -50%) scale(0.8);
     pointer-events: none;
-    clip-path: inset(0); /* 모든 카드에 클리핑 적용 */
-    contain: strict; /* 완전한 격리 */
+    clip-path: inset(0);
+    contain: strict;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border-radius: 16px;
+    overflow: hidden;
+    isolation: isolate;
+    will-change: transform;
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), 
+                filter 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.3s ease;
 }
 
-/* 중앙 카드 (active) - 불투명도 100% 고정 */
 .gallery-card-item[data-pos="0"] {
-    opacity: 1 !important; /* 불투명도 100% 고정 */
+    opacity: 1;
     transform: translate(-50%, -50%) scale(1);
     filter: blur(0);
-    z-index: 10; /* 가장 앞에 배치 */
+    z-index: 10;
     pointer-events: auto;
-    clip-path: inset(0); /* 카드 경계를 넘어서는 내용 클리핑 */
-    contain: strict; /* 완전한 격리 */
+    clip-path: inset(0);
+    contain: strict;
 }
 
-/* 중앙 카드 호버 시에도 불투명도 100% 유지 */
 .gallery-card-item[data-pos="0"]:hover {
-    opacity: 1 !important; /* 불투명도 100% 고정 */
-    transform: translate(-50%, -50%) scale(1.02) !important;
-    filter: blur(0) !important;
-    z-index: 10 !important; /* 호버 시에도 최상위 유지 */
-    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), filter 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    /* opacity transition 완전히 제거 */
-    transition-property: transform, filter !important;
+    transform: translate(-50%, -50%) scale(1.02);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
 }
 
-/* 양 옆 카드 */
 .gallery-card-item[data-pos="-1"],
 .gallery-card-item[data-pos="1"] {
-    opacity: 0.9 !important; /* 불투명도 100% 고정 */
+    opacity: 0.9;
     filter: blur(1px);
-    transform: translate(-50%, -50%) scale(0.95);
-    z-index: 8; /* 중앙 카드보다 뒤, 맨 뒤 카드보다 앞 */
+    z-index: 8;
     pointer-events: auto;
+    clip-path: inset(0);
 }
 
 .gallery-card-item[data-pos="-1"] {
     transform: translate(-50%, -50%) translateX(-40%) scale(0.95);
-    clip-path: inset(0); /* 카드 경계를 넘어서는 내용 클리핑 */
 }
 
 .gallery-card-item[data-pos="1"] {
     transform: translate(-50%, -50%) translateX(40%) scale(0.95);
-    clip-path: inset(0); /* 카드 경계를 넘어서는 내용 클리핑 */
-    contain: strict; /* 완전한 격리 */
-    z-index: 8 !important; /* 중앙 카드보다 뒤, 맨 뒤 카드보다 앞 */
+    contain: strict;
 }
 
 .gallery-card-item[data-pos="1"] * {
-    color: transparent !important;
-    text-shadow: none !important;
+    color: transparent;
+    text-shadow: none;
 }
 
-/* 더 뒤에 있는 카드 - data-pos="2"까지는 보이도록 */
 .gallery-card-item[data-pos="-2"],
 .gallery-card-item[data-pos="2"] {
-    opacity: 0.75 !important;
+    opacity: 0.75;
     filter: blur(2px);
     transform: translate(-50%, -50%) scale(0.9);
-    z-index: 3 !important; /* 보이도록 z-index 설정 */
+    z-index: 2;
     pointer-events: none;
-    visibility: visible !important; /* 보이도록 설정 */
-    display: block !important; /* 표시되도록 설정 */
+    visibility: visible;
+    display: block;
 }
 
 .gallery-card-item[data-pos="-2"] {
@@ -818,67 +799,44 @@ a:hover {
     transform: translate(-50%, -50%) translateX(70%) scale(0.9);
 }
 
-/* data-pos="3" 이상은 완전히 숨김 */
 .gallery-card-item[data-pos="-3"],
-.gallery-card-item[data-pos="3"] {
-    opacity: 0 !important;
-    visibility: hidden !important;
-    display: none !important;
-    pointer-events: none !important;
-    z-index: -1 !important;
+.gallery-card-item[data-pos="3"],
+.gallery-card-item[data-pos="-4"],
+.gallery-card-item[data-pos="4"],
+.gallery-card-item[data-pos="-5"],
+.gallery-card-item[data-pos="5"] {
+    opacity: 0;
+    visibility: hidden;
+    display: none;
+    pointer-events: none;
+    z-index: -10;
 }
 
-/* 맨 뒤 카드는 transform도 제거 (완전히 숨김) */
-
-
-.gallery-card-item {
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    border-radius: 16px;
-    transition: box-shadow 0.3s ease, filter 0.3s ease !important;
-    overflow: hidden;
-    isolation: isolate; /* 새로운 스택 컨텍스트 생성으로 자식 요소가 다른 카드 위에 올라가지 않도록 */
-    will-change: transform; /* opacity는 will-change에서 제외 */
-    /* opacity transition 완전히 제거 */
-    transition-property: box-shadow, filter !important;
-}
-
-/* 현재 카드와 다음 카드 사이에 흰색 배경 추가 */
 .gallery-card-item[data-pos="0"]::before {
-    content: '' !important;
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    background-color: #ffffff !important;
-    opacity: 1 !important;
-    z-index: 9 !important; /* 현재 카드(z-index: 10)보다 뒤, 다음 카드(z-index: 8)보다 앞 */
-    pointer-events: none !important;
-    border-radius: 16px !important;
-    /* 현재 카드와 동일한 크기와 위치 */
-    width: min(35vw, 500px) !important;
-    height: min(70vh, 600px) !important;
-    max-width: 500px !important;
-    max-height: 600px !important;
-    transform: translate(-50%, -50%) scale(1) !important;
-    left: 50% !important;
-    top: 55% !important;
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ffffff;
+    z-index: 9;
+    pointer-events: none;
+    border-radius: 16px;
+    width: min(35vw, 500px);
+    height: min(70vh, 600px);
+    max-width: 500px;
+    max-height: 600px;
+    transform: translate(-50%, -50%) scale(1);
+    left: 50%;
+    top: 55%;
 }
 
-.gallery-card-item:hover {
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
-    border-radius: 16px; /* 호버 시에도 라운드 처리 유지 */
-}
-
-/* 모든 호버 상태에서 opacity 고정 */
 .gallery-card-item[data-pos="-1"]:hover,
-.gallery-card-item[data-pos="1"]:hover {
-    opacity: 1 !important;
-}
-
+.gallery-card-item[data-pos="1"]:hover,
 .gallery-card-item[data-pos="-2"]:hover,
 .gallery-card-item[data-pos="2"]:hover {
-    opacity: 1 !important;
+    opacity: 1;
 }
 
 .gallery-card-link {
@@ -888,22 +846,15 @@ a:hover {
     text-decoration: none;
     color: inherit;
     position: relative;
-    transform-style: preserve-3d;
-    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1) !important;
     border-radius: 16px;
     overflow: hidden;
-    isolation: isolate; /* 새로운 스택 컨텍스트 생성 */
-    transition-property: transform !important; /* opacity transition 완전히 제외 */
-    opacity: 1 !important; /* 불투명도 100% 고정 */
+    isolation: isolate;
 }
 
-/* 카드 호버 시 3D 회전 효과 제거 (투명해지는 느낌 방지) */
 .gallery-card-item:hover .gallery-card-link {
     transform: none;
-    opacity: 1 !important; /* 호버 시에도 불투명도 100% 유지 */
 }
 
-/* 배경 이미지 - 카드 링크와 동일한 애니메이션 */
 .gallery-card-background {
     position: absolute;
     top: 0;
@@ -913,107 +864,62 @@ a:hover {
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1) !important;
     z-index: 1;
-    transform-style: preserve-3d;
-    opacity: 1 !important; /* 불투명도 100% 고정 */
-    image-rendering: auto; /* 이미지 렌더링 최적화 */
-    transition-property: transform !important; /* opacity transition 완전히 제외 */
+    image-rendering: auto;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* 각 카드 뒤에 흰색 불투명도 100% 배경 추가 (뒤 카드의 G 글자 가리기) */
 .gallery-card-item::after {
-    content: '' !important;
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    background-color: #ffffff !important;
-    opacity: 1 !important;
-    z-index: -1 !important; /* 카드 뒤에 배치 */
-    pointer-events: none !important;
-    border-radius: 16px !important;
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ffffff;
+    z-index: -1;
+    pointer-events: none;
+    border-radius: 16px;
 }
 
-/* 중앙 카드와 양 옆 카드는 흰색 배경 제거 (이미지가 보이도록) */
 .gallery-card-item[data-pos="0"]::after,
 .gallery-card-item[data-pos="-1"]::after,
 .gallery-card-item[data-pos="1"]::after {
-    display: none !important;
+    display: none;
 }
 
-/* 배경 이미지의 모든 pseudo-element 완전히 제거 (G 글자 제거) */
 .gallery-card-background::before,
 .gallery-card-background::after {
-    content: none !important;
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
-    position: absolute !important;
-    width: 0 !important;
-    height: 0 !important;
-    overflow: hidden !important;
+    content: none;
+    display: none;
 }
 
-/* 다음 카드의 배경 이미지 pseudo-element 완전히 제거 */
 .gallery-card-item[data-pos="1"] .gallery-card-background::before,
 .gallery-card-item[data-pos="1"] .gallery-card-background::after {
-    content: none !important;
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
-    position: absolute !important;
-    width: 0 !important;
-    height: 0 !important;
-    overflow: hidden !important;
+    content: none;
+    display: none;
 }
 
-/* 배경 이미지는 살짝 확대만 (투명도 변경 없음) */
 .gallery-card-item:hover .gallery-card-background {
     transform: scale(1.03);
-    opacity: 1 !important; /* 호버 시에도 불투명도 100% 유지 */
 }
 
-/* 메인 카드 호버 시 모든 요소의 불투명도 100% 고정 */
-.gallery-card-item[data-pos="0"]:hover,
-.gallery-card-item[data-pos="0"]:hover *,
-.gallery-card-item[data-pos="0"]:hover .gallery-card-link,
-.gallery-card-item[data-pos="0"]:hover .gallery-card-background,
-.gallery-card-item[data-pos="0"]:hover .gallery-card-overlay {
-    opacity: 1 !important; /* 모든 요소 불투명도 100% 고정 */
-    transition: none !important; /* 호버 시 모든 transition 제거 */
-}
-
-/* 메인 카드의 모든 transition에서 opacity 제외 */
-.gallery-card-item[data-pos="0"],
-.gallery-card-item[data-pos="0"] *,
-.gallery-card-item[data-pos="0"] .gallery-card-link,
-.gallery-card-item[data-pos="0"] .gallery-card-background,
-.gallery-card-item[data-pos="0"] .gallery-card-overlay {
-    transition-property: transform, filter, box-shadow !important;
-    /* opacity는 transition에서 완전히 제외 */
-}
-
-/* 다음 카드의 배경 이미지 위에 어두운 오버레이 추가 (G 글자 가리기) */
 .gallery-card-item[data-pos="1"] .gallery-card-background::after {
-    content: '' !important;
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     background: linear-gradient(135deg, 
         rgba(0, 0, 0, 0.4) 0%, 
         rgba(0, 0, 0, 0.2) 30%,
         rgba(0, 0, 0, 0.1) 50%,
         rgba(0, 0, 0, 0.2) 70%,
-        rgba(0, 0, 0, 0.4) 100%) !important;
-    z-index: 999 !important;
-    pointer-events: none !important;
-    mix-blend-mode: multiply !important;
+        rgba(0, 0, 0, 0.4) 100%);
+    z-index: 999;
+    pointer-events: none;
+    mix-blend-mode: multiply;
 }
 
 .gallery-card-placeholder-bg {
@@ -1045,9 +951,9 @@ a:hover {
     flex-direction: column;
     justify-content: flex-end;
     min-height: 40%;
-    pointer-events: none; /* 다른 카드와 겹칠 때 클릭 이벤트 방지 */
-    contain: strict; /* 완전한 격리 */
-    clip-path: inset(0); /* 오버레이도 클리핑 */
+    pointer-events: none;
+    contain: strict;
+    clip-path: inset(0);
 }
 
 .gallery-card-title {
@@ -1105,31 +1011,6 @@ a:hover {
     font-size: 1.125rem;
 }
 
-/* 카드 스택 효과 - 각 카드 뒤에 흰색 배경 추가 (뒤 카드의 G 글자 가리기) */
-.gallery-card-item::after {
-    content: '' !important;
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    background-color: #ffffff !important;
-    opacity: 1 !important;
-    z-index: -1 !important; /* 카드 뒤에 배치 */
-    pointer-events: none !important;
-    border-radius: 16px !important;
-}
-
-/* 중앙 카드와 양 옆 카드는 흰색 배경 제거 (이미지가 보이도록) */
-.gallery-card-item[data-pos="0"]::after,
-.gallery-card-item[data-pos="-1"]::after,
-.gallery-card-item[data-pos="1"]::after {
-    display: none !important;
-}
-
-.gallery-card-item:hover::after {
-    opacity: 1 !important; /* 호버 시에도 흰색 배경 유지 */
-}
 
 /* 슬라이더 네비게이션 버튼 */
 .gallery-slider-nav {
@@ -1204,7 +1085,6 @@ a:hover {
 }
 
 @media (max-width: 1200px) {
-    /* 새 카드 스택 레이아웃에 맞게 크기만 조정 */
     .gallery-card-item {
         width: min(45vw, 420px);
         height: min(70vh, 550px);
@@ -1214,7 +1094,6 @@ a:hover {
         min-height: min(70vh, 550px);
     }
     
-    /* 중간 크기 화면에서도 배경 간격 방지 */
     .gallery-slider-container {
         margin-left: calc(50% - 50vw);
         margin-right: calc(50% - 50vw);
@@ -1222,7 +1101,6 @@ a:hover {
 }
 
 @media (max-width: 768px) {
-    /* 반응형에서 배경이 메뉴와 간격이 생기지 않도록 마진 조정 */
     .gallery-slider-container {
         width: 100vw;
         margin-left: calc(-50vw + 50%);
@@ -1249,7 +1127,6 @@ a:hover {
         max-height: calc(100vh - 250px);
     }
 
-    /* 좌우 카드 이동 거리를 줄여 프레임 밖으로 덜 나가게 */
     .gallery-card-item[data-pos="-1"] {
         transform: translate(-50%, -50%) translateX(-35%) scale(0.95);
     }
@@ -1272,7 +1149,6 @@ a:hover {
         font-size: 1.25rem;
     }
 
-    /* 모바일에서는 버튼이 화면 밖으로 나가지 않도록 고정 위치 사용 */
     .gallery-slider-prev {
         left: 6%;
     }
@@ -1696,7 +1572,7 @@ a:hover {
 @media (max-width: 768px) {
     /* 모바일 헤더 표시 */
     .mobile-header {
-        display: flex !important;
+        display: flex;
         align-items: center;
         gap: 1rem;
         position: fixed;
@@ -1713,16 +1589,16 @@ a:hover {
     
     /* 모바일에서 상단 헤더 숨김 */
     .top-header {
-        display: none !important;
+        display: none;
     }
     
     .mobile-overlay {
-        display: block !important;
+        display: block;
     }
     
     /* 모바일 메뉴 (드롭다운) */
     .mobile-menu {
-        display: block !important;
+        display: block;
         position: fixed;
         top: 60px;
         left: 0;

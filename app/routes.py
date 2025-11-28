@@ -12,6 +12,25 @@ from .forms import PostForm, AdminUserForm
 
 bp = Blueprint('main', __name__)
 
+# 캐시 무효화 헬퍼 함수
+def invalidate_cache(category):
+    """카테고리에 따라 관련 캐시 삭제"""
+    cache.delete('index_gallery_posts')
+    if category == 'gallery':
+        for i in range(1, 11):
+            cache.delete(f'gallery_posts_page_{i}')
+    elif category in ['archive_1', 'archive_2']:
+        for i in range(1, 11):
+            cache.delete(f'archive_{category}_page_{i}')
+
+# 아카이브 제목 헬퍼 함수
+def get_archive_title(type_name, lang='ko'):
+    """아카이브 타입과 언어에 따라 제목 반환"""
+    if type_name == 'archive_1':
+        return 'IU Verification' if lang == 'en' else '아이유 인증 글'
+    else:
+        return 'Support Verification' if lang == 'en' else '서포트 인증 글'
+
 # Static 파일 직접 서빙 (Vercel 환경 대응)
 @bp.route('/static/<path:filename>')
 def serve_static(filename):
@@ -86,107 +105,43 @@ def login():
 
 @bp.route('/login/callback')
 def authorize():
-    import traceback
-    error_details = []
-    
     try:
-        # 1. OAuth 클라이언트 확인
-        error_details.append("Step 1: Getting Google OAuth client")
         google = get_google_client()
         if not google:
-            error_msg = "Google OAuth client not available"
-            error_details.append(f"ERROR: {error_msg}")
-            return f"<pre>{chr(10).join(error_details)}</pre>", 500
+            flash('OAuth 설정이 올바르지 않습니다.', 'danger')
+            return render_template('login_callback.html', success=False, message='OAuth 설정 오류')
         
-        # 2. 토큰 인증
-        error_details.append("Step 2: Authorizing access token")
-        try:
-            token = google.authorize_access_token()
-            error_details.append(f"SUCCESS: Token received")
-        except Exception as e:
-            error_msg = f"Error authorizing access token: {str(e)}"
-            error_details.append(f"ERROR: {error_msg}")
-            error_details.append(f"Traceback: {traceback.format_exc()}")
-            return f"<pre>{chr(10).join(error_details)}</pre>", 500
-        
-        # 3. 사용자 정보 가져오기
-        error_details.append("Step 3: Fetching user info")
-        try:
-            resp = google.get('https://www.googleapis.com/oauth2/v2/userinfo')
-            user_info = resp.json()
-            error_details.append(f"SUCCESS: User info received: {user_info}")
-        except Exception as e:
-            error_msg = f"Error fetching user info: {str(e)}"
-            error_details.append(f"ERROR: {error_msg}")
-            error_details.append(f"Traceback: {traceback.format_exc()}")
-            return f"<pre>{chr(10).join(error_details)}</pre>", 500
-        
-        # 4. User ID 확인
-        error_details.append("Step 4: Checking user ID")
+        token = google.authorize_access_token()
+        resp = google.get('https://www.googleapis.com/oauth2/v2/userinfo')
+        user_info = resp.json()
         user_id = user_info.get('id')
+        
         if not user_id:
-            error_msg = "User ID not found in user_info"
-            error_details.append(f"ERROR: {error_msg}")
-            error_details.append(f"User info keys: {list(user_info.keys())}")
-            return f"<pre>{chr(10).join(error_details)}</pre>", 500
+            return render_template('login_callback.html', success=False, message='사용자 정보를 가져올 수 없습니다.')
         
-        # 5. 데이터베이스 작업
-        error_details.append("Step 5: Database operations")
-        try:
-            user = User.query.filter_by(id=user_id).first()
-            
-            if not user:
-                error_details.append("Creating new user")
-                user = User(
-                    id=user_id,
-                    email=user_info.get('email', ''),
-                    name=user_info.get('name', 'Unknown'),
-                    profile_pic=user_info.get('picture', ''),
-                    role='user'
-                )
-                db.session.add(user)
-                db.session.commit()
-                error_details.append("SUCCESS: New user created")
-            else:
-                error_details.append("Updating existing user")
-                user.email = user_info.get('email', user.email)
-                user.name = user_info.get('name', user.name)
-                user.profile_pic = user_info.get('picture', user.profile_pic)
-                db.session.commit()
-                error_details.append("SUCCESS: User updated")
-        except Exception as e:
-            error_msg = f"Database error: {str(e)}"
-            error_details.append(f"ERROR: {error_msg}")
-            error_details.append(f"Traceback: {traceback.format_exc()}")
-            db.session.rollback()
-            return f"<pre>{chr(10).join(error_details)}</pre>", 500
+        user = User.query.filter_by(id=user_id).first()
+        if not user:
+            user = User(
+                id=user_id,
+                email=user_info.get('email', ''),
+                name=user_info.get('name', 'Unknown'),
+                profile_pic=user_info.get('picture', ''),
+                role='user'
+            )
+            db.session.add(user)
+        else:
+            user.email = user_info.get('email', user.email)
+            user.name = user_info.get('name', user.name)
+            user.profile_pic = user_info.get('picture', user.profile_pic)
         
-        # 6. 로그인 처리
-        error_details.append("Step 6: Logging in user")
-        try:
-            login_user(user)
-            error_details.append("SUCCESS: User logged in")
-        except Exception as e:
-            error_msg = f"Login error: {str(e)}"
-            error_details.append(f"ERROR: {error_msg}")
-            error_details.append(f"Traceback: {traceback.format_exc()}")
-            return f"<pre>{chr(10).join(error_details)}</pre>", 500
-        
-        # 7. 템플릿 렌더링 (팝업용)
-        error_details.append("Step 7: Rendering template")
-        try:
-            return render_template('login_callback.html', success=True, message='로그인되었습니다.')
-        except Exception as e:
-            error_msg = f"Template rendering error: {str(e)}"
-            error_details.append(f"ERROR: {error_msg}")
-            error_details.append(f"Traceback: {traceback.format_exc()}")
-            return f"<pre>{chr(10).join(error_details)}</pre>", 500
+        db.session.commit()
+        login_user(user)
+        return render_template('login_callback.html', success=True, message='로그인되었습니다.')
             
     except Exception as e:
-        error_msg = f"Unexpected error: {str(e)}"
-        error_details.append(f"FATAL ERROR: {error_msg}")
-        error_details.append(f"Full traceback: {traceback.format_exc()}")
-        return f"<pre>{chr(10).join(error_details)}</pre>", 500
+        current_app.logger.error(f"Login callback error: {str(e)}", exc_info=True)
+        db.session.rollback()
+        return render_template('login_callback.html', success=False, message='로그인 중 오류가 발생했습니다.')
 
 @bp.route('/logout')
 @login_required
@@ -327,14 +282,8 @@ def new_post():
         db.session.add(post)
         db.session.commit()
         
-        # 캐시 무효화 (모든 관련 캐시 삭제)
-        cache.delete('index_gallery_posts')
-        # 갤러리 캐시 삭제 (모든 페이지)
-        for i in range(1, 11):  # 최대 10페이지까지
-            cache.delete(f'gallery_posts_page_{i}')
-        if form.category.data in ['archive_1', 'archive_2']:
-            for i in range(1, 11):  # 최대 10페이지까지
-                cache.delete(f'archive_{form.category.data}_page_{i}')
+        # 캐시 무효화
+        invalidate_cache(form.category.data)
         
         flash('글이 작성되었습니다!', 'success')
         
@@ -429,25 +378,13 @@ def archive(type_name):
         
         posts = posts_query.paginate(page=page, per_page=per_page, error_out=False)
         
-        # 언어에 따라 제목 설정
-        from flask import session
-        current_lang = session.get('language', 'ko')
-        if type_name == 'archive_1':
-            title = 'IU Verification' if current_lang == 'en' else '아이유 인증 글'
-        else:
-            title = 'Support Verification' if current_lang == 'en' else '서포트 인증 글'
-        
+        title = get_archive_title(type_name, session.get('language', 'ko'))
         result = render_template('archive.html', posts=posts.items, pagination=posts, title=title, type_name=type_name)
-        cache.set(cache_key, result, timeout=120)  # 2분 캐싱
+        cache.set(cache_key, result, timeout=120)
         return result
     except Exception as e:
         current_app.logger.error(f"Error in archive route: {str(e)}")
-        from flask import session
-        current_lang = session.get('language', 'ko')
-        if type_name == 'archive_1':
-            title = 'IU Verification' if current_lang == 'en' else '아이유 인증 글'
-        else:
-            title = 'Support Verification' if current_lang == 'en' else '서포트 인증 글'
+        title = get_archive_title(type_name, session.get('language', 'ko'))
         return render_template('archive.html', posts=[], pagination=None, title=title, type_name=type_name)
 
 @bp.route('/archive/<type_name>/<int:post_id>')
@@ -475,14 +412,7 @@ def archive_detail(type_name, post_id):
             Post.id > post_id
         ).order_by(Post.id.asc()).first()
         
-        # 언어에 따라 제목 설정
-        from flask import session
-        current_lang = session.get('language', 'ko')
-        if type_name == 'archive_1':
-            title = 'IU Verification' if current_lang == 'en' else '아이유 인증 글'
-        else:
-            title = 'Support Verification' if current_lang == 'en' else '서포트 인증 글'
-        
+        title = get_archive_title(type_name, session.get('language', 'ko'))
         return render_template('archive_detail.html', post=post, prev_post=prev_post, next_post=next_post, type_name=type_name, title=title)
     except Exception as e:
         current_app.logger.error(f"Error in archive_detail route: {str(e)}")
@@ -580,14 +510,8 @@ def edit_post(post_id):
         
         db.session.commit()
         
-        # 캐시 무효화 (모든 관련 캐시 삭제)
-        cache.delete('index_gallery_posts')
-        if post.category == 'gallery':
-            for i in range(1, 11):  # 최대 10페이지까지
-                cache.delete(f'gallery_posts_page_{i}')
-        elif post.category in ['archive_1', 'archive_2']:
-            for i in range(1, 11):  # 최대 10페이지까지
-                cache.delete(f'archive_{post.category}_page_{i}')
+        # 캐시 무효화
+        invalidate_cache(post.category)
         
         flash('글이 수정되었습니다!', 'success')
         
@@ -617,14 +541,8 @@ def delete_post(post_id):
     db.session.delete(post)
     db.session.commit()
     
-    # 캐시 무효화 (모든 관련 캐시 삭제)
-    cache.delete('index_gallery_posts')
-    if category == 'gallery':
-        for i in range(1, 11):  # 최대 10페이지까지
-            cache.delete(f'gallery_posts_page_{i}')
-    elif category in ['archive_1', 'archive_2']:
-        for i in range(1, 11):  # 최대 10페이지까지
-            cache.delete(f'archive_{category}_page_{i}')
+    # 캐시 무효화
+    invalidate_cache(category)
     
     flash('글이 삭제되었습니다.', 'success')
     
