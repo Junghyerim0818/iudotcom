@@ -797,23 +797,17 @@ a:hover {
 
 /* 더 뒤에 있는 카드 - 완전히 숨김 */
 .gallery-card-item[data-pos="-2"],
-.gallery-card-item[data-pos="2"] {
-    opacity: 0 !important; /* 완전히 숨김 */
-    filter: blur(2px);
-    transform: translate(-50%, -50%) scale(0.9);
-    z-index: 1; /* 가장 뒤 */
-    pointer-events: none;
-    visibility: hidden !important; /* 완전히 숨김 */
-    display: none !important; /* 렌더링하지 않음 */
+.gallery-card-item[data-pos="2"],
+.gallery-card-item[data-pos="-3"],
+.gallery-card-item[data-pos="3"] {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    display: none !important;
+    pointer-events: none !important;
+    z-index: -1 !important;
 }
 
-.gallery-card-item[data-pos="-2"] {
-    transform: translate(-50%, -50%) translateX(-70%) scale(0.9);
-}
-
-.gallery-card-item[data-pos="2"] {
-    transform: translate(-50%, -50%) translateX(70%) scale(0.9);
-}
+/* 맨 뒤 카드는 transform도 제거 (완전히 숨김) */
 
 
 .gallery-card-item {
@@ -876,8 +870,8 @@ a:hover {
     image-rendering: auto; /* 이미지 렌더링 최적화 */
 }
 
-/* 각 카드 위에 흰색 불투명도 100% 배경 추가 (뒤 카드의 G 글자 가리기) */
-.gallery-card-item::before {
+/* 각 카드 뒤에 흰색 불투명도 100% 배경 추가 (뒤 카드의 G 글자 가리기) */
+.gallery-card-item::after {
     content: '' !important;
     position: absolute !important;
     top: 0 !important;
@@ -886,15 +880,15 @@ a:hover {
     bottom: 0 !important;
     background-color: #ffffff !important;
     opacity: 1 !important;
-    z-index: 0 !important; /* 배경 이미지 뒤에 배치 */
+    z-index: -1 !important; /* 카드 뒤에 배치 */
     pointer-events: none !important;
     border-radius: 16px !important;
 }
 
 /* 중앙 카드와 양 옆 카드는 흰색 배경 제거 (이미지가 보이도록) */
-.gallery-card-item[data-pos="0"]::before,
-.gallery-card-item[data-pos="-1"]::before,
-.gallery-card-item[data-pos="1"]::before {
+.gallery-card-item[data-pos="0"]::after,
+.gallery-card-item[data-pos="-1"]::after,
+.gallery-card-item[data-pos="1"]::after {
     display: none !important;
 }
 
@@ -1040,22 +1034,30 @@ a:hover {
     font-size: 1.125rem;
 }
 
-/* 카드 스택 효과 */
+/* 카드 스택 효과 - 각 카드 뒤에 흰색 배경 추가 (뒤 카드의 G 글자 가리기) */
 .gallery-card-item::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: none; /* 추가 오버레이 제거 */
-    border-radius: 16px;
-    pointer-events: none;
-    opacity: 0;
+    content: '' !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    background-color: #ffffff !important;
+    opacity: 1 !important;
+    z-index: -1 !important; /* 카드 뒤에 배치 */
+    pointer-events: none !important;
+    border-radius: 16px !important;
+}
+
+/* 중앙 카드와 양 옆 카드는 흰색 배경 제거 (이미지가 보이도록) */
+.gallery-card-item[data-pos="0"]::after,
+.gallery-card-item[data-pos="-1"]::after,
+.gallery-card-item[data-pos="1"]::after {
+    display: none !important;
 }
 
 .gallery-card-item:hover::after {
-    opacity: 0; /* 호버 시에도 투명도 변화 없음 */
+    opacity: 1 !important; /* 호버 시에도 흰색 배경 유지 */
 }
 
 /* 슬라이더 네비게이션 버튼 */
