@@ -743,6 +743,7 @@ a:hover {
 }
 
 .gallery-card-item[data-pos="0"] {
+    opacity: 1;
     transform: translate(-50%, -50%) scale(1);
     filter: blur(0);
     pointer-events: auto;
