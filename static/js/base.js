@@ -597,14 +597,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
         let activeIndex = 0;
 
-        // 현재 activeIndex 기준으로 각 카드의 data-pos 설정
+        // 현재 activeIndex 기준으로 각 카드의 data-pos 설정 및 z-index 설정
         function assignPositions() {
-            const maxOffset = 2; // -2, -1, 0, 1, 2까지만 시각적으로 표시
             cardItems.forEach((card, index) => {
-                let offset = index - activeIndex;
-                if (offset > maxOffset) offset = maxOffset;
-                if (offset < -maxOffset) offset = -maxOffset;
+                // 실제 offset 계산 (제한 없음)
+                const offset = index - activeIndex;
                 card.dataset.pos = String(offset);
+                
+                // z-index를 실제 인덱스 기반으로 설정 (나중에 오는 카드가 위에)
+                // 최대 10개이므로 z-index는 1~10 범위
+                card.style.zIndex = String(10 - index);
             });
         }
 

@@ -79,10 +79,10 @@ def index():
     try:
         # 최근 갤러리 글들 가져오기 (날짜순 정렬 - 최신이 맨 앞)
         # 이미지 데이터는 제외하고 메타데이터만 가져오기 (성능 최적화)
-        # 최대 20개만 가져오기 (페이지네이션)
+        # 카드 스택용으로 10개만 가져오기
         gallery_posts = db.session.query(Post).options(
             joinedload(Post.author)
-        ).filter_by(category='gallery').order_by(Post.created_at.desc()).limit(20).all()
+        ).filter_by(category='gallery').order_by(Post.created_at.desc()).limit(10).all()
         return render_template('index.html', gallery_posts=gallery_posts)
     except Exception as e:
         current_app.logger.error(f"Error in index route: {str(e)}")
