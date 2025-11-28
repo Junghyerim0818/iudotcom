@@ -220,6 +220,47 @@ def get_image(post_id):
         if post.image_data:
             # Postgres의 경우 bytes 객체로 반환되어야 함
             image_bytes = bytes(post.image_data) if not isinstance(post.image_data, bytes) else post.image_data
+            
+            # 쿼리 파라미터로 크기 제한 확인 (카드 스택 최적화용)
+            max_width = request.args.get('w', type=int)
+            max_height = request.args.get('h', type=int)
+            
+            # 크기 제한이 있으면 이미지 리사이징
+            if max_width or max_height:
+                try:
+                    from PIL import Image
+                    import io
+                    img = Image.open(io.BytesIO(image_bytes))
+                    original_width, original_height = img.size
+                    
+                    # 비율 유지하며 리사이징
+                    if max_width and max_height:
+                        # 둘 다 지정된 경우 비율 유지하며 작은 쪽에 맞춤
+                        ratio = min(max_width / original_width, max_height / original_height)
+                        new_width = int(original_width * ratio)
+                        new_height = int(original_height * ratio)
+                    elif max_width:
+                        ratio = max_width / original_width
+                        new_width = max_width
+                        new_height = int(original_height * ratio)
+                    else:
+                        ratio = max_height / original_height
+                        new_width = int(original_width * ratio)
+                        new_height = max_height
+                    
+                    # 원본보다 크면 리사이징하지 않음
+                    if new_width < original_width or new_height < original_height:
+                        img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
+                        output = io.BytesIO()
+                        img_format = img.format or 'JPEG'
+                        img.save(output, format=img_format, quality=85, optimize=True)
+                        image_bytes = output.getvalue()
+                except ImportError:
+                    # PIL이 없으면 원본 반환
+                    pass
+                except Exception as e:
+                    current_app.logger.warning(f"Image resize failed: {str(e)}, returning original")
+            
             return Response(image_bytes, mimetype=post.image_mimetype or 'image/jpeg')
         abort(404)
     except Exception as e:

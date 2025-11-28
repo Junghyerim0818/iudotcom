@@ -641,11 +641,21 @@ document.addEventListener('DOMContentLoaded', function() {
         const cardItems = Array.from(gallerySliderTrack.querySelectorAll('.gallery-card-item'));
         if (cardItems.length === 0) return;
 
-        // 배경 이미지 설정
+        // 배경 이미지 설정 (최적화된 크기로 로드)
         cardItems.forEach((card) => {
             const bgElement = card.querySelector('.gallery-card-background[data-bg-image]');
             if (bgElement) {
-                const imageUrl = bgElement.getAttribute('data-bg-image');
+                let imageUrl = bgElement.getAttribute('data-bg-image');
+                // 카드 크기: 최대 500px x 600px
+                // 레티나 디스플레이 대비 2배 = 1000px x 1200px
+                // 하지만 더 가볍게 하기 위해 800px x 960px로 제한
+                // 서버 측 이미지인 경우 크기 파라미터 추가
+                if (imageUrl.includes('/image/')) {
+                    const urlObj = new URL(imageUrl, window.location.origin);
+                    urlObj.searchParams.set('w', '800');
+                    urlObj.searchParams.set('h', '960');
+                    imageUrl = urlObj.pathname + '?' + urlObj.searchParams.toString();
+                }
                 bgElement.style.backgroundImage = `url('${imageUrl}')`;
             }
         });

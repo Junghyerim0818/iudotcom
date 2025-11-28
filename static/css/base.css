@@ -712,6 +712,23 @@ a:hover {
     justify-content: center;
 }
 
+/* 슬라이더 트랙의 모든 pseudo-element 숨김 (G 글자 제거) */
+.gallery-slider-track::before,
+.gallery-slider-track::after {
+    content: none !important;
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+}
+
+.gallery-slider-wrapper::before,
+.gallery-slider-wrapper::after {
+    content: none !important;
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+}
+
 .gallery-card-item {
     position: absolute;
     top: 55%; /* 화면 중앙보다 살짝 아래에 위치시켜 자연스럽게 보이도록 조정 */
@@ -766,7 +783,42 @@ a:hover {
 
 /* 다음 카드의 텍스트 오버레이가 현재 카드 영역에 보이지 않도록 */
 .gallery-card-item[data-pos="1"] .gallery-card-overlay {
-    display: none; /* 다음 카드의 텍스트 오버레이 완전히 숨김 */
+    display: none !important; /* 다음 카드의 텍스트 오버레이 완전히 숨김 */
+}
+
+/* 다음 카드의 모든 pseudo-element 숨김 (G 글자 제거) */
+.gallery-card-item[data-pos="1"]::before,
+.gallery-card-item[data-pos="1"]::after {
+    content: none !important;
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+/* 다음 카드의 특정 위치에 고정된 텍스트 숨김 (G 글자 제거) */
+.gallery-card-item[data-pos="1"] {
+    color: transparent !important;
+}
+
+.gallery-card-item[data-pos="1"] * {
+    color: transparent !important;
+    text-shadow: none !important;
+}
+
+/* 다음 카드의 모든 자식 요소의 pseudo-element도 숨김 */
+.gallery-card-item[data-pos="1"] .gallery-card-link::before,
+.gallery-card-item[data-pos="1"] .gallery-card-link::after,
+.gallery-card-item[data-pos="1"] .gallery-card-background::before,
+.gallery-card-item[data-pos="1"] .gallery-card-background::after,
+.gallery-card-item[data-pos="1"] .gallery-card-overlay::before,
+.gallery-card-item[data-pos="1"] .gallery-card-overlay::after,
+.gallery-card-item[data-pos="1"] .gallery-card-title::before,
+.gallery-card-item[data-pos="1"] .gallery-card-title::after {
+    content: none !important;
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
 }
 
 /* 더 뒤에 있는 카드 */
@@ -810,12 +862,12 @@ a:hover {
 /* 모든 호버 상태에서 opacity 고정 */
 .gallery-card-item[data-pos="-1"]:hover,
 .gallery-card-item[data-pos="1"]:hover {
-    opacity: 0.9 !important;
+    opacity: 1 !important;
 }
 
 .gallery-card-item[data-pos="-2"]:hover,
 .gallery-card-item[data-pos="2"]:hover {
-    opacity: 0.75 !important;
+    opacity: 1 !important;
 }
 
 .gallery-card-link {
@@ -851,6 +903,7 @@ a:hover {
     z-index: 1;
     transform-style: preserve-3d;
     opacity: 1; /* 투명도 고정 */
+    image-rendering: auto; /* 이미지 렌더링 최적화 */
 }
 
 /* 배경 이미지는 살짝 확대만 (투명도 변경 없음) */
