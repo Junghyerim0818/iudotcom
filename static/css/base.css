@@ -721,12 +721,13 @@ a:hover {
     max-width: 500px;
     max-height: 600px;
     cursor: pointer;
-    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), filter 0.35s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 1;
     filter: blur(4px);
     opacity: 0;
     transform: translate(-50%, -50%) scale(0.8);
     pointer-events: none;
+    clip-path: inset(0); /* 모든 카드에 클리핑 적용 */
 }
 
 /* 중앙 카드 (active) */
@@ -751,6 +752,7 @@ a:hover {
 
 .gallery-card-item[data-pos="-1"] {
     transform: translate(-50%, -50%) translateX(-40%) scale(0.95);
+    clip-path: inset(0); /* 카드 경계를 넘어서는 내용 클리핑 */
 }
 
 .gallery-card-item[data-pos="1"] {
@@ -776,9 +778,10 @@ a:hover {
     transform: translate(-50%, -50%) translateX(70%) scale(0.9);
 }
 
-/* 중앙 카드 호버 시 살짝 확대 (위치 고정 유지) */
+/* 중앙 카드 호버 시 살짝 확대 (위치 고정 유지, 투명도 변경 없음) */
 .gallery-card-item[data-pos="0"]:hover {
     transform: translate(-50%, -50%) scale(1.02);
+    opacity: 1 !important; /* 호버 시에도 투명도 유지 */
 }
 
 .gallery-card-item {
@@ -787,6 +790,7 @@ a:hover {
     transition: box-shadow 0.3s ease, filter 0.3s ease;
     overflow: hidden;
     isolation: isolate; /* 새로운 스택 컨텍스트 생성으로 자식 요소가 다른 카드 위에 올라가지 않도록 */
+    will-change: transform; /* opacity는 will-change에서 제외 */
 }
 
 .gallery-card-item:hover {
@@ -864,6 +868,7 @@ a:hover {
     justify-content: flex-end;
     min-height: 40%;
     pointer-events: none; /* 다른 카드와 겹칠 때 클릭 이벤트 방지 */
+    contain: layout style paint; /* 다른 카드에 영향 주지 않도록 격리 */
 }
 
 .gallery-card-title {
