@@ -1,3 +1,52 @@
+// Google 로그인 버튼 클릭 처리 함수 (최우선 등록)
+function handleGoogleLogin(btn) {
+    console.log('handleGoogleLogin 호출됨');
+    const actualLoginUrl = btn.getAttribute('data-login-url') || '/login';
+    console.log('로그인 URL:', actualLoginUrl);
+    const popup = window.open(actualLoginUrl, 'GoogleLogin', 'width=500,height=600,scrollbars=yes,resizable=yes');
+    
+    if (!popup || popup.closed || typeof popup.closed == 'undefined') {
+        alert('팝업이 차단되었습니다. 팝업 차단을 해제해주세요.');
+        return;
+    }
+    
+    const messageHandler = function(event) {
+        if (event.data && event.data.type === 'login') {
+            if (event.data.success) {
+                const modal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
+                if (modal) modal.hide();
+                window.removeEventListener('message', messageHandler);
+                window.location.reload();
+            } else {
+                alert(event.data.message || '로그인에 실패했습니다.');
+            }
+        }
+    };
+    window.addEventListener('message', messageHandler);
+    
+    const checkInterval = setInterval(function() {
+        if (popup.closed) {
+            clearInterval(checkInterval);
+            window.removeEventListener('message', messageHandler);
+        }
+    }, 500);
+}
+
+// 구글 로그인 버튼 전역 이벤트 (최우선 등록 - 다른 이벤트보다 먼저)
+// DOMContentLoaded 전에 등록하여 최우선 처리
+document.addEventListener('click', function(e) {
+    // 버튼 자체 또는 내부 요소(i 태그, 텍스트 등) 클릭 확인
+    const googleLoginBtn = e.target.closest('#googleLoginBtn');
+    if (googleLoginBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        console.log('구글 로그인 버튼 클릭 감지');
+        handleGoogleLogin(googleLoginBtn);
+        return false;
+    }
+}, true); // capture phase에서 최우선 처리
+
 // 모든 초기화 코드를 하나의 DOMContentLoaded로 통합
 document.addEventListener('DOMContentLoaded', function() {
     // 언어 선택 드롭다운 처리
@@ -158,8 +207,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-});
-
+    
     // 페이지 이동 속도 최적화: 내부 링크를 부분 전환(Partial Navigation)으로 처리
     /**
      * 주어진 URL의 전체 HTML을 가져와서 .main-content 내부만 교체하는 함수
@@ -213,6 +261,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 링크 클릭을 가로채는 전역 이벤트 (캡처 단계 사용)
     document.addEventListener('click', function(e) {
+        // 구글 로그인 버튼은 최우선으로 제외
+        const googleLoginBtn = e.target.closest('#googleLoginBtn');
+        if (googleLoginBtn) {
+            return; // 구글 로그인 버튼은 다른 이벤트에서 처리
+        }
+        
         const link = e.target.closest('a[href]');
         if (!link) return;
 
@@ -221,7 +275,6 @@ document.addEventListener('DOMContentLoaded', function() {
         // 외부 링크, 해시, 자바스크립트 링크, 빈 링크는 무시
         if (!href || href === '#' || href.startsWith('javascript:')) return;
         if (link.getAttribute('target') === '_blank') return;
-        if (link.id === 'googleLoginBtn') return;
         if (link.classList.contains('top-menu-link')) return; // 상단 메뉴는 기존 애니메이션/이동 로직 유지
         if (link.getAttribute('data-bs-toggle')) return; // 모달/드롭다운 등 부트스트랩 트리거는 그대로 둠
 
@@ -317,79 +370,26 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Google 로그인 버튼 클릭 처리 함수
-    function handleGoogleLogin(btn) {
-        const actualLoginUrl = btn.getAttribute('data-login-url') || '/login';
-        const popup = window.open(actualLoginUrl, 'GoogleLogin', 'width=500,height=600,scrollbars=yes,resizable=yes');
-        
-        if (!popup || popup.closed || typeof popup.closed == 'undefined') {
-            alert('팝업이 차단되었습니다. 팝업 차단을 해제해주세요.');
-            return;
-        }
-        
-        const messageHandler = function(event) {
-            if (event.data && event.data.type === 'login') {
-                if (event.data.success) {
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
-                    if (modal) modal.hide();
-                    window.removeEventListener('message', messageHandler);
-                    window.location.reload();
-                } else {
-                    alert(event.data.message || '로그인에 실패했습니다.');
-                }
-            }
-        };
-        window.addEventListener('message', messageHandler);
-        
-        const checkInterval = setInterval(function() {
-            if (popup.closed) {
-                clearInterval(checkInterval);
-                window.removeEventListener('message', messageHandler);
-            }
-        }, 500);
-    }
-    
-    // 구글 로그인 버튼 이벤트 설정 함수
-    function setupGoogleLoginButton() {
-        const googleLoginBtn = document.getElementById('googleLoginBtn');
-        if (googleLoginBtn) {
-            // 기존 이벤트 리스너 제거 후 재등록
-            const newBtn = googleLoginBtn.cloneNode(true);
-            googleLoginBtn.parentNode.replaceChild(newBtn, googleLoginBtn);
-            
-            newBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                e.stopImmediatePropagation();
-                handleGoogleLogin(this);
-                return false;
-            }, true); // capture phase에서 실행
-        }
-    }
-    
-    // 초기 로드 시 버튼 설정
-    setupGoogleLoginButton();
-    
-    // 로그인 모달이 열릴 때 버튼 재설정
+    // 로그인 모달이 열릴 때 버튼에 직접 이벤트 리스너 추가 (이중 안전장치)
     const loginModal = document.getElementById('loginModal');
     if (loginModal) {
         loginModal.addEventListener('shown.bs.modal', function() {
-            setupGoogleLoginButton();
+            const googleLoginBtn = document.getElementById('googleLoginBtn');
+            if (googleLoginBtn) {
+                // 기존 이벤트 리스너 제거 후 재등록
+                const newBtn = googleLoginBtn.cloneNode(true);
+                googleLoginBtn.parentNode.replaceChild(newBtn, googleLoginBtn);
+                
+                newBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                    handleGoogleLogin(this);
+                    return false;
+                }, true);
+            }
         });
     }
-    
-    // 전역 클릭 이벤트 (capture phase) - 최우선 처리
-    document.addEventListener('click', function(e) {
-        // 버튼 자체 또는 내부 요소 클릭 확인
-        const googleLoginBtn = e.target.closest('#googleLoginBtn');
-        if (googleLoginBtn) {
-            e.preventDefault();
-            e.stopPropagation();
-            e.stopImmediatePropagation();
-            handleGoogleLogin(googleLoginBtn);
-            return false;
-        }
-    }, true);
 
     // 글쓰기 모달이 열릴 때 폼 로드
     const newPostModal = document.getElementById('newPostModal');
