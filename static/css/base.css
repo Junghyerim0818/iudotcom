@@ -779,10 +779,6 @@ a:hover {
     contain: strict;
 }
 
-.gallery-card-item[data-pos="1"] * {
-    color: transparent;
-    text-shadow: none;
-}
 
 .gallery-card-item[data-pos="-2"],
 .gallery-card-item[data-pos="2"] {
@@ -865,7 +861,7 @@ a:hover {
     right: 0;
     bottom: 0;
     background-color: #ffffff;
-    z-index: 9;
+    z-index: 0;
     pointer-events: none;
     border-radius: 16px;
     width: min(35vw, 500px);
@@ -906,7 +902,7 @@ a:hover {
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    z-index: 1;
+    z-index: 2;
     image-rendering: auto;
     transition-property: transform;
     transition-duration: 0.6s;
