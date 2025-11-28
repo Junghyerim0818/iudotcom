@@ -736,6 +736,7 @@ a:hover {
     filter: blur(0);
     z-index: 5;
     pointer-events: auto;
+    clip-path: inset(0); /* 카드 경계를 넘어서는 내용 클리핑 */
 }
 
 /* 양 옆 카드 */
@@ -754,6 +755,7 @@ a:hover {
 
 .gallery-card-item[data-pos="1"] {
     transform: translate(-50%, -50%) translateX(40%) scale(0.95);
+    clip-path: inset(0); /* 카드 경계를 넘어서는 내용 클리핑 */
 }
 
 /* 더 뒤에 있는 카드 */
@@ -782,8 +784,9 @@ a:hover {
 .gallery-card-item {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     border-radius: 16px;
-    transition: box-shadow 0.3s ease, opacity 0.3s ease, filter 0.3s ease;
+    transition: box-shadow 0.3s ease, filter 0.3s ease;
     overflow: hidden;
+    isolation: isolate; /* 새로운 스택 컨텍스트 생성으로 자식 요소가 다른 카드 위에 올라가지 않도록 */
 }
 
 .gallery-card-item:hover {
@@ -801,6 +804,7 @@ a:hover {
     transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     border-radius: 16px;
     overflow: hidden;
+    isolation: isolate; /* 새로운 스택 컨텍스트 생성 */
 }
 
 /* 카드 호버 시 3D 회전 효과 제거 (투명해지는 느낌 방지) */
@@ -821,11 +825,13 @@ a:hover {
     transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 1;
     transform-style: preserve-3d;
+    opacity: 1; /* 투명도 고정 */
 }
 
-/* 배경 이미지는 살짝 확대만 */
+/* 배경 이미지는 살짝 확대만 (투명도 변경 없음) */
 .gallery-card-item:hover .gallery-card-background {
     transform: scale(1.03);
+    opacity: 1; /* 호버 시에도 투명도 유지 */
 }
 
 .gallery-card-placeholder-bg {
@@ -857,6 +863,7 @@ a:hover {
     flex-direction: column;
     justify-content: flex-end;
     min-height: 40%;
+    pointer-events: none; /* 다른 카드와 겹칠 때 클릭 이벤트 방지 */
 }
 
 .gallery-card-title {
