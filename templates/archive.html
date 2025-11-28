@@ -13,9 +13,11 @@
         {% if post.has_image_data() or post.image_filename or post.image_url %}
         <div class="mt-2">
             <img src="{% if post.image_url %}{{ post.image_url }}{% elif post.has_image_data() %}{{ url_for('main.get_image', post_id=post.id) }}{% elif post.image_filename %}{{ url_for('static', filename='uploads/' + post.image_filename) }}{% endif %}"
-                 style="max-height: 100px;"
+                 style="max-height: 100px; width: auto;"
                  loading="lazy"
-                 alt="{{ post.title }}">
+                 alt="{{ post.title }}"
+                 width="200"
+                 height="100">
         </div>
         {% endif %}
     </a>

@@ -17,7 +17,9 @@
             <img src="{% if post.image_url %}{{ post.image_url }}{% elif post.has_image_data() %}{{ url_for('main.get_image', post_id=post.id) }}{% elif post.image_filename %}{{ url_for('static', filename='uploads/' + post.image_filename) }}{% endif %}" 
                  class="gallery-detail-image" 
                  alt="{{ post.title }}"
-                 id="archiveDetailImage">
+                 id="archiveDetailImage"
+                 width="1280"
+                 height="720">
         {% else %}
             <div class="gallery-detail-placeholder">
                 <i class="bi bi-image text-muted" style="font-size: 4rem;"></i>

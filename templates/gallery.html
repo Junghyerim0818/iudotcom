@@ -11,7 +11,9 @@
                     <img src="{% if post.image_url %}{{ post.image_url }}{% elif post.has_image_data() %}{{ url_for('main.get_image', post_id=post.id) }}{% elif post.image_filename %}{{ url_for('static', filename='uploads/' + post.image_filename) }}{% endif %}"
                          class="card-img-top"
                          alt="{{ post.title }}"
-                         loading="lazy">
+                         loading="lazy"
+                         width="400"
+                         height="225">
                 {% endif %}
                 <div class="card-body">
                     <h5 class="card-title text-dark">{{ post.title|safe }}</h5>

@@ -21,7 +21,9 @@
             <img src="{% if post.image_url %}{{ post.image_url }}{% elif post.has_image_data() %}{{ url_for('main.get_image', post_id=post.id) }}{% elif post.image_filename %}{{ url_for('static', filename='uploads/' + post.image_filename) }}{% endif %}" 
                  class="gallery-detail-image" 
                  alt="{{ post.title }}"
-                 id="galleryDetailImage">
+                 id="galleryDetailImage"
+                 width="1280"
+                 height="720">
         {% else %}
             <div class="gallery-detail-placeholder">
                 <i class="bi bi-image text-muted" style="font-size: 4rem;"></i>
@@ -143,6 +145,7 @@
     border-radius: 8px;
     padding: 2rem;
     min-height: 400px;
+    aspect-ratio: 16 / 9;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -156,6 +159,7 @@
     object-fit: contain;
     border-radius: 4px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    aspect-ratio: 16 / 9;
 }
 
 .gallery-detail-placeholder {
@@ -176,9 +180,12 @@
 /* 본문 내 이미지도 최대 1280px까지만, 반응형으로 표시 */
 .gallery-detail-content img {
     max-width: min(100%, 1280px);
+    width: 100%;
     height: auto;
     display: block;
     margin: 1rem auto;
+    aspect-ratio: 16 / 9;
+    object-fit: contain;
 }
 
 .gallery-detail-navigation .card {
