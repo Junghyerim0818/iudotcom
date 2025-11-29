@@ -71,20 +71,6 @@
                 </a>
             </li>
             {% if current_user.is_authenticated %}
-                {% if current_user.is_writer() %}
-                    <li class="mobile-menu-item">
-                        <a href="#" class="mobile-menu-link" data-bs-toggle="modal" data-bs-target="#newPostModal">
-                            {% if current_lang == 'en' %}Write{% else %}글쓰기{% endif %}
-                        </a>
-                    </li>
-                {% endif %}
-                {% if current_user.is_admin() %}
-                    <li class="mobile-menu-item">
-                        <a href="{{ url_for('main.admin') }}" class="mobile-menu-link {% if request.endpoint == 'main.admin' %}active{% endif %}">
-                            {% if current_lang == 'en' %}Admin{% else %}관리자{% endif %}
-                        </a>
-                    </li>
-                {% endif %}
                 <li class="mobile-menu-divider"></li>
                 <li class="mobile-menu-item">
                     <a href="{{ url_for('main.logout') }}" class="mobile-menu-link">
