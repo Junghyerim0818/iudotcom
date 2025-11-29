@@ -31,9 +31,7 @@
             <img src="{% if post.image_url %}{{ post.image_url }}{% elif post.has_image_data() %}{{ url_for('main.get_image', post_id=post.id) }}{% elif post.image_filename %}{{ url_for('static', filename='uploads/' + post.image_filename) }}{% endif %}" 
                  class="gallery-detail-image" 
                  alt="{{ post.title }}"
-                 id="archiveDetailImage"
-                 width="1280"
-                 height="720">
+                 id="archiveDetailImage">
         {% else %}
             <div class="gallery-detail-placeholder">
                 <i class="bi bi-image text-muted" style="font-size: 4rem;"></i>
@@ -141,7 +139,7 @@
 
 .gallery-detail-image {
     max-width: 100%;
-    width: 100%; /* 가로 너비 100%로 강제 */
+    width: auto; /* 100% 강제 제거하여 원본 비율 유지 */
     height: auto; /* 높이는 비율에 맞게 자동 조절 */
     max-height: none; /* 높이 제한 제거 */
     object-fit: contain;
