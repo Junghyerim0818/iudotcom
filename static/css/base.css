@@ -51,7 +51,7 @@ body {
 
 /* 스크롤바 너비 보정 */
 html {
-    overflow-y: scroll; /* 스크롤바 공간 항상 확보 */
+    overflow-y: auto; /* 필요할 때만 스크롤바 표시 */
 }
 
 /* 타이포그래피 개선 (NHN 스타일) */
@@ -243,19 +243,22 @@ a:hover {
     position: relative;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     height: 100%;
-    max-width: 1400px;
+    width: 100%;
     margin: 0 auto;
     padding: 0 2rem;
 }
 
 /* 왼쪽: 언어 선택 */
 .top-header-left {
-    flex: 0 0 auto;
-    width: 200px; /* 고정 너비로 중앙 정렬 일관성 유지 */
+    position: absolute;
+    left: 2rem;
+    top: 50%;
+    transform: translateY(-50%);
     display: flex;
     align-items: center;
+    z-index: 10;
 }
 
 .top-language-select {
@@ -338,12 +341,14 @@ a:hover {
 
 /* 중앙: 메뉴 */
 .top-header-center {
-    flex: 1 1 auto;
     display: flex;
     justify-content: center;
+    align-items: center;
     position: absolute;
     left: 50%;
-    transform: translateX(-50%);
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 5;
 }
 
 .top-menu {
@@ -421,12 +426,15 @@ a:hover {
 
 /* 오른쪽: 로그인/프로필 */
 .top-header-right {
-    flex: 0 0 auto;
-    width: 200px; /* 왼쪽과 동일한 너비로 중앙 정렬 일관성 유지 */
+    position: absolute;
+    right: 2rem;
+    top: 50%;
+    transform: translateY(-50%);
     display: flex;
     align-items: center;
     justify-content: flex-end;
     gap: 1rem;
+    z-index: 10;
 }
 
 .top-login-link {
@@ -1566,6 +1574,11 @@ a:hover {
     align-items: center;
     justify-content: center;
     transition: color 0.2s ease;
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
 }
 
 .mobile-menu-toggle:hover {
@@ -1577,14 +1590,19 @@ a:hover {
     font-weight: 700;
     letter-spacing: -0.02em;
     color: var(--text-primary);
-    flex: 1;
     text-align: center;
+    flex: 0 0 auto;
 }
 
 .mobile-profile-icon {
     display: flex;
     align-items: center;
     justify-content: center;
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
 }
 
 .mobile-profile-avatar {
@@ -1619,7 +1637,7 @@ a:hover {
     .mobile-header {
         display: flex;
         align-items: center;
-        gap: 1rem;
+        justify-content: center;
         position: fixed;
         top: 0;
         left: 0;

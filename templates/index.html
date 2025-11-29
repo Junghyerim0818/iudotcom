@@ -1,17 +1,7 @@
 {% extends "base.html" %}
 
-{% block content %}
-<!-- 배경 이미지 (최신 글) -->
-{% if gallery_posts and gallery_posts[0] %}
-    {% set latest_post = gallery_posts[0] %}
-    {% if latest_post.has_image_data() or latest_post.image_filename or latest_post.image_url %}
-        {% set bg_image_url = latest_post.image_url if latest_post.image_url else (url_for('main.get_image', post_id=latest_post.id) if latest_post.has_image_data() else url_for('static', filename='uploads/' + latest_post.image_filename)) %}
-        <div class="index-hero-background" id="indexHeroBackground" data-bg-image="{{ bg_image_url }}">
-            <div class="index-hero-gradient" id="indexHeroGradient"></div>
-        </div>
-    {% endif %}
-{% endif %}
 
+{% block content %}
 <!-- 갤러리 카드 슬라이더 -->
 <div class="gallery-slider-container" id="gallerySliderContainer">
     <!-- 네비게이션 버튼 -->
