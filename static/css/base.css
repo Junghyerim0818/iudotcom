@@ -235,7 +235,8 @@ a:hover {
     left: 0;
     right: 0;
     height: 70px;
-    background-color: transparent;
+    background-color: #ffffff;
+    border-bottom: 1px solid var(--border-color);
     z-index: 1000;
 }
 
