@@ -29,6 +29,15 @@
     </script>
 </head>
 <body>
+    <!-- 전체 페이지 로딩 인디케이터 -->
+    <div class="global-loading-indicator" id="globalLoadingIndicator" style="display: none;">
+        <div class="global-loading-spinner">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">로딩 중...</span>
+            </div>
+            <p class="global-loading-text">{% if current_lang == 'en' %}Loading...{% else %}로딩 중...{% endif %}</p>
+        </div>
+    </div>
     <!-- 모바일 헤더 -->
     <header class="mobile-header" id="mobileHeader">
         <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="메뉴">

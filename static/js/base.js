@@ -47,6 +47,30 @@ document.addEventListener('click', function(e) {
     }
 }, true); // capture phase에서 최우선 처리
 
+// 전역 로딩 인디케이터 관리
+const globalLoadingIndicator = document.getElementById('globalLoadingIndicator');
+if (globalLoadingIndicator) {
+    // 페이지 로드 완료 시 로딩 인디케이터 숨김
+    window.addEventListener('load', function() {
+        globalLoadingIndicator.style.display = 'none';
+    });
+    
+    // 페이지 전환 시작 시 로딩 인디케이터 표시
+    document.addEventListener('click', function(e) {
+        const link = e.target.closest('a[href]');
+        if (link && link.href && !link.target && !link.href.startsWith('#') && 
+            !link.href.startsWith('javascript:') && 
+            !link.href.includes('mailto:') && 
+            !link.href.includes('tel:') &&
+            link.href.startsWith(window.location.origin)) {
+            // 같은 도메인 내 링크인 경우에만 로딩 표시
+            setTimeout(() => {
+                globalLoadingIndicator.style.display = 'flex';
+            }, 100);
+        }
+    });
+}
+
 // 모든 초기화 코드를 하나의 DOMContentLoaded로 통합
 document.addEventListener('DOMContentLoaded', function() {
     // 언어 선택 드롭다운 처리
@@ -609,6 +633,15 @@ document.addEventListener('DOMContentLoaded', function() {
     if (gallerySliderWrapper && gallerySliderTrack) {
         const cardItems = Array.from(gallerySliderTrack.querySelectorAll('.gallery-card-item'));
         if (cardItems.length === 0) return;
+        
+        // 초기 로딩 인디케이터 숨김 (카드가 로드되면)
+        const loadingIndicator = document.getElementById('galleryLoadingIndicator');
+        if (loadingIndicator && cardItems.length > 0) {
+            // 카드가 로드되면 로딩 인디케이터 숨김
+            setTimeout(() => {
+                loadingIndicator.classList.remove('show');
+            }, 500);
+        }
 
         // 배경 이미지 lazy loading - 처음에는 중앙 카드와 인접 카드만 로드
         const loadCardImage = (card, index) => {
@@ -652,13 +685,20 @@ document.addEventListener('DOMContentLoaded', function() {
         };
 
         let activeIndex = 0;
+        
+        // 전역으로 노출하여 순차 로딩 코드에서 접근 가능하도록
+        window.gallerySliderActiveIndex = 0;
 
         // 현재 activeIndex 기준으로 각 카드의 data-pos 설정 및 z-index 설정
         function assignPositions() {
-            cardItems.forEach((card, index) => {
+            // cardItems를 다시 가져와서 새로 추가된 카드도 포함
+            const allCards = Array.from(gallerySliderTrack.querySelectorAll('.gallery-card-item'));
+            allCards.forEach((card, index) => {
                 // 실제 offset 계산 (제한 없음)
                 const offset = index - activeIndex;
                 card.dataset.pos = String(offset);
+                card.dataset.index = String(index);
+                card.dataset.cardIndex = String(index);
                 
                 // z-index를 data-pos의 절댓값 기반으로 설정
                 // data-pos="0": z-index 10 (최고)
@@ -667,13 +707,25 @@ document.addEventListener('DOMContentLoaded', function() {
                 const absOffset = Math.abs(offset);
                 card.style.zIndex = String(10 - absOffset);
             });
+            
+            // cardItems 업데이트
+            cardItems.length = 0;
+            cardItems.push(...allCards);
         }
 
         // 특정 인덱스를 활성화
         function setActiveIndex(newIndex) {
-            const clamped = Math.max(0, Math.min(cardItems.length - 1, newIndex));
-            if (clamped === activeIndex) return;
+            // cardItems를 다시 가져와서 새로 추가된 카드도 포함
+            const allCards = Array.from(gallerySliderTrack.querySelectorAll('.gallery-card-item'));
+            const clamped = Math.max(0, Math.min(allCards.length - 1, newIndex));
+            if (clamped === activeIndex && allCards.length === cardItems.length) return;
+            
+            // cardItems 업데이트
+            cardItems.length = 0;
+            cardItems.push(...allCards);
+            
             activeIndex = clamped;
+            window.gallerySliderActiveIndex = clamped;
             assignPositions();
             
             // 활성화된 카드 주변 이미지 lazy load
@@ -685,6 +737,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
         }
+        
+        // 전역으로 노출하여 순차 로딩 코드에서 접근 가능하도록
+        window.gallerySliderSetActiveIndex = setActiveIndex;
+        window.gallerySliderAssignPositions = assignPositions;
 
         // 초기 위치 설정
         assignPositions();
@@ -735,5 +791,132 @@ document.addEventListener('DOMContentLoaded', function() {
             img.loading = 'lazy';
         }
     });
+
+    // 순차적 로딩: 나머지 갤러리 카드들을 백그라운드에서 순차적으로 로드
+    const gallerySliderTrackForLoading = document.getElementById('gallerySliderTrack');
+    if (gallerySliderTrackForLoading && window.location.pathname === '/') {
+        const initialCards = Array.from(gallerySliderTrackForLoading.querySelectorAll('.gallery-card-item'));
+        let currentOffset = initialCards.length; // 초기에 로드된 카드 개수
+        const batchSize = 5; // 한 번에 5개씩 로드
+        let isLoading = false;
+        let allLoaded = false;
+
+        // 로딩 인디케이터 요소
+        const loadingIndicator = document.getElementById('galleryLoadingIndicator');
+        
+        const showLoading = () => {
+            if (loadingIndicator) {
+                loadingIndicator.classList.add('show');
+            }
+        };
+        
+        const hideLoading = () => {
+            if (loadingIndicator) {
+                loadingIndicator.classList.remove('show');
+            }
+        };
+        
+        const loadNextBatch = async () => {
+            if (isLoading || allLoaded) return;
+            
+            isLoading = true;
+            showLoading();
+            try {
+                const response = await fetch(`/api/gallery-posts?offset=${currentOffset}&limit=${batchSize}`);
+                const data = await response.json();
+                
+                if (data.success && data.posts && data.posts.length > 0) {
+                    // 새 카드들을 DOM에 추가
+                    data.posts.forEach((postData, index) => {
+                        const cardIndex = currentOffset + index;
+                        let imageUrl = postData.image_url || '';
+                        
+                        // 이미지 URL 처리
+                        if (imageUrl && imageUrl.includes('/image/')) {
+                            try {
+                                const urlObj = new URL(imageUrl, window.location.origin);
+                                urlObj.searchParams.set('w', '800');
+                                urlObj.searchParams.set('h', '960');
+                                imageUrl = urlObj.pathname + '?' + urlObj.searchParams.toString();
+                            } catch (e) {
+                                // URL 파싱 실패 시 원본 사용
+                            }
+                        }
+                        
+                        // HTML 이스케이프 처리
+                        const escapeHtml = (text) => {
+                            if (!text) return '';
+                            const div = document.createElement('div');
+                            div.textContent = text;
+                            return div.innerHTML;
+                        };
+                        
+                        const cardHtml = `
+                            <div class="gallery-card-item" data-index="${cardIndex}" data-post-id="${postData.id}" data-card-index="${cardIndex}">
+                                <a href="/gallery/${postData.id}" class="gallery-card-link" data-card-index="${cardIndex}">
+                                    ${imageUrl ? 
+                                        `<div class="gallery-card-background" data-bg-image="${imageUrl}"></div>` :
+                                        `<div class="gallery-card-background gallery-card-placeholder-bg"><i class="bi bi-image"></i></div>`
+                                    }
+                                    <div class="gallery-card-overlay">
+                                        <h3 class="gallery-card-title">${escapeHtml(postData.title)}</h3>
+                                        <div class="gallery-card-meta">
+                                            <span class="gallery-card-author">${escapeHtml(postData.author_name)}</span>
+                                            <span class="gallery-card-date">${escapeHtml(postData.created_at)}</span>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        `;
+                        gallerySliderTrackForLoading.insertAdjacentHTML('beforeend', cardHtml);
+                    });
+                    
+                    // 슬라이더의 위치 재설정 함수 호출 (새 카드 포함)
+                    // assignPositions가 전역으로 노출되어 있다면 호출
+                    if (window.gallerySliderAssignPositions) {
+                        window.gallerySliderAssignPositions();
+                    }
+                    // 또는 setActiveIndex를 현재 인덱스로 호출하여 업데이트
+                    if (window.gallerySliderSetActiveIndex && window.gallerySliderActiveIndex !== undefined) {
+                        window.gallerySliderSetActiveIndex(window.gallerySliderActiveIndex);
+                    }
+                    
+                    currentOffset += data.posts.length;
+                    
+                    // 다음 배치를 조금 후에 로드 (페이지 로딩 부하 분산)
+                    if (data.posts.length === batchSize) {
+                        hideLoading();
+                        setTimeout(() => {
+                            isLoading = false;
+                            loadNextBatch();
+                        }, 500); // 0.5초 후 다음 배치 로드
+                    } else {
+                        allLoaded = true;
+                        isLoading = false;
+                        hideLoading();
+                    }
+                } else {
+                    allLoaded = true;
+                    isLoading = false;
+                    hideLoading();
+                }
+            } catch (error) {
+                console.error('카드 로딩 오류:', error);
+                isLoading = false;
+                hideLoading();
+            }
+        };
+
+        // 첫 배치는 페이지가 완전히 로드되고 첫 페이지가 표시된 후 시작
+        setTimeout(() => {
+            loadNextBatch();
+        }, 1500); // 1.5초 후 첫 배치 로드 (현재 페이지가 완전히 로드된 후)
+    }
+    
+    // 페이지 로딩 완료 시 로컬 로딩 인디케이터 숨김
+    const pageLoadingIndicator = document.getElementById('pageLoadingIndicator');
+    if (pageLoadingIndicator) {
+        pageLoadingIndicator.style.display = 'none';
+    }
 });
 

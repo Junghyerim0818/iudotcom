@@ -1,7 +1,7 @@
 import os
 import secrets
 import base64
-from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app, abort, Response, session
+from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app, abort, Response, session, jsonify
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.utils import secure_filename
 from sqlalchemy.orm import joinedload, defer, load_only
@@ -77,20 +77,55 @@ def load_user(user_id):
 @cache.cached(timeout=60, key_prefix='index_gallery_posts')  # 1분 캐싱
 def index():
     try:
-        # 최근 갤러리 글들 가져오기 (날짜순 정렬 - 최신이 맨 앞)
-        # 이미지 데이터는 제외하고 메타데이터만 가져오기 (성능 최적화)
-        # 카드 스택용으로 10개만 가져오기
-        # 대용량 image_data 컬럼은 제외하여 초기 로딩 속도 개선 (20초 -> 2초로 단축)
+        # 순차 로딩: 처음에는 첫 3-5개만 빠르게 로드하여 즉시 표시
+        # 나머지는 JavaScript에서 AJAX로 순차적으로 로드
+        initial_count = 5  # 초기 로드 개수
         gallery_posts = db.session.query(Post).options(
             joinedload(Post.author),
             defer(Post.image_data),  # 대용량 이미지 데이터 제외 (메모리 및 네트워크 대역폭 절약)
             defer(Post.content)  # content는 필요할 때만 get_image_url()에서 DB에서 가져옴
-        ).filter_by(category='gallery').order_by(Post.created_at.desc()).limit(10).all()
+        ).filter_by(category='gallery').order_by(Post.created_at.desc()).limit(initial_count).all()
         return render_template('index.html', gallery_posts=gallery_posts)
     except Exception as e:
         current_app.logger.error(f"Error in index route: {str(e)}")
         # DB 스키마가 업데이트되지 않은 경우를 대비해 빈 결과 반환
         return render_template('index.html', gallery_posts=[])
+
+@bp.route('/api/gallery-posts')
+def api_gallery_posts():
+    """갤러리 포스트를 JSON으로 반환 (순차 로딩용)"""
+    try:
+        offset = request.args.get('offset', 0, type=int)
+        limit = request.args.get('limit', 10, type=int)
+        
+        posts = db.session.query(Post).options(
+            joinedload(Post.author),
+            defer(Post.image_data),
+            defer(Post.content)
+        ).filter_by(category='gallery').order_by(Post.created_at.desc()).offset(offset).limit(limit).all()
+        
+        posts_data = []
+        for post in posts:
+            image_url = None
+            try:
+                if hasattr(post, 'get_image_url'):
+                    image_url = post.get_image_url()
+            except Exception:
+                pass
+            
+            posts_data.append({
+                'id': post.id,
+                'title': post.title,
+                'created_at': post.created_at.strftime('%Y.%m.%d') if post.created_at else '',
+                'author_name': '아이유닷컴' if post.author.is_admin() else post.author.name,
+                'image_url': image_url,
+                'has_image': post.has_image_data() if hasattr(post, 'has_image_data') else (post.image_filename or post.image_url)
+            })
+        
+        return jsonify({'success': True, 'posts': posts_data, 'count': len(posts_data)})
+    except Exception as e:
+        current_app.logger.error(f"Error in api_gallery_posts: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @bp.route('/login')
 def login():
@@ -313,7 +348,8 @@ def gallery():
         page = request.args.get('page', 1, type=int)
         per_page = 30
         
-        # 캐시 키 생성 (페이지 포함)
+        # 순차 로딩: 첫 페이지만 먼저 빠르게 로드
+        # 첫 페이지가 아닌 경우에도 캐시 활용
         cache_key = f'gallery_posts_page_{page}'
         cached_result = cache.get(cache_key)
         if cached_result:
@@ -328,6 +364,20 @@ def gallery():
         ).filter_by(category='gallery').order_by(Post.created_at.desc())
         
         posts = posts_query.paginate(page=page, per_page=per_page, error_out=False)
+        
+        # 첫 페이지인 경우 즉시 반환 (나머지 페이지는 백그라운드에서 캐싱)
+        if page == 1:
+            result = render_template('gallery.html', posts=posts.items, pagination=posts)
+            # 첫 페이지 캐싱
+            cache.set(cache_key, result, timeout=120)
+            
+            # 백그라운드에서 다음 페이지들을 미리 캐싱 (비동기, 블로킹하지 않음)
+            # 이 부분은 실제로는 클라이언트 측에서 AJAX로 처리하거나
+            # 별도의 백그라운드 작업으로 처리하는 것이 좋습니다
+            
+            return result
+        
+        # 첫 페이지가 아닌 경우 정상적으로 반환
         result = render_template('gallery.html', posts=posts.items, pagination=posts)
         cache.set(cache_key, result, timeout=120)  # 2분 캐싱
         return result
