@@ -2,6 +2,7 @@ from datetime import datetime
 from flask_login import UserMixin
 from sqlalchemy import Index
 from . import db
+import re
 
 class Setting(db.Model):
     """애플리케이션 설정 저장"""
@@ -115,8 +116,51 @@ class Post(db.Model):
         
         return False
     
+    def _extract_first_image_from_content(self, content_html):
+        """HTML 콘텐츠에서 첫 번째 이미지 URL 추출 (내부 헬퍼 메서드)"""
+        if not content_html:
+            return None
+        
+        try:
+            from bs4 import BeautifulSoup
+            soup = BeautifulSoup(content_html, 'html.parser')
+            
+            # img 태그 찾기
+            img_tag = soup.find('img')
+            if img_tag and img_tag.get('src'):
+                img_url = img_tag.get('src')
+                
+                # 상대 경로 처리
+                if img_url.startswith('//'):
+                    img_url = 'https:' + img_url
+                elif img_url.startswith('/'):
+                    # 절대 경로는 그대로 유지
+                    pass
+                elif not img_url.startswith('http'):
+                    # 상대 경로는 그대로 유지 (브라우저가 처리)
+                    pass
+                
+                return img_url
+            
+            # background-image 스타일에서 추출 시도
+            style_tags = soup.find_all(style=re.compile(r'background-image'))
+            for tag in style_tags:
+                style = tag.get('style', '')
+                match = re.search(r'url\(["\']?([^"\']+)["\']?\)', style)
+                if match:
+                    img_url = match.group(1)
+                    if img_url.startswith('//'):
+                        img_url = 'https:' + img_url
+                    return img_url
+        except Exception as e:
+            # BeautifulSoup이 없거나 파싱 에러가 발생해도 계속 진행
+            import sys
+            print(f"Warning: 이미지 추출 중 오류 (무시): {str(e)}", file=sys.stderr)
+        
+        return None
+    
     def get_image_url(self):
-        """포스트의 이미지 URL을 반환하는 헬퍼 메서드 (모든 경우의 수 처리)"""
+        """포스트의 이미지 URL을 반환하는 헬퍼 메서드 (content에서 첫 이미지 추출 우선)"""
         # 1. 외부 이미지 URL이 있으면 우선 사용
         if self.image_url:
             return self.image_url
@@ -163,6 +207,31 @@ class Post(db.Model):
                 return url_for('static', filename='uploads/' + self.image_filename)
             except RuntimeError:
                 return f'/static/uploads/{self.image_filename}'
+        
+        # 4. content 영역에서 첫 번째 이미지 추출 (새로운 우선순위)
+        # content가 로드되지 않았을 경우 DB에서 가져오기
+        content_html = None
+        if self.content:
+            content_html = self.content
+        else:
+            # content가 로드되지 않았을 경우 (defer로 인해), DB에서 content만 가져오기
+            try:
+                if hasattr(self, '_sa_instance_state'):
+                    insp = self._sa_instance_state
+                    if hasattr(insp, 'unloaded') and 'content' in insp.unloaded:
+                        from . import db
+                        content_result = db.session.query(Post.content).filter(
+                            Post.id == self.id
+                        ).scalar()
+                        if content_result:
+                            content_html = content_result
+            except Exception:
+                pass
+        
+        if content_html:
+            content_image_url = self._extract_first_image_from_content(content_html)
+            if content_image_url:
+                return content_image_url
         
         # 이미지가 없는 경우
         return None

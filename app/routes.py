@@ -84,7 +84,7 @@ def index():
         gallery_posts = db.session.query(Post).options(
             joinedload(Post.author),
             defer(Post.image_data),  # 대용량 이미지 데이터 제외 (메모리 및 네트워크 대역폭 절약)
-            defer(Post.content)  # 본문 내용도 인덱스 페이지에서는 불필요하므로 제외
+            defer(Post.content)  # content는 필요할 때만 get_image_url()에서 DB에서 가져옴
         ).filter_by(category='gallery').order_by(Post.created_at.desc()).limit(10).all()
         return render_template('index.html', gallery_posts=gallery_posts)
     except Exception as e:
@@ -320,10 +320,11 @@ def gallery():
             return cached_result
         
         # 이미지 데이터는 제외하고 메타데이터만 가져오기 (성능 최적화)
+        # content는 썸네일 이미지 추출을 위해 로드 필요
         posts_query = db.session.query(Post).options(
             joinedload(Post.author),
-            defer(Post.image_data),  # 대용량 이미지 데이터 제외
-            defer(Post.content)  # 본문 내용도 갤러리 리스트에서는 불필요
+            defer(Post.image_data)  # 대용량 이미지 데이터 제외
+            # content는 썸네일 이미지 추출을 위해 로드
         ).filter_by(category='gallery').order_by(Post.created_at.desc())
         
         posts = posts_query.paginate(page=page, per_page=per_page, error_out=False)
@@ -378,10 +379,11 @@ def archive(type_name):
             return cached_result
         
         # 이미지 데이터는 제외하고 메타데이터만 가져오기 (성능 최적화)
+        # content는 썸네일 이미지 추출을 위해 로드 필요
         posts_query = db.session.query(Post).options(
             joinedload(Post.author),
-            defer(Post.image_data),  # 대용량 이미지 데이터 제외
-            defer(Post.content)  # 본문 내용도 아카이브 리스트에서는 불필요
+            defer(Post.image_data)  # 대용량 이미지 데이터 제외
+            # content는 썸네일 이미지 추출을 위해 로드
         ).filter_by(category=type_name).order_by(Post.created_at.desc())
         
         posts = posts_query.paginate(page=page, per_page=per_page, error_out=False)
