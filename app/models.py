@@ -72,9 +72,24 @@ class Post(db.Model):
     author = db.relationship('User', backref=db.backref('posts', lazy='dynamic'))
     
     def has_image_data(self):
-        """이미지 데이터가 있는지 안전하게 체크"""
+        """이미지 데이터가 있는지 안전하게 체크 (이미지 데이터 로드 없이도 체크 가능)"""
+        # image_url이 있으면 이미지 있음
+        if self.image_url:
+            return True
+        # image_mimetype이 있으면 이미지 데이터 있음 (로드되지 않았어도 판단 가능)
+        if self.image_mimetype:
+            return True
+        # image_filename이 있으면 이미지 있음
+        if self.image_filename:
+            return True
+        # image_data가 로드된 경우만 체크 (로드되지 않았으면 위에서 이미 False 반환)
         try:
-            return self.image_data is not None and len(self.image_data) > 0
+            if hasattr(self, 'image_data') and self.image_data is not None:
+                try:
+                    return len(self.image_data) > 0
+                except (TypeError, AttributeError):
+                    return False
         except (AttributeError, TypeError):
-            return False
+            pass
+        return False
 
