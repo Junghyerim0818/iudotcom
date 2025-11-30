@@ -610,24 +610,46 @@ document.addEventListener('DOMContentLoaded', function() {
         const cardItems = Array.from(gallerySliderTrack.querySelectorAll('.gallery-card-item'));
         if (cardItems.length === 0) return;
 
-        // 배경 이미지 설정 (최적화된 크기로 로드)
-        cardItems.forEach((card) => {
+        // 배경 이미지 lazy loading - 처음에는 중앙 카드와 인접 카드만 로드
+        const loadCardImage = (card, index) => {
             const bgElement = card.querySelector('.gallery-card-background[data-bg-image]');
-            if (bgElement) {
-                let imageUrl = bgElement.getAttribute('data-bg-image');
-                // 카드 크기: 최대 500px x 600px
-                // 레티나 디스플레이 대비 2배 = 1000px x 1200px
-                // 하지만 더 가볍게 하기 위해 800px x 960px로 제한
-                // 서버 측 이미지인 경우 크기 파라미터 추가
-                if (imageUrl.includes('/image/')) {
-                    const urlObj = new URL(imageUrl, window.location.origin);
-                    urlObj.searchParams.set('w', '800');
-                    urlObj.searchParams.set('h', '960');
-                    imageUrl = urlObj.pathname + '?' + urlObj.searchParams.toString();
-                }
-                bgElement.style.backgroundImage = `url('${imageUrl}')`;
+            if (!bgElement || bgElement.dataset.loaded === 'true') return;
+            
+            let imageUrl = bgElement.getAttribute('data-bg-image');
+            // 카드 크기: 최대 500px x 600px
+            // 레티나 디스플레이 대비 2배 = 1000px x 1200px
+            // 하지만 더 가볍게 하기 위해 800px x 960px로 제한
+            // 서버 측 이미지인 경우 크기 파라미터 추가
+            if (imageUrl.includes('/image/')) {
+                const urlObj = new URL(imageUrl, window.location.origin);
+                urlObj.searchParams.set('w', '800');
+                urlObj.searchParams.set('h', '960');
+                imageUrl = urlObj.pathname + '?' + urlObj.searchParams.toString();
             }
-        });
+            
+            // 이미지 프리로딩
+            const img = new Image();
+            img.onload = () => {
+                bgElement.style.backgroundImage = `url('${imageUrl}')`;
+                bgElement.dataset.loaded = 'true';
+            };
+            img.onerror = () => {
+                // 이미지 로드 실패 시 플레이스홀더 유지
+                bgElement.dataset.loaded = 'error';
+            };
+            img.src = imageUrl;
+        };
+
+        // 초기 로드: 중앙 카드와 앞뒤 2개씩만 로드 (총 5개)
+        const loadInitialImages = () => {
+            const visibleRange = 2; // 앞뒤 2개씩
+            cardItems.forEach((card, index) => {
+                const offset = Math.abs(index - activeIndex);
+                if (offset <= visibleRange) {
+                    loadCardImage(card, index);
+                }
+            });
+        };
 
         let activeIndex = 0;
 
@@ -653,10 +675,21 @@ document.addEventListener('DOMContentLoaded', function() {
             if (clamped === activeIndex) return;
             activeIndex = clamped;
             assignPositions();
+            
+            // 활성화된 카드 주변 이미지 lazy load
+            const visibleRange = 2; // 앞뒤 2개씩
+            cardItems.forEach((card, index) => {
+                const offset = Math.abs(index - activeIndex);
+                if (offset <= visibleRange) {
+                    loadCardImage(card, index);
+                }
+            });
         }
 
         // 초기 위치 설정
         assignPositions();
+        // 초기 이미지 로드 (중앙 카드와 주변 카드)
+        loadInitialImages();
 
         // 카드 클릭: 중앙이 아니면 중앙으로 이동, 중앙이면 링크 동작
         cardItems.forEach((card, index) => {
@@ -694,5 +727,13 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     }
+
+    // 본문 내 이미지에 자동으로 lazy loading 적용 (아직 로드되지 않은 이미지만)
+    const contentImages = document.querySelectorAll('.gallery-detail-content img:not([loading])');
+    contentImages.forEach(img => {
+        if (!img.complete && !img.loading) {
+            img.loading = 'lazy';
+        }
+    });
 });
 

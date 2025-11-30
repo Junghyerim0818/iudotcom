@@ -82,3 +82,4 @@ if __name__ == "__main__":
     target_path = r"C:\Users\xktkd\Desktop\images"
     organize_images(target_path)
 
+
