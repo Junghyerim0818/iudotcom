@@ -7,7 +7,16 @@
     <div class="col">
         <a href="{{ url_for('main.gallery_detail', post_id=post.id) }}" class="text-decoration-none">
             <div class="card h-100 gallery-card">
-                {% if post.has_image_data() or post.image_filename or post.image_url %}
+                {% set image_url = post.get_image_url() %}
+                {% if image_url %}
+                    <img src="{{ image_url }}"
+                         class="card-img-top"
+                         alt="{{ post.title }}"
+                         loading="lazy"
+                         width="400"
+                         height="225">
+                {% elif post.has_image_data() or post.image_filename or post.image_url %}
+                    {# 기존 로직 유지 (fallback) #}
                     <img src="{% if post.image_url %}{{ post.image_url }}{% elif post.has_image_data() %}{{ url_for('main.get_image', post_id=post.id) }}{% elif post.image_filename %}{{ url_for('static', filename='uploads/' + post.image_filename) }}{% endif %}"
                          class="card-img-top"
                          alt="{{ post.title }}"

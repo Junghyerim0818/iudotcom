@@ -76,20 +76,94 @@ class Post(db.Model):
         # image_url이 있으면 이미지 있음
         if self.image_url:
             return True
-        # image_mimetype이 있으면 이미지 데이터 있음 (로드되지 않았어도 판단 가능)
-        if self.image_mimetype:
-            return True
         # image_filename이 있으면 이미지 있음
         if self.image_filename:
             return True
-        # image_data가 로드된 경우만 체크 (로드되지 않았으면 위에서 이미 False 반환)
+        # image_mimetype이 있으면 이미지 데이터 있음 (로드되지 않았어도 판단 가능)
+        if self.image_mimetype:
+            return True
+        # image_data가 로드된 경우 체크
         try:
             if hasattr(self, 'image_data') and self.image_data is not None:
                 try:
-                    return len(self.image_data) > 0
+                    if len(self.image_data) > 0:
+                        return True
                 except (TypeError, AttributeError):
-                    return False
+                    pass
         except (AttributeError, TypeError):
             pass
+        
+        # image_data가 로드되지 않았을 경우, DB에서 실제 존재 여부 확인
+        # (최적화로 인해 로드되지 않은 경우를 대비 - DB에 직접 추가된 포스트 처리)
+        try:
+            if hasattr(self, '_sa_instance_state'):
+                insp = self._sa_instance_state
+                # image_data 컬럼이 있는데 로드되지 않았으면, 실제 DB에서 존재하는지 확인
+                if hasattr(insp, 'unloaded') and 'image_data' in insp.unloaded:
+                    # 실제 DB 쿼리로 존재 여부만 확인 (데이터는 로드하지 않음)
+                    from . import db
+                    from sqlalchemy import func
+                    count = db.session.query(func.count(Post.id)).filter(
+                        Post.id == self.id,
+                        Post.image_data.isnot(None)
+                    ).scalar()
+                    if count and count > 0:
+                        return True
+        except Exception:
+            # 에러가 발생하면 안전하게 False 반환
+            pass
+        
         return False
+    
+    def get_image_url(self):
+        """포스트의 이미지 URL을 반환하는 헬퍼 메서드 (모든 경우의 수 처리)"""
+        # 1. 외부 이미지 URL이 있으면 우선 사용
+        if self.image_url:
+            return self.image_url
+        
+        # 2. DB에 저장된 이미지 데이터 확인 (image_mimetype 또는 실제 image_data 존재)
+        has_db_image = False
+        if self.image_mimetype:
+            has_db_image = True
+        elif hasattr(self, 'image_data') and self.image_data is not None:
+            try:
+                if len(self.image_data) > 0:
+                    has_db_image = True
+            except (TypeError, AttributeError):
+                pass
+        else:
+            # image_data가 로드되지 않았을 경우, DB에서 실제 존재 여부 확인
+            try:
+                if hasattr(self, '_sa_instance_state'):
+                    insp = self._sa_instance_state
+                    if hasattr(insp, 'unloaded') and 'image_data' in insp.unloaded:
+                        from . import db
+                        from sqlalchemy import func
+                        count = db.session.query(func.count(Post.id)).filter(
+                            Post.id == self.id,
+                            Post.image_data.isnot(None)
+                        ).scalar()
+                        if count and count > 0:
+                            has_db_image = True
+            except Exception:
+                pass
+        
+        if has_db_image:
+            from flask import url_for
+            try:
+                return url_for('main.get_image', post_id=self.id)
+            except RuntimeError:
+                # request context가 없는 경우 (예: 백그라운드 작업)
+                return f'/image/{self.id}'
+        
+        # 3. 파일 시스템에 저장된 이미지 파일이 있으면 static 파일 사용
+        if self.image_filename:
+            from flask import url_for
+            try:
+                return url_for('static', filename='uploads/' + self.image_filename)
+            except RuntimeError:
+                return f'/static/uploads/{self.image_filename}'
+        
+        # 이미지가 없는 경우
+        return None
 

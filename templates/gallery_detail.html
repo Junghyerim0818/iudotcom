@@ -31,7 +31,17 @@
        수동 작성 글만 상단 이미지 박스를 보여준다. #}
     {% if not post.tistory_link %}
     <div class="gallery-detail-image-wrapper mb-4">
-        {% if post.has_image_data() or post.image_filename or post.image_url %}
+        {% set image_url = post.get_image_url() %}
+        {% if image_url %}
+            <img src="{{ image_url }}" 
+                 class="gallery-detail-image" 
+                 alt="{{ post.title }}"
+                 id="galleryDetailImage"
+                 fetchpriority="high"
+                 loading="eager"
+                 decoding="async">
+        {% elif post.has_image_data() or post.image_filename or post.image_url %}
+            {# 기존 로직 유지 (fallback) #}
             <img src="{% if post.image_url %}{{ post.image_url }}{% elif post.has_image_data() %}{{ url_for('main.get_image', post_id=post.id) }}{% elif post.image_filename %}{{ url_for('static', filename='uploads/' + post.image_filename) }}{% endif %}" 
                  class="gallery-detail-image" 
                  alt="{{ post.title }}"
