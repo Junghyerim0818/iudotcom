@@ -653,11 +653,20 @@ document.addEventListener('DOMContentLoaded', function() {
             // 레티나 디스플레이 대비 2배 = 1000px x 1200px
             // 하지만 더 가볍게 하기 위해 800px x 960px로 제한
             // 서버 측 이미지인 경우 크기 파라미터 추가
-            if (imageUrl.includes('/image/')) {
-                const urlObj = new URL(imageUrl, window.location.origin);
-                urlObj.searchParams.set('w', '800');
-                urlObj.searchParams.set('h', '960');
-                imageUrl = urlObj.pathname + '?' + urlObj.searchParams.toString();
+            if (imageUrl && imageUrl.includes('/image/')) {
+                try {
+                    const urlObj = new URL(imageUrl, window.location.origin);
+                    // 이미 파라미터가 있으면 유지, 없으면 추가
+                    if (!urlObj.searchParams.has('w')) {
+                        urlObj.searchParams.set('w', '800');
+                    }
+                    if (!urlObj.searchParams.has('h')) {
+                        urlObj.searchParams.set('h', '960');
+                    }
+                    imageUrl = urlObj.pathname + '?' + urlObj.searchParams.toString();
+                } catch (e) {
+                    // URL 파싱 실패 시 원본 사용
+                }
             }
             
             // 이미지 프리로딩
@@ -831,12 +840,17 @@ document.addEventListener('DOMContentLoaded', function() {
                         const cardIndex = currentOffset + index;
                         let imageUrl = postData.image_url || '';
                         
-                        // 이미지 URL 처리
+                        // 이미지 URL 처리 (카드 스택용 800x960)
                         if (imageUrl && imageUrl.includes('/image/')) {
                             try {
                                 const urlObj = new URL(imageUrl, window.location.origin);
-                                urlObj.searchParams.set('w', '800');
-                                urlObj.searchParams.set('h', '960');
+                                // 이미 파라미터가 있으면 유지, 없으면 추가
+                                if (!urlObj.searchParams.has('w')) {
+                                    urlObj.searchParams.set('w', '800');
+                                }
+                                if (!urlObj.searchParams.has('h')) {
+                                    urlObj.searchParams.set('h', '960');
+                                }
                                 imageUrl = urlObj.pathname + '?' + urlObj.searchParams.toString();
                             } catch (e) {
                                 // URL 파싱 실패 시 원본 사용

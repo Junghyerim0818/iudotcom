@@ -33,6 +33,9 @@
     <div class="gallery-detail-image-wrapper mb-4">
         {% set image_url = post.get_image_url() %}
         {% if image_url %}
+            {% if image_url.startswith('/image/') %}
+                {% set image_url = image_url + '?w=1500' %}
+            {% endif %}
             <img src="{{ image_url }}" 
                  class="gallery-detail-image" 
                  alt="{{ post.title }}"
@@ -42,7 +45,7 @@
                  decoding="async">
         {% elif post.has_image_data() or post.image_filename or post.image_url %}
             {# 기존 로직 유지 (fallback) #}
-            <img src="{% if post.image_url %}{{ post.image_url }}{% elif post.has_image_data() %}{{ url_for('main.get_image', post_id=post.id) }}{% elif post.image_filename %}{{ url_for('static', filename='uploads/' + post.image_filename) }}{% endif %}" 
+            <img src="{% if post.image_url %}{{ post.image_url }}{% elif post.has_image_data() %}{{ url_for('main.get_image', post_id=post.id) }}?w=1500{% elif post.image_filename %}{{ url_for('static', filename='uploads/' + post.image_filename) }}{% endif %}" 
                  class="gallery-detail-image" 
                  alt="{{ post.title }}"
                  id="galleryDetailImage"
@@ -81,6 +84,18 @@
                 {% if post.content %}
                 <div class="gallery-detail-content">
                     {{ post.content|safe }}
+                </div>
+                {% endif %}
+                
+                {# 원본 다운로드 버튼 #}
+                {% if post.has_image_data() or post.image_url %}
+                <div class="mt-3 pt-3 border-top">
+                    <a href="{{ url_for('main.download_original_image', post_id=post.id) }}" 
+                       class="btn btn-outline-primary" 
+                       download>
+                        <i class="bi bi-download me-2"></i>
+                        {% if current_lang == 'en' %}Download Original Image{% else %}원본 다운로드{% endif %}
+                    </a>
                 </div>
                 {% endif %}
             </div>

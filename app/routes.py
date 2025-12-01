@@ -260,6 +260,46 @@ def get_image(post_id):
         current_app.logger.error(f"Error serving image for post {post_id}: {str(e)}")
         abort(404)
 
+@bp.route('/image/<int:post_id>/download')
+def download_original_image(post_id):
+    """원본 이미지를 다운로드하는 라우트 (크기 제한 없음)"""
+    try:
+        post = Post.query.get_or_404(post_id)
+        if post.image_data:
+            # Postgres의 경우 bytes 객체로 반환되어야 함
+            image_bytes = bytes(post.image_data) if not isinstance(post.image_data, bytes) else post.image_data
+            
+            # 파일명 생성
+            filename = f"image_{post_id}"
+            if post.image_mimetype:
+                if 'jpeg' in post.image_mimetype or 'jpg' in post.image_mimetype:
+                    filename += '.jpg'
+                elif 'png' in post.image_mimetype:
+                    filename += '.png'
+                elif 'gif' in post.image_mimetype:
+                    filename += '.gif'
+                elif 'webp' in post.image_mimetype:
+                    filename += '.webp'
+                else:
+                    filename += '.jpg'
+            else:
+                filename += '.jpg'
+            
+            return Response(
+                image_bytes,
+                mimetype=post.image_mimetype or 'image/jpeg',
+                headers={
+                    'Content-Disposition': f'attachment; filename="{filename}"'
+                }
+            )
+        elif post.image_url:
+            # 외부 이미지 URL인 경우 리다이렉트
+            return redirect(post.image_url)
+        abort(404)
+    except Exception as e:
+        current_app.logger.error(f"Error downloading image for post {post_id}: {str(e)}")
+        abort(404)
+
 def save_picture(form_picture):
     """이미지를 DB에 저장하고 (image_data, image_mimetype) 튜플 반환"""
     # 파일 데이터 읽기

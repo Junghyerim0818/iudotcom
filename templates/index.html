@@ -30,10 +30,13 @@
                         <a href="{{ url_for('main.gallery_detail', post_id=post.id) }}" class="gallery-card-link" data-card-index="{{ loop.index0 }}">
                             {% set image_url = post.get_image_url() %}
                             {% if image_url %}
+                                {% if image_url.startswith('/image/') %}
+                                    {% set image_url = image_url + '?w=800&h=960' %}
+                                {% endif %}
                                 <div class="gallery-card-background" data-bg-image="{{ image_url }}"></div>
                             {% elif post.has_image_data() or post.image_filename or post.image_url %}
                                 {# 기존 로직 유지 (fallback) #}
-                                {% set image_url = post.image_url if post.image_url else (url_for('main.get_image', post_id=post.id) if post.has_image_data() else (url_for('static', filename='uploads/' + post.image_filename) if post.image_filename else None)) %}
+                                {% set image_url = post.image_url if post.image_url else (url_for('main.get_image', post_id=post.id) + '?w=800&h=960' if post.has_image_data() else (url_for('static', filename='uploads/' + post.image_filename) if post.image_filename else None)) %}
                                 {% if image_url %}
                                     <div class="gallery-card-background" data-bg-image="{{ image_url }}"></div>
                                 {% else %}

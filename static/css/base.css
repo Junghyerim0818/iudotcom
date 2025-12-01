@@ -668,7 +668,7 @@ a:hover {
 
 /* 갤러리 로딩 인디케이터 */
 .gallery-loading-indicator {
-    position: absolute;
+    position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
@@ -834,6 +834,7 @@ a:hover {
 }
 
 .gallery-slider-wrapper {
+    position: relative;
     overflow: hidden;
     height: 100%;
     padding: 0;

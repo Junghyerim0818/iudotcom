@@ -22,6 +22,9 @@
         {% set image_url = post.get_image_url() %}
         {% if image_url %}
         <div class="mt-2">
+            {% if image_url.startswith('/image/') %}
+                {% set image_url = image_url + '?w=1500' %}
+            {% endif %}
             <img src="{{ image_url }}"
                  style="max-height: 100px; width: auto;"
                  loading="lazy"
@@ -32,7 +35,7 @@
         {% elif post.has_image_data() or post.image_filename or post.image_url %}
         {# 기존 로직 유지 (fallback) #}
         <div class="mt-2">
-            <img src="{% if post.image_url %}{{ post.image_url }}{% elif post.has_image_data() %}{{ url_for('main.get_image', post_id=post.id) }}{% elif post.image_filename %}{{ url_for('static', filename='uploads/' + post.image_filename) }}{% endif %}"
+            <img src="{% if post.image_url %}{{ post.image_url }}{% elif post.has_image_data() %}{{ url_for('main.get_image', post_id=post.id) }}?w=1500{% elif post.image_filename %}{{ url_for('static', filename='uploads/' + post.image_filename) }}{% endif %}"
                  style="max-height: 100px; width: auto;"
                  loading="lazy"
                  alt="{{ post.title }}"
