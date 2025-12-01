@@ -55,30 +55,12 @@
                 <!-- 이미지 캐러셀 (본문 하단에 배치) -->
                 {% if post.images|length > 0 %}
                 <div class="gallery-detail-images mt-4">
-                    <div id="galleryCarousel" class="carousel slide" data-bs-ride="carousel">
-                        <div class="carousel-indicators">
-                            {% for img in post.images %}
-                            <button type="button" data-bs-target="#galleryCarousel" data-bs-slide-to="{{ loop.index0 }}" class="{% if loop.first %}active{% endif %}" aria-current="{% if loop.first %}true{% endif %}" aria-label="Slide {{ loop.index }}"></button>
-                            {% endfor %}
-                        </div>
-                        <div class="carousel-inner">
-                            {% for img in post.images %}
-                            <div class="carousel-item {% if loop.first %}active{% endif %}">
-                                <img src="{{ url_for('main.get_post_image', image_id=img.id) }}" class="d-block w-auto mw-100 mx-auto rounded" alt="{{ post.title }}" style="max-height: 80vh; object-fit: contain;">
-                            </div>
-                            {% endfor %}
-                        </div>
-                        {% if post.images|length > 1 %}
-                        <button class="carousel-control-prev" type="button" data-bs-target="#galleryCarousel" data-bs-slide="prev">
-                            <span class="carousel-control-prev-icon" aria-hidden="true" style="background-color: rgba(0,0,0,0.3); border-radius: 50%;"></span>
-                            <span class="visually-hidden">Previous</span>
-                        </button>
-                        <button class="carousel-control-next" type="button" data-bs-target="#galleryCarousel" data-bs-slide="next">
-                            <span class="carousel-control-next-icon" aria-hidden="true" style="background-color: rgba(0,0,0,0.3); border-radius: 50%;"></span>
-                            <span class="visually-hidden">Next</span>
-                        </button>
-                        {% endif %}
-                    </div>
+                    {% for img in post.images %}
+                    <img src="{{ url_for('main.get_post_image', image_id=img.id) }}"
+                         class="d-block w-auto mw-100 mx-auto rounded mb-3"
+                         alt="{{ post.title }}"
+                         style="max-height: 80vh; object-fit: contain;">
+                    {% endfor %}
                 </div>
                 {% elif post.has_image_data() or post.image_url %}
                 <!-- 단일 이미지 (PostImage가 없을 경우 기존 방식) -->
@@ -213,7 +195,6 @@
 .gallery-detail-content {
     margin-top: 1rem;
     line-height: 1.6;
-    white-space: pre-wrap;
 }
 
 /* 본문 내 이미지도 최대 1280px까지만, 반응형으로 표시 */
