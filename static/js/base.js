@@ -764,6 +764,18 @@ document.addEventListener('DOMContentLoaded', function() {
         // 전역으로 노출하여 순차 로딩 코드에서 접근 가능하도록
         window.gallerySliderSetActiveIndex = setActiveIndex;
         window.gallerySliderAssignPositions = assignPositions;
+        window.gallerySliderActiveIndex = activeIndex;
+
+        // activeIndex 변경 감지 및 추가 로드 트리거를 위한 래퍼 함수
+        const originalSetActiveIndex = setActiveIndex;
+        setActiveIndex = (index) => {
+            window.gallerySliderActiveIndex = index;
+            originalSetActiveIndex(index);
+            // 인덱스 변경 시 다음 배치 로드 필요성 체크
+            if (typeof loadNextBatch === 'function') {
+                loadNextBatch();
+            }
+        };
 
         // 초기 위치 설정
         assignPositions();
@@ -882,6 +894,14 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const loadNextBatch = async () => {
             if (isLoading || allLoaded) return;
+            
+            // 현재 보이는 카드 인덱스가 로드된 전체 카드의 80% 지점에 도달했을 때만 로딩 인디케이터 표시 및 로드
+            // 단, 마지막 로드된 배치 근처에 있을 때만 로딩 표시
+            const totalLoaded = currentOffset;
+            const remainingCards = totalLoaded - window.gallerySliderActiveIndex;
+            
+            // 아직 볼 카드가 충분하면 로딩 표시 안 함
+            if (remainingCards > 5) return;
             
             isLoading = true;
             if (cardStackLoading) cardStackLoading.classList.add('show');
