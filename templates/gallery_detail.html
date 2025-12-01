@@ -42,7 +42,9 @@
                  id="galleryDetailImage"
                  fetchpriority="high"
                  loading="eager"
-                 decoding="async">
+                 decoding="async"
+                 width="1500"
+                 height="2000">
         {% elif post.has_image_data() or post.image_filename or post.image_url %}
             {# 기존 로직 유지 (fallback) #}
             <img src="{% if post.image_url %}{{ post.image_url }}{% elif post.has_image_data() %}{{ url_for('main.get_image', post_id=post.id) }}?w=1500{% elif post.image_filename %}{{ url_for('static', filename='uploads/' + post.image_filename) }}{% endif %}" 

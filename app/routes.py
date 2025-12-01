@@ -31,10 +31,10 @@ def get_archive_title(type_name, lang='ko'):
     else:
         return 'Support Verification' if lang == 'en' else '서포트 인증 글'
 
-# Static 파일 직접 서빙 (Vercel 환경 대응)
+# Static 파일 직접 서빙 (Vercel 환경 대응, 캐싱 최적화)
 @bp.route('/static/<path:filename>')
 def serve_static(filename):
-    """Static 파일을 직접 서빙 (루트의 static 폴더)"""
+    """Static 파일을 직접 서빙 (루트의 static 폴더, 캐싱 헤더 포함)"""
     from flask import send_from_directory, current_app
     # Vercel 환경과 로컬 환경 모두 대응
     # app 폴더의 부모 디렉토리(프로젝트 루트)의 static 폴더
@@ -45,7 +45,17 @@ def serve_static(filename):
     if not os.path.exists(static_dir):
         static_dir = current_app.static_folder
     
-    return send_from_directory(static_dir, filename)
+    response = send_from_directory(static_dir, filename)
+    
+    # 정적 파일 캐싱 헤더 설정
+    if filename.endswith(('.css', '.js', '.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.woff', '.woff2', '.ttf', '.eot')):
+        # CSS, JS, 이미지, 폰트 파일은 1년 캐싱
+        response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
+    else:
+        # 기타 파일은 1시간 캐싱
+        response.headers['Cache-Control'] = 'public, max-age=3600'
+    
+    return response
 
 # Google OAuth Setup - 지연 등록 방식
 def get_google_client():
@@ -207,7 +217,7 @@ def change_language(lang_code):
 
 @bp.route('/image/<int:post_id>')
 def get_image(post_id):
-    """DB에 저장된 이미지를 반환하는 라우트"""
+    """DB에 저장된 이미지를 반환하는 라우트 (WebP 지원 및 캐싱 최적화)"""
     try:
         post = Post.query.get_or_404(post_id)
         if post.image_data:
@@ -218,43 +228,92 @@ def get_image(post_id):
             max_width = request.args.get('w', type=int)
             max_height = request.args.get('h', type=int)
             
+            # WebP 지원 확인
+            accept_header = request.headers.get('Accept', '')
+            supports_webp = 'image/webp' in accept_header
+            
             # 크기 제한이 있으면 이미지 리사이징
-            if max_width or max_height:
+            if max_width or max_height or supports_webp:
                 try:
                     from PIL import Image
                     import io
                     img = Image.open(io.BytesIO(image_bytes))
+                    
+                    # RGBA 모드인 경우 RGB로 변환 (JPEG 호환성)
+                    if img.mode in ('RGBA', 'LA', 'P'):
+                        if supports_webp:
+                            # WebP는 알파 채널 지원
+                            pass
+                        else:
+                            # JPEG는 알파 채널 미지원, RGB로 변환
+                            rgb_img = Image.new('RGB', img.size, (255, 255, 255))
+                            if img.mode == 'P':
+                                img = img.convert('RGBA')
+                            rgb_img.paste(img, mask=img.split()[-1] if img.mode in ('RGBA', 'LA') else None)
+                            img = rgb_img
+                    elif img.mode != 'RGB' and not supports_webp:
+                        img = img.convert('RGB')
+                    
                     original_width, original_height = img.size
                     
                     # 비율 유지하며 리사이징
-                    if max_width and max_height:
-                        # 둘 다 지정된 경우 비율 유지하며 작은 쪽에 맞춤
-                        ratio = min(max_width / original_width, max_height / original_height)
-                        new_width = int(original_width * ratio)
-                        new_height = int(original_height * ratio)
-                    elif max_width:
-                        ratio = max_width / original_width
-                        new_width = max_width
-                        new_height = int(original_height * ratio)
-                    else:
-                        ratio = max_height / original_height
-                        new_width = int(original_width * ratio)
-                        new_height = max_height
+                    if max_width or max_height:
+                        if max_width and max_height:
+                            # 둘 다 지정된 경우 비율 유지하며 작은 쪽에 맞춤
+                            ratio = min(max_width / original_width, max_height / original_height)
+                            new_width = int(original_width * ratio)
+                            new_height = int(original_height * ratio)
+                        elif max_width:
+                            ratio = max_width / original_width
+                            new_width = max_width
+                            new_height = int(original_height * ratio)
+                        else:
+                            ratio = max_height / original_height
+                            new_width = int(original_width * ratio)
+                            new_height = max_height
+                        
+                        # 원본보다 크면 리사이징하지 않음
+                        if new_width < original_width or new_height < original_height:
+                            img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
                     
-                    # 원본보다 크면 리사이징하지 않음
-                    if new_width < original_width or new_height < original_height:
-                        img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
-                        output = io.BytesIO()
+                    output = io.BytesIO()
+                    
+                    # WebP 지원 시 WebP로 변환 (압축 효율 향상)
+                    if supports_webp:
+                        img.save(output, format='WEBP', quality=85, method=6)
+                        mimetype = 'image/webp'
+                    else:
                         img_format = img.format or 'JPEG'
+                        if img_format == 'PNG' and img.mode == 'RGB':
+                            # PNG를 JPEG로 변환 (더 작은 파일 크기)
+                            img_format = 'JPEG'
                         img.save(output, format=img_format, quality=85, optimize=True)
-                        image_bytes = output.getvalue()
+                        mimetype = 'image/jpeg' if img_format == 'JPEG' else (post.image_mimetype or 'image/jpeg')
+                    
+                    image_bytes = output.getvalue()
                 except ImportError:
                     # PIL이 없으면 원본 반환
-                    pass
+                    mimetype = post.image_mimetype or 'image/jpeg'
                 except Exception as e:
                     current_app.logger.warning(f"Image resize failed: {str(e)}, returning original")
+                    mimetype = post.image_mimetype or 'image/jpeg'
+            else:
+                mimetype = post.image_mimetype or 'image/jpeg'
             
-            return Response(image_bytes, mimetype=post.image_mimetype or 'image/jpeg')
+            # ETag 생성 (캐싱 최적화)
+            import hashlib
+            etag = hashlib.md5(image_bytes).hexdigest()
+            
+            # If-None-Match 헤더 확인 (304 Not Modified 응답)
+            if request.headers.get('If-None-Match') == etag:
+                return Response(status=304)
+            
+            response = Response(image_bytes, mimetype=mimetype)
+            # 캐싱 헤더 설정 (1년 캐싱)
+            response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
+            response.headers['ETag'] = etag
+            response.headers['Vary'] = 'Accept'  # WebP 지원 여부에 따라 다른 응답
+            return response
         abort(404)
     except Exception as e:
         current_app.logger.error(f"Error serving image for post {post_id}: {str(e)}")
@@ -384,9 +443,9 @@ def new_post():
 @bp.route('/gallery')
 def gallery():
     try:
-        # 페이지네이션 추가 (페이지당 9개)
+        # 페이지네이션 추가 (페이지당 8개)
         page = request.args.get('page', 1, type=int)
-        per_page = 9
+        per_page = 8
         
         # 순차 로딩: 첫 페이지만 먼저 빠르게 로드
         # 첫 페이지가 아닌 경우에도 캐시 활용
