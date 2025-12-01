@@ -19,12 +19,11 @@
                              class="card-img-top gallery-thumbnail"
                              alt="{{ post.title }}"
                              loading="lazy">
-                    {% elif post.has_image_data() or post.image_filename or post.image_url %}
-                        {# 기존 로직 유지 (fallback) #}
-                        <img src="{% if post.image_url %}{{ post.image_url }}{% elif post.has_image_data() %}{{ url_for('main.get_image', post_id=post.id) }}?w=1500{% elif post.image_filename %}{{ url_for('static', filename='uploads/' + post.image_filename) }}{% endif %}"
-                             class="card-img-top gallery-thumbnail"
-                             alt="{{ post.title }}"
-                             loading="lazy">
+                    {% else %}
+                        {# 대표 이미지가 없을 때는 심플한 플레이스홀더 표시 #}
+                        <div class="card-img-top gallery-thumbnail d-flex align-items-center justify-content-center bg-light text-muted">
+                            <i class="bi bi-image" style="font-size: 2rem;"></i>
+                        </div>
                     {% endif %}
                     <div class="card-body">
                         <h5 class="card-title text-dark">{{ post.title|safe }}</h5>

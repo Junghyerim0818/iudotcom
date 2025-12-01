@@ -504,7 +504,7 @@ def new_post():
              
         post = Post(
             title=form.title.data,
-            content=form.content.data,
+            content=form.content.data.strip() if form.content.data else '',
             category=form.category.data,
             image_data=image_data,
             image_mimetype=image_mimetype,
