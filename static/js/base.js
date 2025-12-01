@@ -886,7 +886,7 @@ document.addEventListener('DOMContentLoaded', function() {
         function handleSwipe() {
             const xDiff = touchEndX - touchStartX;
             const yDiff = touchEndY - touchStartY;
-            const threshold = 50; // 스와이프 인식 최소 거리
+            const threshold = 30; // 스와이프 인식 최소 거리 (모바일에서 조금 더 민감하게)
             
             // 수직 이동보다 수평 이동이 커야 스와이프로 인정
             if (Math.abs(xDiff) > Math.abs(yDiff)) {
