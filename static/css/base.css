@@ -1377,7 +1377,7 @@ a:hover {
     object-fit: cover;
 }
 
-/* 갤러리 페이지 전용: 세로로 긴 썸네일 비율 */
+/* 갤러리 페이지 전용: 세로로 긴 썸네일 비율 (크기 절반) */
 .main-content-gallery .card-img-top,
 .main-content-gallery .gallery-thumbnail {
     aspect-ratio: 3 / 4; /* 세로가 더 긴 비율 (3:4) */
@@ -1385,17 +1385,32 @@ a:hover {
     object-position: center;
     width: 100%;
     height: auto;
+    max-height: 200px; /* 썸네일 최대 높이 제한 (절반 크기) */
 }
 
-/* 갤러리 카드 호버 효과 */
+/* 갤러리 카드 호버 효과 (크기 절반) */
 .gallery-card {
     transition: transform 0.2s, box-shadow 0.2s;
     cursor: pointer;
 }
 
 .gallery-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* 갤러리 카드 본문 크기 조정 */
+.main-content-gallery .gallery-card .card-body {
+    padding: 0.75rem;
+}
+
+.main-content-gallery .gallery-card .card-title {
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+}
+
+.main-content-gallery .gallery-card .card-text {
+    font-size: 0.75rem;
 }
 
 /* 모달 스타일 */

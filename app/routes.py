@@ -384,9 +384,9 @@ def new_post():
 @bp.route('/gallery')
 def gallery():
     try:
-        # 페이지네이션 추가 (페이지당 30개)
+        # 페이지네이션 추가 (페이지당 9개)
         page = request.args.get('page', 1, type=int)
-        per_page = 30
+        per_page = 9
         
         # 순차 로딩: 첫 페이지만 먼저 빠르게 로드
         # 첫 페이지가 아닌 경우에도 캐시 활용
