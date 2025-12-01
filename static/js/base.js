@@ -792,6 +792,34 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
+        // 마우스/트랙패드 스크롤로 카드 스택 이동
+        let wheelLocked = false;
+        const wheelCooldown = 200; // ms 단위, 너무 빠르게 넘기는 것 방지
+
+        gallerySliderWrapper.addEventListener('wheel', function(e) {
+            // 세로 스크롤 기준으로만 처리
+            const delta = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+            if (!delta) return;
+
+            // 한 번에 여러 번 호출되는 것을 방지
+            if (wheelLocked) return;
+            wheelLocked = true;
+            setTimeout(() => {
+                wheelLocked = false;
+            }, wheelCooldown);
+
+            // 페이지 전체 스크롤 대신 카드 스택만 움직이도록 기본 스크롤 막기
+            e.preventDefault();
+
+            if (delta > 0) {
+                // 아래로 스크롤 → 다음 카드
+                setActiveIndex(activeIndex + 1);
+            } else {
+                // 위로 스크롤 → 이전 카드
+                setActiveIndex(activeIndex - 1);
+            }
+        }, { passive: false });
+
         // 홈 버튼: 첫 번째 카드 활성화
         if (galleryHomeBtn) {
             galleryHomeBtn.addEventListener('click', function() {
