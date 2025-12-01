@@ -47,30 +47,6 @@ document.addEventListener('click', function(e) {
     }
 }, true); // capture phase에서 최우선 처리
 
-// 전역 로딩 인디케이터 관리
-const globalLoadingIndicator = document.getElementById('globalLoadingIndicator');
-if (globalLoadingIndicator) {
-    // 페이지 로드 완료 시 로딩 인디케이터 숨김
-    window.addEventListener('load', function() {
-        globalLoadingIndicator.style.display = 'none';
-    });
-    
-    // 페이지 전환 시작 시 로딩 인디케이터 표시
-    document.addEventListener('click', function(e) {
-        const link = e.target.closest('a[href]');
-        if (link && link.href && !link.target && !link.href.startsWith('#') && 
-            !link.href.startsWith('javascript:') && 
-            !link.href.includes('mailto:') && 
-            !link.href.includes('tel:') &&
-            link.href.startsWith(window.location.origin)) {
-            // 같은 도메인 내 링크인 경우에만 로딩 표시
-            setTimeout(() => {
-                globalLoadingIndicator.style.display = 'flex';
-            }, 100);
-        }
-    });
-}
-
 // 모든 초기화 코드를 하나의 DOMContentLoaded로 통합
 // HTML이 먼저 표시되도록 약간 지연
 document.addEventListener('DOMContentLoaded', function() {
@@ -904,11 +880,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 3000); // 3초 후 첫 배치 로드 (초기 로딩 완료 후)
     }
     
-    // 페이지 로딩 완료 시 로컬 로딩 인디케이터 숨김
-    const pageLoadingIndicator = document.getElementById('pageLoadingIndicator');
-    if (pageLoadingIndicator) {
-        pageLoadingIndicator.style.display = 'none';
-    }
     });
 });
 
