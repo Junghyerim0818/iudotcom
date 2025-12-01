@@ -779,7 +779,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (gallerySliderTrackForLoading && window.location.pathname === '/') {
         const initialCards = Array.from(gallerySliderTrackForLoading.querySelectorAll('.gallery-card-item'));
         let currentOffset = initialCards.length; // 초기에 로드된 카드 개수
-        const batchSize = 5; // 한 번에 5개씩 로드
+        const batchSize = 10; // 한 번에 10개씩 로드
         let isLoading = false;
         let allLoaded = false;
         
