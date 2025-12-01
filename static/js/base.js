@@ -52,32 +52,29 @@ document.addEventListener('click', function(e) {
 document.addEventListener('DOMContentLoaded', function() {
     // HTML이 먼저 렌더링되도록 약간 지연
     requestAnimationFrame(function() {
-    // 언어 선택 드롭다운 처리 (부분 페이지 전환 사용)
+    // 언어 선택 드롭다운 처리 (즉시 반영)
     const languageSelect = document.getElementById('languageSelect');
     if (languageSelect) {
         languageSelect.addEventListener('change', function(e) {
             const langCode = this.value;
             if (langCode && (langCode === 'ko' || langCode === 'en')) {
-                // 언어 변경 API 호출
+                // 언어 변경 API 호출 후 즉시 리로드
                 fetch('/lang/' + langCode, {
                     method: 'GET',
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest'
-                    }
+                    },
+                    credentials: 'same-origin' // 쿠키 포함
                 })
+                .then(response => response.json())
                 .then(() => {
-                    // 현재 페이지를 부분 전환으로 다시 로드
+                    // 캐시 무효화를 위해 타임스탬프 추가하여 리로드
                     const currentUrl = window.location.pathname + window.location.search;
-                    if (typeof loadPagePartial === 'function') {
-                        loadPagePartial(currentUrl, { push: false });
-                    } else {
-                        // 부분 전환 함수가 없으면 전체 리로드
-                        window.location.reload();
-                    }
+                    window.location.href = currentUrl + (currentUrl.includes('?') ? '&' : '?') + '_t=' + Date.now();
                 })
                 .catch(() => {
                     // 실패 시 전체 리로드
-                    window.location.href = '/lang/' + langCode;
+                    window.location.reload();
                 });
             }
         });
@@ -387,32 +384,29 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // 모바일 언어 선택 (부분 페이지 전환 사용)
+    // 모바일 언어 선택 (즉시 반영)
     const mobileLanguageSelect = document.getElementById('mobileLanguageSelect');
     if (mobileLanguageSelect) {
         mobileLanguageSelect.addEventListener('change', function(e) {
             const langCode = this.value;
             if (langCode && (langCode === 'ko' || langCode === 'en')) {
-                // 언어 변경 API 호출
+                // 언어 변경 API 호출 후 즉시 리로드
                 fetch('/lang/' + langCode, {
                     method: 'GET',
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest'
-                    }
+                    },
+                    credentials: 'same-origin' // 쿠키 포함
                 })
+                .then(response => response.json())
                 .then(() => {
-                    // 현재 페이지를 부분 전환으로 다시 로드
+                    // 캐시 무효화를 위해 타임스탬프 추가하여 리로드
                     const currentUrl = window.location.pathname + window.location.search;
-                    if (typeof loadPagePartial === 'function') {
-                        loadPagePartial(currentUrl, { push: false });
-                    } else {
-                        // 부분 전환 함수가 없으면 전체 리로드
-                        window.location.reload();
-                    }
+                    window.location.href = currentUrl + (currentUrl.includes('?') ? '&' : '?') + '_t=' + Date.now();
                 })
                 .catch(() => {
                     // 실패 시 전체 리로드
-                    window.location.href = '/lang/' + langCode;
+                    window.location.reload();
                 });
             }
         });
