@@ -87,9 +87,9 @@ def load_user(user_id):
 @cache.cached(timeout=60, key_prefix='index_gallery_posts')  # 1분 캐싱
 def index():
     try:
-        # 순차 로딩: 처음에는 첫 3개만 빠르게 로드하여 즉시 표시
+        # 순차 로딩: 처음에는 첫 10개를 빠르게 로드하여 즉시 표시
         # 나머지는 JavaScript에서 AJAX로 순차적으로 로드
-        initial_count = 3  # 초기 로드 개수 (더 빠른 첫 진입을 위해 줄임)
+        initial_count = 10  # 초기 로드 개수
         gallery_posts = db.session.query(Post).options(
             joinedload(Post.author),
             defer(Post.image_data),  # 대용량 이미지 데이터 제외 (메모리 및 네트워크 대역폭 절약)
