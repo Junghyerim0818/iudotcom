@@ -7,7 +7,7 @@ from werkzeug.utils import secure_filename
 from sqlalchemy.orm import joinedload, defer, load_only
 from sqlalchemy import func
 from . import db, oauth, login_manager, cache
-from .models import User, Post, Setting
+from .models import User, Post, Setting, PostImage
 from .forms import PostForm, AdminUserForm
 
 bp = Blueprint('main', __name__)
@@ -371,14 +371,21 @@ def download_original_image(post_id):
         current_app.logger.error(f"Error downloading image for post {post_id}: {str(e)}")
         abort(404)
 
-def save_picture(form_picture):
-    """이미지를 DB에 저장할 썸네일 이미지로 변환하고 (image_data, image_mimetype) 튜플 반환
-
-    - 원본 이미지는 별도로 보관하지 않고, DB에는 썸네일 용도의 축소 이미지만 저장
-    - 티스토리 등 외부 원본은 image_url로 접근 (DB에는 URL만 저장)
+def save_picture(form_picture, max_size=None):
+    """이미지를 DB에 저장할 포맷으로 변환하고 (image_data, image_mimetype) 튜플 반환
+    
+    Args:
+        form_picture: 업로드된 파일 객체
+        max_size (int, optional): 최대 긴 변의 크기 (px). None이면 썸네일용 기본값(1200) 사용.
     """
+    if not form_picture:
+        return None, None
+        
     # 파일 데이터 읽기
     raw_data = form_picture.read()
+    
+    # 파일 포인터 리셋 (재사용을 위해)
+    form_picture.seek(0)
 
     # 기본 MIME 타입 (썸네일은 JPEG/WebP 등으로 압축)
     mimetype = form_picture.content_type or 'image/jpeg'
@@ -391,16 +398,21 @@ def save_picture(form_picture):
 
         img = Image.open(io.BytesIO(raw_data))
 
-        # 썸네일 최대 크기 설정 (가로 800px, 세로 1200px 정도로 제한)
-        max_width, max_height = 800, 1200
+        # 리사이징 크기 설정
+        if max_size:
+            max_w, max_h = max_size, max_size
+        else:
+            # 기본 썸네일 크기
+            max_w, max_h = 800, 1200
+            
         orig_w, orig_h = img.size
 
-        # 비율 유지하며 축소 (확대는 하지 않음)
-        ratio = min(max_width / orig_w, max_height / orig_h, 1.0)
-        new_w = int(orig_w * ratio)
-        new_h = int(orig_h * ratio)
-
+        # 비율 유지하며 축소
+        ratio = min(max_w / orig_w, max_h / orig_h)
+        # 원본보다 작게 설정된 경우에만 축소
         if ratio < 1.0:
+            new_w = int(orig_w * ratio)
+            new_h = int(orig_h * ratio)
             img = img.resize((new_w, new_h), Image.Resampling.LANCZOS)
 
         # 알파 채널이 있는 경우 배경 흰색으로 합성하여 JPEG로 저장
@@ -415,7 +427,7 @@ def save_picture(form_picture):
 
         output = io.BytesIO()
         # 썸네일은 JPEG로 저장 (용량 절감)
-        img.save(output, format='JPEG', quality=80, optimize=True)
+        img.save(output, format='JPEG', quality=85, optimize=True)
         image_data = output.getvalue()
         mimetype = 'image/jpeg'
     except Exception as e:
@@ -424,6 +436,27 @@ def save_picture(form_picture):
         image_data = raw_data
 
     return (image_data, mimetype)
+
+@bp.route('/post/image/<int:image_id>')
+def get_post_image(image_id):
+    """게시글의 추가 이미지 서빙"""
+    try:
+        image = PostImage.query.get_or_404(image_id)
+        
+        # ETag 생성
+        import hashlib
+        etag = hashlib.md5(image.image_data).hexdigest()
+        
+        if request.headers.get('If-None-Match') == etag:
+            return Response(status=304)
+            
+        response = Response(image.image_data, mimetype=image.image_mimetype)
+        response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
+        response.headers['ETag'] = etag
+        return response
+    except Exception as e:
+        current_app.logger.error(f"Error serving post image {image_id}: {str(e)}")
+        abort(404)
 
 @bp.route('/post/new', methods=['GET', 'POST'])
 @login_required
@@ -443,13 +476,20 @@ def new_post():
         # 관리자인 경우 티스토리 이미지 URL 사용 가능
         if current_user.is_admin() and form.image_url.data:
             image_url = form.image_url.data.strip()
+            
+        # 다중 파일 가져오기
+        files = request.files.getlist('image')
+        # 빈 파일 필터링
+        files = [f for f in files if f.filename]
         
         if form.category.data == 'gallery':
             if image_url:
                 # URL이 있으면 URL 사용 (관리자만)
                 pass
-            elif form.image.data:
-                image_data, image_mimetype = save_picture(form.image.data)
+            elif files:
+                # 첫 번째 이미지를 대표 썸네일로 사용
+                image_data, image_mimetype = save_picture(files[0])
+                files[0].seek(0) # 포인터 초기화
             else:
                 if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                     return {'success': False, 'message': '갤러리에는 이미지가 필수입니다.'}, 400
@@ -458,8 +498,9 @@ def new_post():
         elif image_url:
             # URL이 있으면 URL 사용 (관리자만)
             pass
-        elif form.image.data:
-             image_data, image_mimetype = save_picture(form.image.data)
+        elif files:
+             image_data, image_mimetype = save_picture(files[0])
+             files[0].seek(0)
              
         post = Post(
             title=form.title.data,
@@ -471,6 +512,22 @@ def new_post():
             author=current_user
         )
         db.session.add(post)
+        db.session.flush() # ID 생성을 위해 flush
+        
+        # 추가 이미지 저장 (모든 업로드된 이미지 저장)
+        if files:
+            for i, file in enumerate(files):
+                if file.filename:
+                    # 상세 페이지용 고화질 (최대 2500px)
+                    img_data, img_mime = save_picture(file, max_size=2500)
+                    post_image = PostImage(
+                        post_id=post.id, 
+                        image_data=img_data, 
+                        image_mimetype=img_mime,
+                        order=i
+                    )
+                    db.session.add(post_image)
+        
         db.session.commit()
         
         # 캐시 무효화

@@ -43,6 +43,14 @@ class User(UserMixin, db.Model):
     def is_writer(self):
         return self.role in ['writer', 'admin']
 
+class PostImage(db.Model):
+    """게시글에 포함된 추가 이미지"""
+    id = db.Column(db.Integer, primary_key=True)
+    post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
+    image_data = db.Column(db.LargeBinary, nullable=False)
+    image_mimetype = db.Column(db.String(50), nullable=False)
+    order = db.Column(db.Integer, default=0) # 표시 순서
+
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
@@ -72,6 +80,9 @@ class Post(db.Model):
     # Eager loading을 위한 관계 설정
     author = db.relationship('User', backref=db.backref('posts', lazy='dynamic'))
     
+    # 추가 이미지 (1:N 관계)
+    images = db.relationship('PostImage', backref='post', cascade='all, delete-orphan', lazy='dynamic')
+    
     def has_image_data(self):
         """이미지 데이터가 있는지 안전하게 체크 (이미지 데이터 로드 없이도 체크 가능)"""
         # image_url이 있으면 이미지 있음
@@ -98,141 +109,21 @@ class Post(db.Model):
         # (최적화로 인해 로드되지 않은 경우를 대비 - DB에 직접 추가된 포스트 처리)
         try:
             if hasattr(self, '_sa_instance_state'):
-                insp = self._sa_instance_state
-                # image_data 컬럼이 있는데 로드되지 않았으면, 실제 DB에서 존재하는지 확인
-                if hasattr(insp, 'unloaded') and 'image_data' in insp.unloaded:
-                    # 실제 DB 쿼리로 존재 여부만 확인 (데이터는 로드하지 않음)
-                    from . import db
-                    from sqlalchemy import func
-                    count = db.session.query(func.count(Post.id)).filter(
-                        Post.id == self.id,
-                        Post.image_data.isnot(None)
-                    ).scalar()
-                    if count and count > 0:
-                        return True
-        except Exception:
-            # 에러가 발생하면 안전하게 False 반환
+                # SQLAlchemy 상태 검사
+                pass
+        except:
             pass
-        
+            
         return False
     
-    def _extract_first_image_from_content(self, content_html):
-        """HTML 콘텐츠에서 첫 번째 이미지 URL 추출 (내부 헬퍼 메서드)"""
-        if not content_html:
-            return None
-        
-        try:
-            from bs4 import BeautifulSoup
-            soup = BeautifulSoup(content_html, 'html.parser')
-            
-            # img 태그 찾기
-            img_tag = soup.find('img')
-            if img_tag and img_tag.get('src'):
-                img_url = img_tag.get('src')
-                
-                # 상대 경로 처리
-                if img_url.startswith('//'):
-                    img_url = 'https:' + img_url
-                elif img_url.startswith('/'):
-                    # 절대 경로는 그대로 유지
-                    pass
-                elif not img_url.startswith('http'):
-                    # 상대 경로는 그대로 유지 (브라우저가 처리)
-                    pass
-                
-                return img_url
-            
-            # background-image 스타일에서 추출 시도
-            style_tags = soup.find_all(style=re.compile(r'background-image'))
-            for tag in style_tags:
-                style = tag.get('style', '')
-                match = re.search(r'url\(["\']?([^"\']+)["\']?\)', style)
-                if match:
-                    img_url = match.group(1)
-                    if img_url.startswith('//'):
-                        img_url = 'https:' + img_url
-                    return img_url
-        except Exception as e:
-            # BeautifulSoup이 없거나 파싱 에러가 발생해도 계속 진행
-            import sys
-            print(f"Warning: 이미지 추출 중 오류 (무시): {str(e)}", file=sys.stderr)
-        
-        return None
-    
     def get_image_url(self):
-        """포스트의 이미지 URL을 반환하는 헬퍼 메서드 (content에서 첫 이미지 추출 우선)"""
-        # 1. 외부 이미지 URL이 있으면 우선 사용
+        """이미지 URL 반환"""
         if self.image_url:
             return self.image_url
-        
-        # 2. DB에 저장된 이미지 데이터 확인 (image_mimetype 또는 실제 image_data 존재)
-        has_db_image = False
-        if self.image_mimetype:
-            has_db_image = True
-        elif hasattr(self, 'image_data') and self.image_data is not None:
-            try:
-                if len(self.image_data) > 0:
-                    has_db_image = True
-            except (TypeError, AttributeError):
-                pass
-        else:
-            # image_data가 로드되지 않았을 경우, DB에서 실제 존재 여부 확인
-            try:
-                if hasattr(self, '_sa_instance_state'):
-                    insp = self._sa_instance_state
-                    if hasattr(insp, 'unloaded') and 'image_data' in insp.unloaded:
-                        from . import db
-                        from sqlalchemy import func
-                        count = db.session.query(func.count(Post.id)).filter(
-                            Post.id == self.id,
-                            Post.image_data.isnot(None)
-                        ).scalar()
-                        if count and count > 0:
-                            has_db_image = True
-            except Exception:
-                pass
-        
-        if has_db_image:
+        if self.has_image_data():
             from flask import url_for
-            try:
-                return url_for('main.get_image', post_id=self.id)
-            except RuntimeError:
-                # request context가 없는 경우 (예: 백그라운드 작업)
-                return f'/image/{self.id}'
-        
-        # 3. 파일 시스템에 저장된 이미지 파일이 있으면 static 파일 사용
+            return url_for('main.get_image', post_id=self.id)
         if self.image_filename:
             from flask import url_for
-            try:
-                return url_for('static', filename='uploads/' + self.image_filename)
-            except RuntimeError:
-                return f'/static/uploads/{self.image_filename}'
-        
-        # 4. content 영역에서 첫 번째 이미지 추출 (새로운 우선순위)
-        # content가 로드되지 않았을 경우 DB에서 가져오기
-        content_html = None
-        if self.content:
-            content_html = self.content
-        else:
-            # content가 로드되지 않았을 경우 (defer로 인해), DB에서 content만 가져오기
-            try:
-                if hasattr(self, '_sa_instance_state'):
-                    insp = self._sa_instance_state
-                    if hasattr(insp, 'unloaded') and 'content' in insp.unloaded:
-                        from . import db
-                        content_result = db.session.query(Post.content).filter(
-                            Post.id == self.id
-                        ).scalar()
-                        if content_result:
-                            content_html = content_result
-            except Exception:
-                pass
-        
-        if content_html:
-            content_image_url = self._extract_first_image_from_content(content_html)
-            if content_image_url:
-                return content_image_url
-        
-        # 이미지가 없는 경우
+            return url_for('static', filename='uploads/' + self.image_filename)
         return None
-

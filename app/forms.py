@@ -14,7 +14,7 @@ class PostForm(FlaskForm):
     ], validators=[DataRequired()])
     image = FileField('이미지 업로드', validators=[
         FileAllowed(['jpg', 'png', 'jpeg', 'gif', 'webp'], 'Images only!')
-    ])
+    ], render_kw={'multiple': True})
     image_url = StringField('이미지 URL (티스토리 등)', validators=[Optional()])
     submit = SubmitField('작성하기')
 
