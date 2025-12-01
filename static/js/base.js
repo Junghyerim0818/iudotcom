@@ -878,11 +878,14 @@ document.addEventListener('DOMContentLoaded', function() {
         const batchSize = 20; // 한 번에 20개씩 로드
         let isLoading = false;
         let allLoaded = false;
+        const cardStackLoading = document.getElementById('cardStackLoading');
         
         const loadNextBatch = async () => {
             if (isLoading || allLoaded) return;
             
             isLoading = true;
+            if (cardStackLoading) cardStackLoading.classList.add('show');
+
             try {
                 const response = await fetch(`/api/gallery-posts?offset=${currentOffset}&limit=${batchSize}`);
                 const data = await response.json();
@@ -954,19 +957,23 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (data.posts.length === batchSize) {
                         setTimeout(() => {
                             isLoading = false;
+                            if (cardStackLoading) cardStackLoading.classList.remove('show');
                             loadNextBatch();
                         }, 500); // 0.5초 후 다음 배치 로드
                     } else {
                         allLoaded = true;
                         isLoading = false;
+                        if (cardStackLoading) cardStackLoading.classList.remove('show');
                     }
                 } else {
                     allLoaded = true;
                     isLoading = false;
+                    if (cardStackLoading) cardStackLoading.classList.remove('show');
                 }
             } catch (error) {
                 console.error('카드 로딩 오류:', error);
                 isLoading = false;
+                if (cardStackLoading) cardStackLoading.classList.remove('show');
             }
         };
 
