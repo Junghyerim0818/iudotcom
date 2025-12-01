@@ -120,10 +120,11 @@ class Post(db.Model):
         """대표 이미지 URL 반환
         
         우선순위:
-        1) 외부 image_url (티스토리 등)
+        1) 외부 image_url (티스토리 등, 별도 필드)
         2) Post.image_data (썸네일용 DB 이미지)
         3) PostImage에 저장된 첫 번째 추가 이미지
         4) 기존 파일 기반 image_filename
+        5) 본문(content) 안에 포함된 첫 번째 이미지/티스토리 URL
         """
         from flask import url_for
 
@@ -146,5 +147,24 @@ class Post(db.Model):
         # 4) 기존 파일 기반 업로드가 있다면 그 경로 사용
         if self.image_filename:
             return url_for('static', filename='uploads/' + self.image_filename)
+
+        # 5) 본문 내용에서 첫 번째 이미지 / 티스토리 링크 추출
+        if self.content:
+            try:
+                # 5-1) <img src="..."> 태그에서 src 우선 추출
+                img_match = re.search(r'<img[^>]+src=[\'\"]([^\'\"]+)[\'\"]', self.content, re.IGNORECASE)
+                if img_match:
+                    return img_match.group(1)
+
+                # 5-2) 티스토리/이미지 확장자 링크를 일반 텍스트에서 추출
+                url_match = re.search(
+                    r'(https?://[^\s\'"]+\.(?:jpg|jpeg|png|gif|webp))',
+                    self.content,
+                    re.IGNORECASE
+                )
+                if url_match:
+                    return url_match.group(1)
+            except Exception:
+                pass
 
         return None
