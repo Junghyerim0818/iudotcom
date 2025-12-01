@@ -52,13 +52,33 @@ document.addEventListener('click', function(e) {
 document.addEventListener('DOMContentLoaded', function() {
     // HTML이 먼저 렌더링되도록 약간 지연
     requestAnimationFrame(function() {
-    // 언어 선택 드롭다운 처리
+    // 언어 선택 드롭다운 처리 (부분 페이지 전환 사용)
     const languageSelect = document.getElementById('languageSelect');
     if (languageSelect) {
         languageSelect.addEventListener('change', function(e) {
             const langCode = this.value;
             if (langCode && (langCode === 'ko' || langCode === 'en')) {
-                window.location.href = '/lang/' + langCode;
+                // 언어 변경 API 호출
+                fetch('/lang/' + langCode, {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(() => {
+                    // 현재 페이지를 부분 전환으로 다시 로드
+                    const currentUrl = window.location.pathname + window.location.search;
+                    if (typeof loadPagePartial === 'function') {
+                        loadPagePartial(currentUrl, { push: false });
+                    } else {
+                        // 부분 전환 함수가 없으면 전체 리로드
+                        window.location.reload();
+                    }
+                })
+                .catch(() => {
+                    // 실패 시 전체 리로드
+                    window.location.href = '/lang/' + langCode;
+                });
             }
         });
     }
@@ -367,13 +387,33 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // 모바일 언어 선택
+    // 모바일 언어 선택 (부분 페이지 전환 사용)
     const mobileLanguageSelect = document.getElementById('mobileLanguageSelect');
     if (mobileLanguageSelect) {
         mobileLanguageSelect.addEventListener('change', function(e) {
             const langCode = this.value;
             if (langCode && (langCode === 'ko' || langCode === 'en')) {
-                window.location.href = '/lang/' + langCode;
+                // 언어 변경 API 호출
+                fetch('/lang/' + langCode, {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(() => {
+                    // 현재 페이지를 부분 전환으로 다시 로드
+                    const currentUrl = window.location.pathname + window.location.search;
+                    if (typeof loadPagePartial === 'function') {
+                        loadPagePartial(currentUrl, { push: false });
+                    } else {
+                        // 부분 전환 함수가 없으면 전체 리로드
+                        window.location.reload();
+                    }
+                })
+                .catch(() => {
+                    // 실패 시 전체 리로드
+                    window.location.href = '/lang/' + langCode;
+                });
             }
         });
     }
@@ -653,9 +693,9 @@ document.addEventListener('DOMContentLoaded', function() {
             img.src = imageUrl;
         };
 
-        // 초기 로드: 중앙 카드와 앞뒤 1개씩만 로드 (총 3개, 더 빠른 초기 로딩)
+        // 초기 로드: 중앙 카드와 앞뒤 2개씩 로드 (총 5개, 다다음 카드까지 미리보기)
         const loadInitialImages = () => {
-            const visibleRange = 1; // 앞뒤 1개씩 (초기 로딩 속도 향상)
+            const visibleRange = 2; // 앞뒤 2개씩 (다다음 카드까지 미리보기)
             cardItems.forEach((card, index) => {
                 const offset = Math.abs(index - activeIndex);
                 if (offset <= visibleRange) {
@@ -708,8 +748,8 @@ document.addEventListener('DOMContentLoaded', function() {
             window.gallerySliderActiveIndex = clamped;
             assignPositions();
             
-            // 활성화된 카드 주변 이미지 lazy load
-            const visibleRange = 1; // 앞뒤 1개씩 (초기 로딩 속도 향상)
+            // 활성화된 카드 주변 이미지 lazy load (다다음 카드까지 미리보기)
+            const visibleRange = 2; // 앞뒤 2개씩 (다다음 카드까지 미리보기)
             cardItems.forEach((card, index) => {
                 const offset = Math.abs(index - activeIndex);
                 if (offset <= visibleRange) {

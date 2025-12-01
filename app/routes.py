@@ -204,6 +204,18 @@ def change_language(lang_code):
         session['language'] = lang_code
         session.permanent = True  # 세션을 영구적으로 저장
         session.modified = True  # 세션 수정 표시
+        
+        # 캐시 무효화 (언어 변경 시)
+        cache.delete('index_gallery_posts')
+        for i in range(1, 11):
+            cache.delete(f'gallery_posts_page_{i}')
+            cache.delete(f'archive_archive_1_page_{i}')
+            cache.delete(f'archive_archive_2_page_{i}')
+    
+    # AJAX 요청인 경우 JSON 응답
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return jsonify({'success': True, 'language': lang_code})
+    
     # 리다이렉트할 때 현재 페이지로 돌아가거나 홈으로
     referrer = request.referrer
     if referrer:
