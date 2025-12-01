@@ -372,15 +372,57 @@ def download_original_image(post_id):
         abort(404)
 
 def save_picture(form_picture):
-    """이미지를 DB에 저장하고 (image_data, image_mimetype) 튜플 반환"""
+    """이미지를 DB에 저장할 썸네일 이미지로 변환하고 (image_data, image_mimetype) 튜플 반환
+
+    - 원본 이미지는 별도로 보관하지 않고, DB에는 썸네일 용도의 축소 이미지만 저장
+    - 티스토리 등 외부 원본은 image_url로 접근 (DB에는 URL만 저장)
+    """
     # 파일 데이터 읽기
-    image_data = form_picture.read()
-    
-    # MIME 타입 결정
+    raw_data = form_picture.read()
+
+    # 기본 MIME 타입 (썸네일은 JPEG/WebP 등으로 압축)
     mimetype = form_picture.content_type or 'image/jpeg'
     if not mimetype or not mimetype.startswith('image/'):
         mimetype = 'image/jpeg'
-    
+
+    try:
+        from PIL import Image
+        import io
+
+        img = Image.open(io.BytesIO(raw_data))
+
+        # 썸네일 최대 크기 설정 (가로 800px, 세로 1200px 정도로 제한)
+        max_width, max_height = 800, 1200
+        orig_w, orig_h = img.size
+
+        # 비율 유지하며 축소 (확대는 하지 않음)
+        ratio = min(max_width / orig_w, max_height / orig_h, 1.0)
+        new_w = int(orig_w * ratio)
+        new_h = int(orig_h * ratio)
+
+        if ratio < 1.0:
+            img = img.resize((new_w, new_h), Image.Resampling.LANCZOS)
+
+        # 알파 채널이 있는 경우 배경 흰색으로 합성하여 JPEG로 저장
+        if img.mode in ('RGBA', 'LA', 'P'):
+            rgb_img = Image.new('RGB', img.size, (255, 255, 255))
+            if img.mode == 'P':
+                img = img.convert('RGBA')
+            rgb_img.paste(img, mask=img.split()[-1] if img.mode in ('RGBA', 'LA') else None)
+            img = rgb_img
+        elif img.mode != 'RGB':
+            img = img.convert('RGB')
+
+        output = io.BytesIO()
+        # 썸네일은 JPEG로 저장 (용량 절감)
+        img.save(output, format='JPEG', quality=80, optimize=True)
+        image_data = output.getvalue()
+        mimetype = 'image/jpeg'
+    except Exception as e:
+        # Pillow가 없거나 변환 실패 시 원본 데이터를 그대로 저장 (최후의 보루)
+        current_app.logger.warning(f"Thumbnail generation failed, storing original image: {str(e)}")
+        image_data = raw_data
+
     return (image_data, mimetype)
 
 @bp.route('/post/new', methods=['GET', 'POST'])
