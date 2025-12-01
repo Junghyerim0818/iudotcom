@@ -26,43 +26,6 @@
         </div>
     </div>
 
-    {# 티스토리에서 넘어온 글(post.tistory_link가 있는 경우)는 본문 안에 이미지가 포함되므로
-       상단 썸네일 이미지는 중복 표시를 피하기 위해 숨기고,
-       수동 작성 글만 상단 이미지 박스를 보여준다. #}
-    {% if not post.tistory_link %}
-    <div class="gallery-detail-image-wrapper mb-4">
-        {% set image_url = post.get_image_url() %}
-        {% if image_url %}
-            {% if image_url.startswith('/image/') %}
-                {% set image_url = image_url + '?w=1500' %}
-            {% endif %}
-            <img src="{{ image_url }}" 
-                 class="gallery-detail-image" 
-                 alt="{{ post.title }}"
-                 id="galleryDetailImage"
-                 fetchpriority="high"
-                 loading="eager"
-                 decoding="async"
-                 width="1500"
-                 height="2000">
-        {% elif post.has_image_data() or post.image_filename or post.image_url %}
-            {# 기존 로직 유지 (fallback) #}
-            <img src="{% if post.image_url %}{{ post.image_url }}{% elif post.has_image_data() %}{{ url_for('main.get_image', post_id=post.id) }}?w=1500{% elif post.image_filename %}{{ url_for('static', filename='uploads/' + post.image_filename) }}{% endif %}" 
-                 class="gallery-detail-image" 
-                 alt="{{ post.title }}"
-                 id="galleryDetailImage"
-                 fetchpriority="high"
-                 loading="eager"
-                 decoding="async">
-        {% else %}
-            <div class="gallery-detail-placeholder">
-                <i class="bi bi-image text-muted" style="font-size: 4rem;"></i>
-                <p class="text-muted mt-3">{% if current_lang == 'en' %}No image available{% else %}이미지가 없습니다{% endif %}</p>
-            </div>
-        {% endif %}
-    </div>
-    {% endif %}
-
     <div class="gallery-detail-info">
         <div class="card">
             <div class="card-body">
