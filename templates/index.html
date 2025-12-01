@@ -14,15 +14,6 @@
     
     <!-- 카드 슬라이더 -->
     <div class="gallery-slider-wrapper" id="gallerySliderWrapper">
-        <!-- 로딩 인디케이터 (초기에는 숨김, 순차 로딩 중에만 표시) -->
-        <div class="gallery-loading-indicator" id="galleryLoadingIndicator">
-            <div class="gallery-loading-spinner">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">로딩 중...</span>
-                </div>
-                <p class="gallery-loading-text">{% if current_lang == 'en' %}Loading more...{% else %}추가 로딩 중...{% endif %}</p>
-            </div>
-        </div>
         <div class="gallery-slider-track" id="gallerySliderTrack">
             {% if gallery_posts %}
                 {% for post in gallery_posts %}

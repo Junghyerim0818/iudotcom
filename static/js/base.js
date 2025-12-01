@@ -72,7 +72,10 @@ if (globalLoadingIndicator) {
 }
 
 // 모든 초기화 코드를 하나의 DOMContentLoaded로 통합
+// HTML이 먼저 표시되도록 약간 지연
 document.addEventListener('DOMContentLoaded', function() {
+    // HTML이 먼저 렌더링되도록 약간 지연
+    requestAnimationFrame(function() {
     // 언어 선택 드롭다운 처리
     const languageSelect = document.getElementById('languageSelect');
     if (languageSelect) {
@@ -634,14 +637,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const cardItems = Array.from(gallerySliderTrack.querySelectorAll('.gallery-card-item'));
         if (cardItems.length === 0) return;
         
-        // 초기 로딩 인디케이터 숨김 (카드가 로드되면)
-        const loadingIndicator = document.getElementById('galleryLoadingIndicator');
-        if (loadingIndicator && cardItems.length > 0) {
-            // 카드가 로드되면 로딩 인디케이터 숨김
-            setTimeout(() => {
-                loadingIndicator.classList.remove('show');
-            }, 500);
-        }
 
         // 배경 이미지 lazy loading - 처음에는 중앙 카드와 인접 카드만 로드
         const loadCardImage = (card, index) => {
@@ -682,9 +677,9 @@ document.addEventListener('DOMContentLoaded', function() {
             img.src = imageUrl;
         };
 
-        // 초기 로드: 중앙 카드와 앞뒤 2개씩만 로드 (총 5개)
+        // 초기 로드: 중앙 카드와 앞뒤 1개씩만 로드 (총 3개, 더 빠른 초기 로딩)
         const loadInitialImages = () => {
-            const visibleRange = 2; // 앞뒤 2개씩
+            const visibleRange = 1; // 앞뒤 1개씩 (초기 로딩 속도 향상)
             cardItems.forEach((card, index) => {
                 const offset = Math.abs(index - activeIndex);
                 if (offset <= visibleRange) {
@@ -738,7 +733,7 @@ document.addEventListener('DOMContentLoaded', function() {
             assignPositions();
             
             // 활성화된 카드 주변 이미지 lazy load
-            const visibleRange = 2; // 앞뒤 2개씩
+            const visibleRange = 1; // 앞뒤 1개씩 (초기 로딩 속도 향상)
             cardItems.forEach((card, index) => {
                 const offset = Math.abs(index - activeIndex);
                 if (offset <= visibleRange) {
@@ -753,8 +748,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // 초기 위치 설정
         assignPositions();
-        // 초기 이미지 로드 (중앙 카드와 주변 카드)
-        loadInitialImages();
+        // 초기 이미지 로드는 HTML 렌더링 후 지연 (HTML 먼저 표시)
+        setTimeout(() => {
+            loadInitialImages();
+        }, 100);
 
         // 카드 클릭: 중앙이 아니면 중앙으로 이동, 중앙이면 링크 동작
         cardItems.forEach((card, index) => {
@@ -809,27 +806,11 @@ document.addEventListener('DOMContentLoaded', function() {
         const batchSize = 5; // 한 번에 5개씩 로드
         let isLoading = false;
         let allLoaded = false;
-
-        // 로딩 인디케이터 요소
-        const loadingIndicator = document.getElementById('galleryLoadingIndicator');
-        
-        const showLoading = () => {
-            if (loadingIndicator) {
-                loadingIndicator.classList.add('show');
-            }
-        };
-        
-        const hideLoading = () => {
-            if (loadingIndicator) {
-                loadingIndicator.classList.remove('show');
-            }
-        };
         
         const loadNextBatch = async () => {
             if (isLoading || allLoaded) return;
             
             isLoading = true;
-            showLoading();
             try {
                 const response = await fetch(`/api/gallery-posts?offset=${currentOffset}&limit=${batchSize}`);
                 const data = await response.json();
@@ -899,7 +880,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     // 다음 배치를 조금 후에 로드 (페이지 로딩 부하 분산)
                     if (data.posts.length === batchSize) {
-                        hideLoading();
                         setTimeout(() => {
                             isLoading = false;
                             loadNextBatch();
@@ -907,24 +887,21 @@ document.addEventListener('DOMContentLoaded', function() {
                     } else {
                         allLoaded = true;
                         isLoading = false;
-                        hideLoading();
                     }
                 } else {
                     allLoaded = true;
                     isLoading = false;
-                    hideLoading();
                 }
             } catch (error) {
                 console.error('카드 로딩 오류:', error);
                 isLoading = false;
-                hideLoading();
             }
         };
 
-        // 첫 배치는 페이지가 완전히 로드되고 첫 페이지가 표시된 후 시작
+        // 첫 배치는 페이지가 완전히 로드되고 첫 페이지가 표시된 후 시작 (더 늦게 시작하여 초기 로딩 부하 감소)
         setTimeout(() => {
             loadNextBatch();
-        }, 1500); // 1.5초 후 첫 배치 로드 (현재 페이지가 완전히 로드된 후)
+        }, 3000); // 3초 후 첫 배치 로드 (초기 로딩 완료 후)
     }
     
     // 페이지 로딩 완료 시 로컬 로딩 인디케이터 숨김
@@ -932,5 +909,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (pageLoadingIndicator) {
         pageLoadingIndicator.style.display = 'none';
     }
+    });
 });
 

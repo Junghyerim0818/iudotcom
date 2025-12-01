@@ -666,55 +666,6 @@ a:hover {
     opacity: 1;
 }
 
-/* 갤러리 로딩 인디케이터 */
-.gallery-loading-indicator {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 100;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    pointer-events: none;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
-}
-
-.gallery-loading-indicator.show {
-    opacity: 1;
-    visibility: visible;
-}
-
-.gallery-loading-spinner {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-    padding: 2rem;
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 16px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-}
-
-.gallery-loading-spinner .spinner-border {
-    width: 3rem;
-    height: 3rem;
-    border-width: 0.3rem;
-    color: var(--accent-color);
-}
-
-.gallery-loading-text {
-    margin: 0;
-    font-size: 1rem;
-    font-weight: 500;
-    color: var(--text-primary);
-    letter-spacing: -0.01em;
-}
-
 /* 페이지 로딩 인디케이터 (갤러리/아카이브 페이지용) */
 .page-loading-indicator {
     position: fixed;
