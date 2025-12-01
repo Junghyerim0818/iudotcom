@@ -1108,7 +1108,7 @@ a:hover {
 /* 홈 버튼 */
 .gallery-slider-controls {
     position: absolute;
-    bottom: 2rem;
+    bottom: 4rem; /* 카드 이미지와 겹치지 않도록 조금 위로 배치하여 전체 페이지 스크롤 최소화 */
     left: 50%;
     transform: translateX(-50%);
     z-index: 100;
@@ -1130,6 +1130,32 @@ a:hover {
     box-shadow: var(--shadow-md);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
+}
+
+/* 갤러리 페이지 전용 로딩 인디케이터 */
+.gallery-page-wrapper {
+    position: relative;
+}
+
+.gallery-page-loading {
+    position: absolute;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.7);
+    z-index: 10;
+}
+
+.gallery-page-loading.show {
+    display: flex;
+}
+
+.gallery-page-loading-inner {
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
 .gallery-home-btn:hover {
@@ -1667,7 +1693,7 @@ a:hover {
     .mobile-header {
         display: flex;
         align-items: center;
-        justify-content: center;
+        justify-content: space-between;
         position: fixed;
         top: 0;
         left: 0;
@@ -1678,6 +1704,16 @@ a:hover {
         padding: 0 1rem;
         z-index: 1001;
         box-shadow: var(--shadow-sm);
+    }
+
+    .mobile-header-brand {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        letter-spacing: -0.02em;
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
     }
     
     /* 모바일에서 상단 헤더 숨김 */

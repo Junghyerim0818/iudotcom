@@ -2,81 +2,96 @@
 
 {% block content %}
 <h2 class="mb-4">갤러리</h2>
-<div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-3" id="galleryPostsContainer">
-    {% for post in posts %}
-    <div class="col">
-        <a href="{{ url_for('main.gallery_detail', post_id=post.id) }}" class="text-decoration-none">
-            <div class="card h-100 gallery-card">
-                {% set image_url = post.get_image_url() %}
-                {% if image_url %}
-                    {% if image_url.startswith('/image/') %}
-                        {% set image_url = image_url + '?w=1500' %}
+
+<div class="gallery-page-wrapper">
+    <!-- 갤러리 리스트 -->
+    <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-3" id="galleryPostsContainer">
+        {% for post in posts %}
+        <div class="col">
+            <a href="{{ url_for('main.gallery_detail', post_id=post.id) }}" class="text-decoration-none">
+                <div class="card h-100 gallery-card">
+                    {% set image_url = post.get_image_url() %}
+                    {% if image_url %}
+                        {% if image_url.startswith('/image/') %}
+                            {% set image_url = image_url + '?w=1500' %}
+                        {% endif %}
+                        <img src="{{ image_url }}"
+                             class="card-img-top gallery-thumbnail"
+                             alt="{{ post.title }}"
+                             loading="lazy">
+                    {% elif post.has_image_data() or post.image_filename or post.image_url %}
+                        {# 기존 로직 유지 (fallback) #}
+                        <img src="{% if post.image_url %}{{ post.image_url }}{% elif post.has_image_data() %}{{ url_for('main.get_image', post_id=post.id) }}?w=1500{% elif post.image_filename %}{{ url_for('static', filename='uploads/' + post.image_filename) }}{% endif %}"
+                             class="card-img-top gallery-thumbnail"
+                             alt="{{ post.title }}"
+                             loading="lazy">
                     {% endif %}
-                    <img src="{{ image_url }}"
-                         class="card-img-top gallery-thumbnail"
-                         alt="{{ post.title }}"
-                         loading="lazy">
-                {% elif post.has_image_data() or post.image_filename or post.image_url %}
-                    {# 기존 로직 유지 (fallback) #}
-                    <img src="{% if post.image_url %}{{ post.image_url }}{% elif post.has_image_data() %}{{ url_for('main.get_image', post_id=post.id) }}?w=1500{% elif post.image_filename %}{{ url_for('static', filename='uploads/' + post.image_filename) }}{% endif %}"
-                         class="card-img-top gallery-thumbnail"
-                         alt="{{ post.title }}"
-                         loading="lazy">
-                {% endif %}
-                <div class="card-body">
-                    <h5 class="card-title text-dark">{{ post.title|safe }}</h5>
-                    <p class="card-text"><small class="text-muted">By {% if post.author.is_admin() %}아이유닷컴{% else %}{{ post.author.name }}{% endif %} on {{ post.created_at.strftime('%Y-%m-%d') }}</small></p>
+                    <div class="card-body">
+                        <h5 class="card-title text-dark">{{ post.title|safe }}</h5>
+                        <p class="card-text"><small class="text-muted">By {% if post.author.is_admin() %}아이유닷컴{% else %}{{ post.author.name }}{% endif %} on {{ post.created_at.strftime('%Y-%m-%d') }}</small></p>
+                    </div>
                 </div>
-            </div>
-        </a>
+            </a>
+        </div>
+        {% else %}
+        <p>게시물이 없습니다.</p>
+        {% endfor %}
     </div>
-    {% else %}
-    <p>게시물이 없습니다.</p>
-    {% endfor %}
+
+    <!-- 페이지네이션 -->
+    {% if pagination and pagination.pages > 1 %}
+    <nav aria-label="페이지 네비게이션" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if pagination.has_prev %}
+            <li class="page-item">
+                <a class="page-link gallery-page-link" href="{{ url_for('main.gallery', page=pagination.prev_num) }}">이전</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">이전</span>
+            </li>
+            {% endif %}
+            
+            {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                {% if page_num %}
+                    {% if page_num == pagination.page %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ page_num }}</span>
+                    </li>
+                    {% else %}
+                    <li class="page-item">
+                        <a class="page-link gallery-page-link" href="{{ url_for('main.gallery', page=page_num) }}">{{ page_num }}</a>
+                    </li>
+                    {% endif %}
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">…</span>
+                    </li>
+                {% endif %}
+            {% endfor %}
+            
+            {% if pagination.has_next %}
+            <li class="page-item">
+                <a class="page-link gallery-page-link" href="{{ url_for('main.gallery', page=pagination.next_num) }}">다음</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">다음</span>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+    <!-- 갤러리 페이지 전용 로딩 인디케이터 -->
+    <div class="gallery-page-loading" id="galleryPageLoading">
+        <div class="gallery-page-loading-inner">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">로딩 중...</span>
+            </div>
+        </div>
+    </div>
 </div>
 
-{% if pagination and pagination.pages > 1 %}
-<nav aria-label="페이지 네비게이션" class="mt-4">
-    <ul class="pagination justify-content-center">
-        {% if pagination.has_prev %}
-        <li class="page-item">
-            <a class="page-link" href="{{ url_for('main.gallery', page=pagination.prev_num) }}">이전</a>
-        </li>
-        {% else %}
-        <li class="page-item disabled">
-            <span class="page-link">이전</span>
-        </li>
-        {% endif %}
-        
-        {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
-            {% if page_num %}
-                {% if page_num == pagination.page %}
-                <li class="page-item active">
-                    <span class="page-link">{{ page_num }}</span>
-                </li>
-                {% else %}
-                <li class="page-item">
-                    <a class="page-link" href="{{ url_for('main.gallery', page=page_num) }}">{{ page_num }}</a>
-                </li>
-                {% endif %}
-            {% else %}
-                <li class="page-item disabled">
-                    <span class="page-link">…</span>
-                </li>
-            {% endif %}
-        {% endfor %}
-        
-        {% if pagination.has_next %}
-        <li class="page-item">
-            <a class="page-link" href="{{ url_for('main.gallery', page=pagination.next_num) }}">다음</a>
-        </li>
-        {% else %}
-        <li class="page-item disabled">
-            <span class="page-link">다음</span>
-        </li>
-        {% endif %}
-    </ul>
-</nav>
-{% endif %}
 {% endblock %}
 

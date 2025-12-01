@@ -242,6 +242,15 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
+        // 갤러리 페이지인 경우 전용 로딩 인디케이터 표시
+        const isGalleryPage = url.startsWith('/gallery');
+        if (isGalleryPage) {
+            const galleryLoader = mainContent.querySelector('#galleryPageLoading');
+            if (galleryLoader) {
+                galleryLoader.classList.add('show');
+            }
+        }
+
         fetch(url, {
             headers: {
                 'X-Requested-With': 'XMLHttpRequest'
@@ -819,6 +828,31 @@ document.addEventListener('DOMContentLoaded', function() {
                 setActiveIndex(activeIndex - 1);
             }
         }, { passive: false });
+
+        // 모바일 터치 스와이프 지원
+        let touchStartX = 0;
+        let touchEndX = 0;
+        
+        gallerySliderWrapper.addEventListener('touchstart', function(e) {
+            touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+        
+        gallerySliderWrapper.addEventListener('touchend', function(e) {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        }, { passive: true });
+        
+        function handleSwipe() {
+            const threshold = 50; // 스와이프 인식 최소 거리
+            if (touchEndX < touchStartX - threshold) {
+                // 왼쪽으로 스와이프 -> 다음 카드
+                setActiveIndex(activeIndex + 1);
+            }
+            if (touchEndX > touchStartX + threshold) {
+                // 오른쪽으로 스와이프 -> 이전 카드
+                setActiveIndex(activeIndex - 1);
+            }
+        }
 
         // 홈 버튼: 첫 번째 카드 활성화
         if (galleryHomeBtn) {
