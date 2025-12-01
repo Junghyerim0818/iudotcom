@@ -521,12 +521,11 @@ def new_post():
                     # 상세 페이지용 고화질 (최대 2500px)
                     img_data, img_mime = save_picture(file, max_size=2500)
                     post_image = PostImage(
-                        post_id=post.id, 
                         image_data=img_data, 
                         image_mimetype=img_mime,
                         order=i
                     )
-                    db.session.add(post_image)
+                    post.images.append(post_image)
         
         db.session.commit()
         

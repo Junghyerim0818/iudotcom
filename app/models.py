@@ -81,7 +81,7 @@ class Post(db.Model):
     author = db.relationship('User', backref=db.backref('posts', lazy='dynamic'))
     
     # 추가 이미지 (1:N 관계)
-    images = db.relationship('PostImage', backref='post', cascade='all, delete-orphan', lazy='dynamic')
+    images = db.relationship('PostImage', backref='post', cascade='all, delete-orphan', lazy=True)
     
     def has_image_data(self):
         """이미지 데이터가 있는지 안전하게 체크 (이미지 데이터 로드 없이도 체크 가능)"""
