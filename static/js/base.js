@@ -843,26 +843,48 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // 모바일 터치 스와이프 지원
         let touchStartX = 0;
+        let touchStartY = 0;
         let touchEndX = 0;
+        let touchEndY = 0;
         
         gallerySliderWrapper.addEventListener('touchstart', function(e) {
-            touchStartX = e.changedTouches[0].screenX;
+            touchStartX = e.changedTouches[0].clientX;
+            touchStartY = e.changedTouches[0].clientY;
         }, { passive: true });
         
+        gallerySliderWrapper.addEventListener('touchmove', function(e) {
+            // 수평 이동이 수직 이동보다 크면 기본 스크롤 막고 스와이프로 처리 가능성 열어둠
+            // 단, passive: false로 설정해야 preventDefault 가능
+            const xDiff = Math.abs(e.changedTouches[0].clientX - touchStartX);
+            const yDiff = Math.abs(e.changedTouches[0].clientY - touchStartY);
+            
+            if (xDiff > yDiff && xDiff > 10) {
+                if (e.cancelable) e.preventDefault();
+            }
+        }, { passive: false });
+        
         gallerySliderWrapper.addEventListener('touchend', function(e) {
-            touchEndX = e.changedTouches[0].screenX;
+            touchEndX = e.changedTouches[0].clientX;
+            touchEndY = e.changedTouches[0].clientY;
             handleSwipe();
         }, { passive: true });
         
         function handleSwipe() {
+            const xDiff = touchEndX - touchStartX;
+            const yDiff = touchEndY - touchStartY;
             const threshold = 50; // 스와이프 인식 최소 거리
-            if (touchEndX < touchStartX - threshold) {
-                // 왼쪽으로 스와이프 -> 다음 카드
-                setActiveIndex(activeIndex + 1);
-            }
-            if (touchEndX > touchStartX + threshold) {
-                // 오른쪽으로 스와이프 -> 이전 카드
-                setActiveIndex(activeIndex - 1);
+            
+            // 수직 이동보다 수평 이동이 커야 스와이프로 인정
+            if (Math.abs(xDiff) > Math.abs(yDiff)) {
+                if (Math.abs(xDiff) > threshold) {
+                    if (xDiff > 0) {
+                        // 오른쪽으로 스와이프 -> 이전 카드 (사용자 입장에서는 왼쪽 카드를 당겨오는 느낌)
+                        setActiveIndex(activeIndex - 1);
+                    } else {
+                        // 왼쪽으로 스와이프 -> 다음 카드 (사용자 입장에서는 현재 카드를 왼쪽으로 미는 느낌)
+                        setActiveIndex(activeIndex + 1);
+                    }
+                }
             }
         }
 
