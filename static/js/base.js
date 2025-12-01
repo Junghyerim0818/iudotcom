@@ -281,6 +281,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // 스크롤 맨 위로
             window.scrollTo({ top: 0, behavior: 'auto' });
+
+            // 갤러리 페이지 전용 로딩 인디케이터 숨기기 (부분 전환 완료 후)
+            if (isGalleryPage) {
+                const galleryLoader = mainContent.querySelector('#galleryPageLoading');
+                if (galleryLoader) {
+                    galleryLoader.classList.remove('show');
+                }
+            }
+
+            // 부분 전환 후 상단 메뉴 분홍 배경 위치 재계산
+            // (디테일 페이지 진입/이탈 시 레이아웃이 변해도 올바른 위치로 다시 정렬)
+            requestAnimationFrame(() => {
+                updateActiveMenuBackground(false);
+            });
         })
         .catch(() => {
             // 에러 시에는 일반 페이지 이동으로 폴백
