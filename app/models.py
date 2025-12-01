@@ -117,13 +117,34 @@ class Post(db.Model):
         return False
     
     def get_image_url(self):
-        """이미지 URL 반환"""
+        """대표 이미지 URL 반환
+        
+        우선순위:
+        1) 외부 image_url (티스토리 등)
+        2) Post.image_data (썸네일용 DB 이미지)
+        3) PostImage에 저장된 첫 번째 추가 이미지
+        4) 기존 파일 기반 image_filename
+        """
+        from flask import url_for
+
+        # 1) 외부 URL이 명시되어 있으면 그대로 사용
         if self.image_url:
             return self.image_url
-        if self.has_image_data():
-            from flask import url_for
+
+        # 2) Post 자체에 DB 이미지가 있으면 /image/<post_id> 사용
+        if self.image_mimetype or self.image_data:
             return url_for('main.get_image', post_id=self.id)
+
+        # 3) PostImage에 추가 이미지가 있으면 첫 번째 이미지를 대표로 사용
+        try:
+            if self.images and len(self.images) > 0:
+                first_image = sorted(self.images, key=lambda img: (img.order or 0, img.id))[0]
+                return url_for('main.get_post_image', image_id=first_image.id)
+        except Exception:
+            pass
+
+        # 4) 기존 파일 기반 업로드가 있다면 그 경로 사용
         if self.image_filename:
-            from flask import url_for
             return url_for('static', filename='uploads/' + self.image_filename)
+
         return None
