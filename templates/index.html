@@ -1,46 +1,6 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="home-content-wrapper">
-    <h1 class="page-title">갤러리</h1>
-    <p class="page-subtitle">아이유의 다양한 순간들을 만나보세요</p>
-    
-    <div class="gallery-post-list" id="homeGalleryList">
-        {% if gallery_posts %}
-            {% for post in gallery_posts %}
-                <a href="{{ url_for('main.gallery_detail', post_id=post.id) }}" class="gallery-post-item">
-                    <div class="gallery-post-content">
-                        <h5 class="gallery-post-title">{{ post.title|safe }}</h5>
-                        <div class="gallery-post-meta">
-                            <span class="gallery-post-author">{% if post.author.is_admin() %}아이유닷컴{% else %}{{ post.author.name }}{% endif %}</span>
-                            <span class="gallery-post-date">{{ post.created_at.strftime('%Y-%m-%d') }}</span>
-                        </div>
-                    </div>
-                    <div class="gallery-post-thumbnail">
-                        {% set image_url = post.get_image_url(use_thumbnail=True, thumbnail_size='160x108') %}
-                        {% if image_url %}
-                            {% if image_url.startswith('/image/') or image_url.startswith('/post/image/') %}
-                                {% set sep = '&' if '?' in image_url else '?' %}
-                                {% set image_url = image_url + sep + 'w=160&h=108' %}
-                            {% endif %}
-                            <img src="{{ image_url }}"
-                                 class="gallery-thumbnail-img"
-                                 alt="{{ post.title }}"
-                                 loading="lazy">
-                        {% else %}
-                            <div class="gallery-thumbnail-placeholder d-flex align-items-center justify-content-center bg-light text-muted">
-                                <i class="bi bi-image"></i>
-                            </div>
-                        {% endif %}
-                    </div>
-                </a>
-            {% endfor %}
-        {% else %}
-            <div class="empty-state">
-                <p>갤러리에 글이 없습니다.</p>
-            </div>
-        {% endif %}
-    </div>
-</div>
+<!-- 홈 페이지는 빈 콘텐츠 -->
 {% endblock %}
 

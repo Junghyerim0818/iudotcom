@@ -168,21 +168,26 @@ document.addEventListener('DOMContentLoaded', function() {
             const itemRect = activeItem.getBoundingClientRect();
             const wrapperRect = menuWrapper.getBoundingClientRect();
             
+            // 정확한 중앙 정렬을 위해 패딩 고려
             const left = itemRect.left - wrapperRect.left;
             const width = itemRect.width;
+            
+            // 배경 박스가 메뉴 항목의 정 중앙에 오도록 조정
+            const backgroundLeft = left;
+            const backgroundWidth = width;
             
             if (animate) {
                 // 애니메이션 적용
                 requestAnimationFrame(() => {
                     menuBackground.style.transition = 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
-                    menuBackground.style.transform = `translateX(${left}px)`;
-                    menuBackground.style.width = `${width}px`;
+                    menuBackground.style.transform = `translateX(${backgroundLeft}px)`;
+                    menuBackground.style.width = `${backgroundWidth}px`;
                 });
             } else {
                 // 애니메이션 없이 즉시 위치 설정 (로딩 완료 시)
                 menuBackground.style.transition = 'none';
-                menuBackground.style.transform = `translateX(${left}px)`;
-                menuBackground.style.width = `${width}px`;
+                menuBackground.style.transform = `translateX(${backgroundLeft}px)`;
+                menuBackground.style.width = `${backgroundWidth}px`;
             }
         }
     }
@@ -217,8 +222,33 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
+    // 메뉴 위치를 메인 영역 기준으로 조정하는 함수
+    function updateMenuPosition() {
+        const mainContentArea = document.querySelector('.main-content-area');
+        const menuNav = document.querySelector('.main-menu-nav');
+        if (!mainContentArea || !menuNav) return;
+        
+        // 메인 영역의 위치와 크기를 기준으로 메뉴를 중앙 정렬
+        // 이미 CSS에서 left: 50%, transform: translateX(-50%)로 처리되므로
+        // JavaScript에서는 추가 조정이 필요 없음
+    }
+    
+    // 윈도우 리사이즈 시 메뉴 위치 업데이트
+    let resizeTimer;
+    window.addEventListener('resize', function() {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+            updateMenuPosition();
+            const activeLink = document.querySelector('.top-menu-link.active');
+            if (activeLink) {
+                updateActiveMenu(activeLink, false);
+            }
+        }, 100);
+    });
+    
     // 초기화 - 애니메이션 없이 즉시 위치 설정
     initActiveMenuBackground(false);
+    updateMenuPosition();
     
     // 페이지 이동 속도 최적화: 내부 링크를 부분 전환(Partial Navigation)으로 처리
     /**

@@ -330,20 +330,28 @@ a:hover {
     }
 }
 
-/* 중앙: 메뉴 (KWANGYA 스타일 - 하나의 라운드 박스) - 오버레이 형식 */
+/* 중앙: 메뉴 (KWANGYA 스타일 - 하나의 라운드 박스) - 오버레이 형식, 메인 영역 기준 중앙 정렬 */
 .main-menu-nav {
-    position: fixed;
-    top: 1rem;
+    position: absolute;
+    top: 2rem;
     left: 50%;
     transform: translateX(-50%);
     z-index: 200;
     display: flex;
     justify-content: center;
     align-items: center;
+    width: 100%;
+    pointer-events: none;
+}
+
+.main-menu-nav .top-menu-wrapper {
+    pointer-events: all;
 }
 
 .top-menu-wrapper {
-    background-color: #f5f5f5;
+    background-color: rgba(245, 245, 245, 0.8);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     border-radius: 50px;
     padding: 0.5rem;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
@@ -368,7 +376,7 @@ a:hover {
 .menu-active-background {
     position: absolute;
     top: 0.5rem;
-    left: 0.5rem;
+    left: 0;
     height: calc(100% - 1rem);
     background-color: #ffffff;
     border-radius: 50px;
@@ -376,6 +384,7 @@ a:hover {
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 0;
     pointer-events: none;
+    will-change: transform, width;
 }
 
 .top-menu-link {
@@ -706,6 +715,7 @@ html {
     margin-bottom: 1.5rem;
     padding-bottom: 1.5rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    align-items: center;
 }
 
 .sidebar-icon-link {
