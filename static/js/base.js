@@ -106,7 +106,78 @@ document.addEventListener('DOMContentLoaded', function() {
     // 페이지 로드 시 통계 데이터 로드
     loadSidebarStats();
     
-    // 활성 메뉴 배경 관련 코드 제거됨 - KWANGYA 스타일로 변경
+    // 활성 메뉴 배경 부드럽게 이동 (KWANGYA 스타일)
+    function updateActiveMenu(activeLink) {
+        const menuLinks = document.querySelectorAll('.top-menu-link');
+        menuLinks.forEach(link => {
+            link.classList.remove('active');
+        });
+        if (activeLink) {
+            activeLink.classList.add('active');
+        }
+        
+        // 배경 요소 이동 애니메이션
+        const menuWrapper = document.querySelector('.top-menu-wrapper');
+        const menu = document.querySelector('.top-menu');
+        if (!menuWrapper || !menu || !activeLink) return;
+        
+        // 배경 요소가 없으면 생성
+        let menuBackground = menuWrapper.querySelector('.menu-active-background');
+        if (!menuBackground) {
+            menuBackground = document.createElement('div');
+            menuBackground.className = 'menu-active-background';
+            menuWrapper.appendChild(menuBackground);
+        }
+        
+        // 활성 링크의 위치 계산
+        const activeItem = activeLink.closest('.top-menu-item');
+        if (activeItem) {
+            const itemRect = activeItem.getBoundingClientRect();
+            const wrapperRect = menuWrapper.getBoundingClientRect();
+            
+            const left = itemRect.left - wrapperRect.left;
+            const width = itemRect.width;
+            
+            // 부드러운 애니메이션을 위해 requestAnimationFrame 사용
+            requestAnimationFrame(() => {
+                menuBackground.style.transform = `translateX(${left}px)`;
+                menuBackground.style.width = `${width}px`;
+            });
+        }
+    }
+    
+    // URL로 활성 메뉴 찾기
+    function findActiveMenuByUrl(url) {
+        const menuLinks = document.querySelectorAll('.top-menu-link');
+        const urlPath = url.split('?')[0]; // 쿼리 스트링 제거
+        
+        for (let link of menuLinks) {
+            const linkHref = link.getAttribute('href');
+            if (linkHref) {
+                const linkPath = linkHref.split('?')[0];
+                // 정확히 일치하거나, archive의 경우 type_name 매칭
+                if (linkPath === urlPath || 
+                    (urlPath.includes('/archive/') && linkPath.includes('/archive/'))) {
+                    return link;
+                }
+            }
+        }
+        return null;
+    }
+    
+    // 초기 활성 메뉴 배경 위치 설정
+    function initActiveMenuBackground() {
+        const activeLink = document.querySelector('.top-menu-link.active');
+        if (activeLink) {
+            // 약간의 지연을 두어 DOM이 완전히 렌더링된 후 실행
+            setTimeout(() => {
+                updateActiveMenu(activeLink);
+            }, 50);
+        }
+    }
+    
+    // 초기화
+    initActiveMenuBackground();
     
     // 페이지 이동 속도 최적화: 내부 링크를 부분 전환(Partial Navigation)으로 처리
     /**
@@ -124,14 +195,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // 갤러리 페이지인 경우 전용 로딩 인디케이터 표시
-        const isGalleryPage = url.startsWith('/gallery');
-        if (isGalleryPage) {
-            const galleryLoader = mainContent.querySelector('#galleryPageLoading');
-            if (galleryLoader) {
-                galleryLoader.classList.add('show');
-            }
-        }
+        // 로딩 인디케이터 제거됨
 
         fetch(url, {
             headers: {
@@ -169,16 +233,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 window.scrollTo({ top: 0, behavior: 'auto' });
             }
 
-            // 갤러리 페이지 전용 로딩 인디케이터 숨기기 (부분 전환 완료 후)
-            if (isGalleryPage) {
-                const galleryLoader = mainContent.querySelector('#galleryPageLoading');
-                if (galleryLoader) {
-                    galleryLoader.classList.remove('show');
-                }
-            }
+            // 로딩 인디케이터 제거됨
 
             // 통계 데이터 다시 로드 (사이드바 업데이트)
             loadSidebarStats();
+            
+            // 새 콘텐츠에서 활성 메뉴 업데이트
+            const urlPath = url.split('?')[0];
+            const activeLink = findActiveMenuByUrl(urlPath);
+            if (activeLink) {
+                updateActiveMenu(activeLink);
+            }
         })
         .catch(() => {
             // 에러 시에는 일반 페이지 이동으로 폴백
@@ -215,6 +280,21 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
+        // 메뉴 링크는 AJAX로 처리 (부드러운 전환)
+        if (link.classList.contains('top-menu-link')) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // 활성 메뉴 업데이트
+            updateActiveMenu(link);
+            
+            // 콘텐츠 로드
+            if (href.startsWith('/')) {
+                loadPagePartial(href, { push: true });
+            }
+            return;
+        }
+
         // 루트로 가는 링크 (메인 홈)는 아직 전체 새로고침 사용 (갤러리 카드 스택 초기화 이슈 방지)
         if (href === '/' || href.startsWith('/?')) {
             return;
@@ -231,6 +311,15 @@ document.addEventListener('DOMContentLoaded', function() {
     window.addEventListener('popstate', function() {
         // 현재 URL 기준으로 다시 부분 로딩 시도
         loadPagePartial(window.location.pathname + window.location.search, { push: false });
+        
+        // 활성 메뉴 업데이트
+        setTimeout(() => {
+            const currentPath = window.location.pathname;
+            const activeLink = findActiveMenuByUrl(currentPath);
+            if (activeLink) {
+                updateActiveMenu(activeLink);
+            }
+        }, 100);
     });
     
     // 모바일 메뉴 관리
