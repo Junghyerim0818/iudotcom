@@ -2,37 +2,36 @@
 
 {% block content %}
 <h2 class="mb-4">{{ title }}</h2>
-    <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-3" id="archivePostsContainer">
+    <div class="gallery-post-list" id="archivePostsContainer">
     {% for post in posts %}
-        <div class="col">
-            <a href="{{ url_for('main.archive_detail', type_name=type_name, post_id=post.id) }}" class="text-decoration-none">
-                <div class="card h-100 gallery-card">
-                    {% set image_url = post.get_image_url(use_thumbnail=True, thumbnail_size='160x108') %}
-                    {% if image_url %}
-                        {% if image_url.startswith('/image/') %}
-                            {% set image_url = image_url + '?w=1500' %}
-                        {% endif %}
-                        <img src="{{ image_url }}"
-                             class="card-img-top gallery-thumbnail"
-                             alt="{{ post.title }}"
-                             loading="lazy">
-                    {% else %}
-                        {# 대표 이미지가 없을 때는 심플한 플레이스홀더 표시 #}
-                        <div class="card-img-top gallery-thumbnail d-flex align-items-center justify-content-center bg-light text-muted">
-                            <i class="bi bi-image" style="font-size: 2rem;"></i>
-                        </div>
-                    {% endif %}
-                    <div class="card-body">
-                        <h5 class="card-title text-dark">{{ post.title|safe }}</h5>
-                        <p class="card-text"><small class="text-muted">By {% if post.author.is_admin() %}아이유닷컴{% else %}{{ post.author.name }}{% endif %} on {{ post.created_at.strftime('%Y-%m-%d') }}</small></p>
-                    </div>
+        <a href="{{ url_for('main.archive_detail', type_name=type_name, post_id=post.id) }}" class="gallery-post-item">
+            <div class="gallery-post-content">
+                <h5 class="gallery-post-title">{{ post.title|safe }}</h5>
+                <div class="gallery-post-meta">
+                    <span class="gallery-post-author">{% if post.author.is_admin() %}아이유닷컴{% else %}{{ post.author.name }}{% endif %}</span>
+                    <span class="gallery-post-date">{{ post.created_at.strftime('%Y-%m-%d') }}</span>
                 </div>
-            </a>
-        </div>
+            </div>
+            <div class="gallery-post-thumbnail">
+                {% set image_url = post.get_image_url(use_thumbnail=True, thumbnail_size='160x108') %}
+                {% if image_url %}
+                    {% if image_url.startswith('/image/') %}
+                        {% set image_url = image_url + '?w=1500' %}
+                    {% endif %}
+                    <img src="{{ image_url }}"
+                         class="gallery-thumbnail-img"
+                         alt="{{ post.title }}"
+                         loading="lazy">
+                {% else %}
+                    {# 대표 이미지가 없을 때는 심플한 플레이스홀더 표시 #}
+                    <div class="gallery-thumbnail-placeholder d-flex align-items-center justify-content-center bg-light text-muted">
+                        <i class="bi bi-image"></i>
+                    </div>
+                {% endif %}
+            </div>
+        </a>
     {% else %}
-        <div class="col-12">
-            <p>저장된 글이 없습니다.</p>
-        </div>
+        <p>저장된 글이 없습니다.</p>
     {% endfor %}
     </div>
 
