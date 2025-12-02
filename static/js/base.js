@@ -238,6 +238,11 @@ document.addEventListener('DOMContentLoaded', function() {
         const menuNav = document.querySelector('.main-menu-nav');
         const scrollableArea = document.querySelector('.main-content-scrollable');
         if (!mainContentArea || !menuNav || !scrollableArea) return;
+
+        // 모바일(1024px 이하)에서는 CSS에서 여백을 처리하므로 JS 조정 불필요
+        if (window.innerWidth <= 1024) {
+            return;
+        }
         
         // 메뉴탭의 높이 계산 (top + 메뉴 높이 + 여백)
         const menuRect = menuNav.getBoundingClientRect();
