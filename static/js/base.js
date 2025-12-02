@@ -182,12 +182,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     menuBackground.style.transition = 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
                     menuBackground.style.transform = `translateX(${backgroundLeft}px)`;
                     menuBackground.style.width = `${backgroundWidth}px`;
+                    menuBackground.style.opacity = '1';
                 });
             } else {
                 // 애니메이션 없이 즉시 위치 설정 (로딩 완료 시)
                 menuBackground.style.transition = 'none';
                 menuBackground.style.transform = `translateX(${backgroundLeft}px)`;
                 menuBackground.style.width = `${backgroundWidth}px`;
+                menuBackground.style.opacity = '1';
             }
         }
     }
@@ -300,6 +302,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const newTitle = doc.querySelector('title');
 
             if (newMain) {
+                // 새 콘텐츠 적용 전 살짝 페이드 아웃
+                mainContent.style.opacity = '0';
                 mainContent.innerHTML = newMain.innerHTML;
             } else {
                 // 예상치 못한 경우에는 전체 이동으로 폴백
@@ -321,6 +325,11 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 window.scrollTo({ top: 0, behavior: 'auto' });
             }
+
+            // 콘텐츠 페이드 인으로 깜빡임 최소화
+            requestAnimationFrame(() => {
+                mainContent.style.opacity = '1';
+            });
 
             // 로딩 인디케이터 제거됨
 
@@ -370,7 +379,6 @@ document.addEventListener('DOMContentLoaded', function() {
         // 외부 링크, 해시, 자바스크립트 링크, 빈 링크는 무시
         if (!href || href === '#' || href.startsWith('javascript:')) return;
         if (link.getAttribute('target') === '_blank') return;
-        if (link.classList.contains('top-menu-link')) return; // 상단 메뉴는 기존 애니메이션/이동 로직 유지
         if (link.getAttribute('data-bs-toggle')) return; // 모달/드롭다운 등 부트스트랩 트리거는 그대로 둠
 
         // 외부 도메인은 건드리지 않음

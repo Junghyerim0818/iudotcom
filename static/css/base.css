@@ -385,6 +385,7 @@ a:hover {
     z-index: 0;
     pointer-events: none;
     will-change: transform, width;
+    opacity: 0;
 }
 
 .top-menu-link {
@@ -921,6 +922,7 @@ html {
     color: var(--text-primary);
     max-width: 1200px;
     margin: 0 auto;
+    transition: opacity 0.2s ease;
 }
 
 /* 모든 페이지: 위아래 양옆 여백 통일 */
