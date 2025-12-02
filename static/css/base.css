@@ -951,8 +951,6 @@ a:hover {
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
-    /* 메뉴와 콘텐츠 간 간격을 조금 줄임 */
-    padding: 4.5rem 2.5rem 2rem;
     margin-top: 0;
 }
 
@@ -1286,10 +1284,8 @@ html {
         overflow-y: auto;
         opacity: 1;
     }
-    
-    /* 메인 메뉴: 모바일에서는 화면 하단에 고정 (KWANGYA 스타일) */
+
     .main-menu-nav {
-        position: fixed;
         left: 50%;
         transform: translateX(-50%);
         width: 100%;
@@ -2033,7 +2029,6 @@ html {
     .main-content-archive,
     .main-content-admin {
         padding: 1rem;
-        padding-top: calc(60px + 1rem);
     }
 }
 
