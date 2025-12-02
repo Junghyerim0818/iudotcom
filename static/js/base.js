@@ -923,7 +923,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (gallerySliderTrackForLoading && window.location.pathname === '/') {
         const initialCards = Array.from(gallerySliderTrackForLoading.querySelectorAll('.gallery-card-item'));
         let currentOffset = initialCards.length; // 초기에 로드된 카드 개수
-        const batchSize = 20; // 한 번에 20개씩 로드
+        const batchSize = 50; // 한 번에 50개씩 로드 (최대 개수 제한 없음)
         let isLoading = false;
         let allLoaded = false;
         const cardStackLoading = document.getElementById('cardStackLoading');
@@ -952,8 +952,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         const cardIndex = currentOffset + index;
                         let imageUrl = postData.image_url || '';
                         
-                        // 이미지 URL 처리 (카드 스택용 800x960)
-                        if (imageUrl && imageUrl.includes('/image/')) {
+                        // 이미지 URL 처리 (카드 스택용 800x960) - 원본 이미지 기준
+                        // 서버에서 이미 원본 URL을 반환하므로 티스토리 썸네일 서버 URL 변환 없이 사용
+                        if (imageUrl && (imageUrl.includes('/image/') || imageUrl.includes('/post/image/'))) {
                             try {
                                 const urlObj = new URL(imageUrl, window.location.origin);
                                 // 이미 파라미터가 있으면 유지, 없으면 추가
@@ -968,6 +969,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 // URL 파싱 실패 시 원본 사용
                             }
                         }
+                        // 티스토리 원본 URL은 그대로 사용 (서버에서 use_thumbnail=False로 반환)
                         
                         // HTML 이스케이프 처리
                         const escapeHtml = (text) => {

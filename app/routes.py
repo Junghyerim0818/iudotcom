@@ -89,7 +89,7 @@ def index():
     try:
         # 순차 로딩: 처음에는 첫 10개를 빠르게 로드하여 즉시 표시
         # 나머지는 JavaScript에서 AJAX로 순차적으로 로드
-        initial_count = 5  # 초기 로드 개수
+        initial_count = 10  # 초기 로드 개수
         gallery_posts = db.session.query(Post).options(
             joinedload(Post.author),
             defer(Post.image_data),  # 대용량 이미지 데이터 제외 (메모리 및 네트워크 대역폭 절약)
@@ -119,7 +119,8 @@ def api_gallery_posts():
             image_url = None
             try:
                 if hasattr(post, 'get_image_url'):
-                    image_url = post.get_image_url()
+                    # 원본 이미지 URL 사용 (use_thumbnail=False)
+                    image_url = post.get_image_url(use_thumbnail=False)
             except Exception:
                 pass
             
