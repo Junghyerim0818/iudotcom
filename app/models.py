@@ -121,14 +121,9 @@ class Post(db.Model):
         """티스토리 원본 URL을 티스토리 썸네일 서버 URL로 변환
         
         티스토리 썸네일 서버 형식:
-        - 썸네일: https://i1.daumcdn.net/thumb/S{width}x{height}.fwebp.q85/?scode=mtistory2&fname={encoded_url}
-        - 원본(비율 유지): https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname={encoded_url}
+        https://i1.daumcdn.net/thumb/S{width}x{height}.fwebp.q85/?scode=mtistory2&fname={원본_URL}
         
-        패턴 분석:
-        - i1.daumcdn.net: 썸네일 서버
-        - img1.daumcdn.net: 원본 이미지 서버
-        - S{width}x{height}: 고정 크기 썸네일
-        - R1280x0: 비율 유지, 최대 너비 1280px
+        원본 URL을 그대로 fname 파라미터에 붙이면 됩니다.
         """
         # 티스토리 원본 URL 찾기
         original_url = None
@@ -159,11 +154,9 @@ class Post(db.Model):
             return None
         
         try:
-            # 티스토리 원본 URL을 인코딩 (이중 인코딩 필요)
-            # fname 파라미터에는 URL이 이미 인코딩된 상태로 들어감
-            encoded_url = quote(original_url, safe='')
             # 티스토리 썸네일 서버 URL 생성
-            thumbnail_url = f"https://i1.daumcdn.net/thumb/S{width}x{height}.fwebp.q85/?scode=mtistory2&fname={encoded_url}"
+            # fname 파라미터에 원본 URL을 그대로 붙임 (브라우저가 자동으로 인코딩)
+            thumbnail_url = f"https://i1.daumcdn.net/thumb/S{width}x{height}.fwebp.q85/?scode=mtistory2&fname={original_url}"
             return thumbnail_url
         except Exception:
             return None
