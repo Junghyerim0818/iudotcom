@@ -19,7 +19,7 @@
                 {% for post in gallery_posts %}
                     <div class="gallery-card-item" data-index="{{ loop.index0 }}" data-post-id="{{ post.id }}" data-card-index="{{ loop.index0 }}">
                         <a href="{{ url_for('main.gallery_detail', post_id=post.id) }}" class="gallery-card-link" data-card-index="{{ loop.index0 }}">
-                            {% set image_url = post.get_image_url(use_thumbnail=True, thumbnail_size='160x108') %}
+                            {% set image_url = post.get_image_url(use_thumbnail=False) %}
                             {% if image_url %}
                                 {% if image_url.startswith('/image/') or image_url.startswith('/post/image/') %}
                                     {% set sep = '&' if '?' in image_url else '?' %}
