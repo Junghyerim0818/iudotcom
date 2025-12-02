@@ -629,26 +629,6 @@ a:hover {
         font-size: 0.8125rem;
     }
 
-    /* 모바일에서 사이드바 숨기고 메인 영역만 사용 */
-    .left-sidebar,
-    .right-sidebar {
-        display: none;
-    }
-
-    .main-layout-wrapper {
-        grid-template-columns: 0 1fr 0;
-        padding: 0;
-        gap: 0;
-        margin-top: 60px; /* 모바일 헤더 높이만큼 아래로 */
-    }
-    
-    .main-content-area {
-        grid-column: 1 / -1;
-        height: calc(100vh - 60px);
-        border-radius: 0;
-        box-shadow: none;
-    }
-    
     /* 모바일 메뉴 (KWANGYA 스타일 - 둥근 박스) */
     .mobile-menu {
         display: block;
