@@ -534,6 +534,38 @@ a:hover {
 
 /* 모바일 공통 스타일 */
 @media (max-width: 768px) {
+    /* 모바일 헤더/오버레이/메뉴 활성화 */
+    .mobile-header {
+        display: flex;
+    }
+
+    .mobile-overlay {
+        display: none; /* JS에서 active 클래스 붙일 때만 표시 */
+    }
+
+    .mobile-menu {
+        display: none; /* JS에서 mobile-open 클래스 붙일 때 높이/투명도로 표시 */
+    }
+
+    /* 작은 화면에서는 사이드바 숨기고 메인 영역만 사용 */
+    .left-sidebar,
+    .right-sidebar {
+        display: none;
+    }
+
+    .main-layout-wrapper {
+        grid-template-columns: 1fr;
+        padding: 0.75rem;
+    }
+
+    .main-content-area {
+        grid-column: 1;
+        width: 100%;
+        height: calc(100vh - 60px);
+        margin-top: 60px; /* 모바일 헤더 높이만큼 아래로 */
+        border-radius: 16px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
     /* 플로팅 관리자 버튼 */
     .floating-admin-nav {
         right: 1rem;
@@ -558,7 +590,7 @@ a:hover {
         padding-top: 0;
         margin-left: 0;
         padding: 1rem;
-        padding-top: calc(60px + 1rem);
+        padding-top: calc(60px + 0.5rem);
     }
 
     /* 모바일에서 갤러리/아카이브 리스트 카드 정렬 */
@@ -918,7 +950,8 @@ a:hover {
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
-    padding: 6rem 3rem 2rem;
+    /* 메뉴와 콘텐츠 간 간격을 조금 줄임 */
+    padding: 4.5rem 2.5rem 2rem;
     margin-top: 0;
 }
 
@@ -1253,24 +1286,30 @@ html {
         opacity: 1;
     }
     
-    /* 메인 메뉴: 모바일에서도 표시 (오버레이 대신 일반 배치) */
+    /* 메인 메뉴: 모바일에서는 화면 하단에 고정 (KWANGYA 스타일) */
     .main-menu-nav {
-        position: static;
-        transform: none;
+        position: fixed;
+        left: 50%;
+        bottom: 0.75rem;
+        transform: translateX(-50%);
         width: 100%;
-        pointer-events: auto;
-        padding: 0.75rem 1rem 0.5rem;
+        pointer-events: none;
+        padding: 0;
         display: flex;
         justify-content: center;
         align-items: center;
+        z-index: 1001;
     }
 
-    .top-menu-wrapper {
-        max-width: 100%;
+    .main-menu-nav .top-menu-wrapper {
+        pointer-events: all;
+        width: calc(100% - 2.5rem);
+        max-width: 420px;
     }
     
+    /* 하단 메뉴 탭에 가리지 않도록 콘텐츠 여백 확보 */
     .main-content-scrollable {
-        padding: 0 1.5rem 2rem;
+        padding: 0 1.5rem 5.5rem;
     }
     
     .main-content {
@@ -1897,7 +1936,7 @@ html {
 }
 
 /* 모바일 헤더 */
-/* 데스크톱에서 모바일 헤더와 메뉴 숨김 */
+/* 데스크톱 기본값: 모바일 헤더/메뉴/오버레이 숨김 */
 .mobile-header {
     display: none;
 }
