@@ -119,15 +119,24 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         })
         .then(response => response.json())
-        .then(data => {
+            .then(data => {
             if (data.success) {
                 const totalPostsEl = document.getElementById('totalPostsCount');
                 const todayPostsEl = document.getElementById('todayPostsCount');
+                const mobileTotalEl = document.getElementById('mobileTotalPostsCount');
+                const mobileTodayEl = document.getElementById('mobileTodayPostsCount');
+
                 if (totalPostsEl) {
                     totalPostsEl.textContent = data.total_posts.toLocaleString();
                 }
                 if (todayPostsEl) {
                     todayPostsEl.textContent = data.today_posts.toLocaleString();
+                }
+                if (mobileTotalEl) {
+                    mobileTotalEl.textContent = data.total_posts.toLocaleString();
+                }
+                if (mobileTodayEl) {
+                    mobileTodayEl.textContent = data.today_posts.toLocaleString();
                 }
             }
         })
