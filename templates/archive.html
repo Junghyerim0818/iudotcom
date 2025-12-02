@@ -7,7 +7,7 @@
         <div class="col">
             <a href="{{ url_for('main.archive_detail', type_name=type_name, post_id=post.id) }}" class="text-decoration-none">
                 <div class="card h-100 gallery-card">
-                    {% set image_url = post.get_image_url(use_thumbnail=True, thumbnail_size='300x450') %}
+                    {% set image_url = post.get_image_url(use_thumbnail=True, thumbnail_size='160x108') %}
                     {% if image_url %}
                         {% if image_url.startswith('/image/') %}
                             {% set image_url = image_url + '?w=1500' %}

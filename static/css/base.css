@@ -1420,19 +1420,21 @@ a:hover {
     height: auto;
     width: 100%;
     max-width: 100%;
-    aspect-ratio: 16 / 9;
+    aspect-ratio: 160 / 108; /* 160x108 비율 고정 */
     object-fit: cover;
 }
 
-/* 갤러리 페이지 전용: 세로로 더 긴 썸네일 비율 (크기 절반) */
+/* 갤러리/아카이브 페이지 썸네일: 160x108 비율 고정 */
 .main-content-gallery .card-img-top,
-.main-content-gallery .gallery-thumbnail {
-    aspect-ratio: 2 / 3; /* 세로로 더 긴 비율 (2:3) */
+.main-content-gallery .gallery-thumbnail,
+.main-content-archive .card-img-top,
+.main-content-archive .gallery-thumbnail {
+    aspect-ratio: 160 / 108; /* 160x108 비율 고정 */
     object-fit: cover;
     object-position: center;
     width: 100%;
     height: auto;
-    max-height: 250px; /* 썸네일 최대 높이 제한 (세로로 길게) */
+    max-height: 108px; /* 썸네일 최대 높이 108px */
 }
 
 /* 갤러리 카드 호버 효과 (크기 절반) */
