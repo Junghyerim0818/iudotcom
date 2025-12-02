@@ -228,16 +228,9 @@ a:hover {
     min-width: 0;
 }
 
-/* 상단 헤더 스타일 */
+/* 상단 헤더 스타일 - 제거됨 (메인 영역 안으로 이동) */
 .top-header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 70px;
-    background-color: #ffffff;
-    border-bottom: 1px solid var(--border-color);
-    z-index: 1000;
+    display: none;
 }
 
 .top-header-container {
@@ -331,16 +324,11 @@ a:hover {
     }
 }
 
-/* 중앙: 메뉴 (KWANGYA 스타일 - 하나의 라운드 박스) */
-.top-header-center {
+/* 중앙: 메뉴 (KWANGYA 스타일 - 하나의 라운드 박스) - 메인 영역 안으로 이동 */
+.main-menu-nav {
     display: flex;
     justify-content: center;
     align-items: center;
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 5;
 }
 
 .top-menu-wrapper {
@@ -554,11 +542,10 @@ a:hover {
 .main-layout-wrapper {
     display: grid;
     grid-template-columns: 200px 1fr 200px;
-    min-height: calc(100vh - 70px);
-    margin-top: 70px;
+    min-height: 100vh;
     position: relative;
     background-color: #f8f8f8; /* 배경색 변경 */
-    padding: 0 1rem;
+    padding: 1rem;
     gap: 1rem;
 }
 
@@ -566,9 +553,9 @@ a:hover {
 .left-sidebar {
     position: fixed;
     left: 1rem;
-    top: calc(70px + 1rem);
+    top: 1rem;
     width: 200px;
-    height: calc(100vh - 70px - 2rem);
+    height: calc(100vh - 2rem);
     background-color: #f5f5f5; /* 밝은 회색 배경 */
     border-radius: 20px;
     padding: 2rem 1.5rem;
@@ -617,25 +604,62 @@ a:hover {
     line-height: 1.2;
 }
 
-/* 중앙 콘텐츠 영역 (둥근 박스) */
+/* 중앙 콘텐츠 영역 (둥근 박스, 고정 높이) */
 .main-content-area {
     grid-column: 2;
-    min-height: calc(100vh - 70px - 2rem);
-    margin: 1rem 0;
+    height: calc(100vh - 2rem);
     background-color: #ffffff;
     border-radius: 20px;
-    overflow-y: auto;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-    padding: 2rem 3rem;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* 메인 영역 내부 메뉴 */
+.main-menu-nav {
+    flex-shrink: 0;
+    padding: 1.5rem 2rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.main-menu-nav .top-menu-wrapper {
+    margin: 0 auto;
+    max-width: fit-content;
+}
+
+/* 메인 콘텐츠 스크롤 가능 영역 */
+.main-content-scrollable {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0 3rem 2rem;
+}
+
+.main-content-scrollable::-webkit-scrollbar {
+    width: 8px;
+}
+
+.main-content-scrollable::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.main-content-scrollable::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+.main-content-scrollable::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3);
 }
 
 /* 오른쪽 사이드바 - KWANGYA 119 스타일 (어두운 배경, 둥근 박스) */
 .right-sidebar {
     position: fixed;
     right: 1rem;
-    top: calc(70px + 1rem);
+    top: 1rem;
     width: 200px;
-    height: calc(100vh - 70px - 2rem);
+    height: calc(100vh - 2rem);
     background-color: #2a2a2a; /* 어두운 회색 배경 */
     border-radius: 20px;
     padding: 2rem 1.5rem;
@@ -733,7 +757,7 @@ a:hover {
 
 .main-content {
     margin-left: 0;
-    padding: 0;
+    padding: 2rem 0 0;
     min-height: auto;
     background-color: transparent;
     color: var(--text-primary);
@@ -793,12 +817,88 @@ a:hover {
 
 /* 카드 스택 관련 스타일 모두 제거됨 - 원페이지 빌드로 변경 */
 
-/* 모바일 반응형 - 사이드바 숨김 */
+/* 태블릿/모바일 반응형 - 사이드바 숨김, 메인 메뉴도 숨김 */
 @media (max-width: 1024px) {
+    /* 모바일 헤더 표시 */
+    .mobile-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 60px;
+        background-color: #ffffff;
+        border-bottom: 1px solid var(--border-color);
+        padding: 0 1rem;
+        z-index: 1001;
+        box-shadow: var(--shadow-sm);
+    }
+    
+    .mobile-header-brand {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        letter-spacing: -0.02em;
+    }
+    
+    .mobile-menu-toggle {
+        background-color: #f5f5f5;
+        border: none;
+        color: var(--text-primary);
+        font-size: 1.25rem;
+        cursor: pointer;
+        padding: 0.625rem;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        border-radius: 50%;
+    }
+    
+    .mobile-menu-toggle:hover {
+        background-color: #e9e9e9;
+    }
+    
+    .mobile-overlay {
+        display: block;
+        background-color: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+    }
+    
+    .mobile-menu {
+        display: block;
+        position: fixed;
+        top: 70px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: calc(100% - 2rem);
+        max-width: 400px;
+        background-color: #ffffff;
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+        opacity: 0;
+        z-index: 1000;
+    }
+    
+    .mobile-menu.mobile-open {
+        max-height: 500px;
+        overflow-y: auto;
+        opacity: 1;
+    }
+    
     .main-layout-wrapper {
         grid-template-columns: 0 1fr 0;
         padding: 0;
         gap: 0;
+        margin-top: 60px;
     }
     
     .left-sidebar,
@@ -811,12 +911,98 @@ a:hover {
         margin: 0;
         border-radius: 0;
         box-shadow: none;
-        padding: 2rem 1.5rem;
-        min-height: calc(100vh - 70px);
+        height: calc(100vh - 60px);
+        padding: 0;
+    }
+    
+    /* 메인 메뉴 숨김 */
+    .main-menu-nav {
+        display: none;
+    }
+    
+    .main-content-scrollable {
+        padding: 0 1.5rem 2rem;
     }
     
     .main-content {
-        padding: 0;
+        padding: 1.5rem 0 0;
+    }
+    
+    /* 모바일 메뉴 리스트 스타일 */
+    .mobile-menu-list {
+        list-style: none;
+        margin: 0;
+        padding: 0.75rem;
+    }
+    
+    .mobile-menu-item {
+        margin: 0.25rem 0;
+    }
+    
+    .mobile-menu-link {
+        display: block;
+        padding: 0.875rem 1.25rem;
+        color: var(--text-primary);
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 0.9375rem;
+        transition: all 0.2s ease;
+        border-radius: 12px;
+    }
+    
+    .mobile-menu-link:hover,
+    .mobile-menu-link.active {
+        background-color: #f5f5f5;
+        color: var(--text-primary);
+    }
+    
+    .mobile-menu-link.active {
+        background-color: #ffffff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        font-weight: 600;
+    }
+    
+    .mobile-menu-divider {
+        height: 1px;
+        background-color: var(--border-color);
+        margin: 0.5rem 0.75rem;
+    }
+    
+    .mobile-menu-footer {
+        padding: 1rem 1.5rem;
+        border-top: 1px solid var(--border-color);
+    }
+    
+    .mobile-menu-footer .top-language-select {
+        display: flex;
+        justify-content: center;
+    }
+    
+    .mobile-menu-footer .top-language-dropdown {
+        background-color: #f5f5f5;
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 0.625rem 1rem;
+        font-size: 0.875rem;
+        min-width: 120px;
+    }
+    
+    .mobile-login-link {
+        display: block;
+        padding: 0.875rem 1.25rem;
+        text-align: center;
+        background-color: #f5f5f5;
+        color: var(--text-primary);
+        text-decoration: none;
+        border-radius: 12px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        margin: 0.25rem 0;
+    }
+    
+    .mobile-login-link:hover {
+        background-color: #e9e9e9;
+        color: var(--text-primary);
     }
 }
 
@@ -1498,43 +1684,13 @@ a:hover {
 }
 
 @media (max-width: 768px) {
-    /* 모바일 헤더 표시 */
-    .mobile-header {
-        display: grid;
-        grid-template-columns: auto 1fr auto;
-        align-items: center;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 60px;
-        background-color: #ffffff;
-        border-bottom: 1px solid var(--border-color);
-        padding: 0 1rem;
-        z-index: 1001;
-        box-shadow: var(--shadow-sm);
-    }
-
-    .mobile-header-brand {
-        font-size: 1.25rem;
-        font-weight: 700;
-        color: var(--text-primary);
-        letter-spacing: -0.02em;
-        text-align: center;
-        justify-self: center;
-        white-space: nowrap;
+    /* 모바일 헤더는 1024px 이하에서 이미 표시됨 */
+    .main-layout-wrapper {
+        margin-top: 60px;
     }
     
-    /* 모바일에서 상단 헤더 숨김 */
-    .top-header {
-        display: none;
-    }
-    
-    .mobile-overlay {
-        display: block;
-        background-color: rgba(0, 0, 0, 0.5);
-        backdrop-filter: blur(4px);
-        -webkit-backdrop-filter: blur(4px);
+    .main-content-area {
+        height: calc(100vh - 60px);
     }
     
     /* 모바일 메뉴 (KWANGYA 스타일 - 둥근 박스) */
