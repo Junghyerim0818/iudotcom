@@ -222,15 +222,21 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // 메뉴 위치를 메인 영역 기준으로 조정하는 함수
+    // 메뉴 위치를 메인 영역 기준으로 조정하고 콘텐츠 여백 설정
     function updateMenuPosition() {
         const mainContentArea = document.querySelector('.main-content-area');
         const menuNav = document.querySelector('.main-menu-nav');
-        if (!mainContentArea || !menuNav) return;
+        const scrollableArea = document.querySelector('.main-content-scrollable');
+        if (!mainContentArea || !menuNav || !scrollableArea) return;
         
-        // 메인 영역의 위치와 크기를 기준으로 메뉴를 중앙 정렬
-        // 이미 CSS에서 left: 50%, transform: translateX(-50%)로 처리되므로
-        // JavaScript에서는 추가 조정이 필요 없음
+        // 메뉴탭의 높이 계산 (top + 메뉴 높이 + 여백)
+        const menuRect = menuNav.getBoundingClientRect();
+        const menuHeight = menuRect.height;
+        const menuTop = parseFloat(getComputedStyle(menuNav).top) || 32; // 2rem = 32px
+        
+        // 콘텐츠 영역의 상단 패딩을 메뉴탭 높이 + 여백으로 설정
+        const contentPaddingTop = menuTop + menuHeight + 1.5 * 16; // 1.5rem 여백 추가
+        scrollableArea.style.paddingTop = `${contentPaddingTop}px`;
     }
     
     // 윈도우 리사이즈 시 메뉴 위치 업데이트
@@ -248,7 +254,19 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 초기화 - 애니메이션 없이 즉시 위치 설정
     initActiveMenuBackground(false);
-    updateMenuPosition();
+    
+    // DOM 로드 완료 후 메뉴 위치 및 콘텐츠 여백 설정
+    function initializeMenuAndContent() {
+        updateMenuPosition();
+    }
+    
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(initializeMenuAndContent, 100);
+        });
+    } else {
+        setTimeout(initializeMenuAndContent, 100);
+    }
     
     // 페이지 이동 속도 최적화: 내부 링크를 부분 전환(Partial Navigation)으로 처리
     /**
@@ -316,6 +334,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 // 로딩 중에는 이미 애니메이션이 실행되었으므로, 완료 시에는 즉시 위치만 맞춤
                 setTimeout(() => {
                     updateActiveMenu(activeLink, false);
+                    updateMenuPosition(); // 콘텐츠 변경 후 메뉴 위치 및 여백 재계산
+                }, 100);
+            } else {
+                // 활성 메뉴가 없어도 메뉴 위치는 업데이트
+                setTimeout(() => {
+                    updateMenuPosition();
                 }, 100);
             }
         })

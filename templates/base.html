@@ -134,13 +134,11 @@
                                 <span class="top-menu-text">{% if current_lang == 'en' %}Home{% else %}홈{% endif %}</span>
                             </a>
                         </li>
-                        {% if request.endpoint != 'main.index' %}
                         <li class="top-menu-item">
                             <a href="{{ url_for('main.gallery') }}" class="top-menu-link {% if request.endpoint == 'main.gallery' %}active{% endif %}">
                                 <span class="top-menu-text">{% if current_lang == 'en' %}Gallery{% else %}갤러리{% endif %}</span>
                             </a>
                         </li>
-                        {% endif %}
                         <li class="top-menu-item">
                             <a href="{{ url_for('main.archive', type_name='archive_1') }}" class="top-menu-link {% if request.endpoint == 'main.archive' and request.view_args.type_name == 'archive_1' %}active{% endif %}">
                                 <span class="top-menu-text">{% if current_lang == 'en' %}IU Verification{% else %}아이유 인증 글{% endif %}</span>
