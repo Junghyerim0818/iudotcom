@@ -30,6 +30,12 @@
     min-width: 150px;
 }
 
+/* 관리자 페이지 수정 버튼 - 글씨 세로 방지 */
+.admin-update-btn {
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
 /* 부드러운 스크롤 */
 html {
     scroll-behavior: smooth;
