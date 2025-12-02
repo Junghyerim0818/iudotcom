@@ -157,12 +157,12 @@
                         </li>
                         <li class="top-menu-item">
                             <a href="{{ url_for('main.archive', type_name='archive_1') }}" class="top-menu-link {% if request.endpoint == 'main.archive' and request.view_args.type_name == 'archive_1' %}active{% endif %}">
-                                <span class="top-menu-text">{% if current_lang == 'en' %}IU Verification{% else %}아이유 인증 글{% endif %}</span>
+                                <span class="top-menu-text">{% if current_lang == 'en' %}From IU{% else %}프롬유{% endif %}</span>
                             </a>
                         </li>
                         <li class="top-menu-item">
                             <a href="{{ url_for('main.archive', type_name='archive_2') }}" class="top-menu-link {% if request.endpoint == 'main.archive' and request.view_args.type_name == 'archive_2' %}active{% endif %}">
-                                <span class="top-menu-text">{% if current_lang == 'en' %}Support Verification{% else %}서포트 인증 글{% endif %}</span>
+                                <span class="top-menu-text">{% if current_lang == 'en' %}Support{% else %}서포트{% endif %}</span>
                             </a>
                         </li>
                     </ul>

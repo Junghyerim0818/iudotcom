@@ -203,9 +203,17 @@ document.addEventListener('DOMContentLoaded', function() {
             const linkHref = link.getAttribute('href');
             if (linkHref) {
                 const linkPath = linkHref.split('?')[0];
-                // 정확히 일치하거나, archive의 경우 type_name 매칭
-                if (linkPath === urlPath || 
-                    (urlPath.includes('/archive/') && linkPath.includes('/archive/'))) {
+                // 1) 정확히 일치하는 경우
+                if (linkPath === urlPath) {
+                    return link;
+                }
+
+                // 2) 상세 페이지 등에서 아카이브 타입 매칭
+                //    /archive/archive_1/123 → /archive/archive_1
+                if (urlPath.startsWith('/archive/archive_1') && linkPath.startsWith('/archive/archive_1')) {
+                    return link;
+                }
+                if (urlPath.startsWith('/archive/archive_2') && linkPath.startsWith('/archive/archive_2')) {
                     return link;
                 }
             }

@@ -27,9 +27,9 @@ def invalidate_cache(category):
 def get_archive_title(type_name, lang='ko'):
     """아카이브 타입과 언어에 따라 제목 반환"""
     if type_name == 'archive_1':
-        return 'IU Verification' if lang == 'en' else '아이유 인증 글'
+        return 'From IU' if lang == 'en' else '프롬유'
     else:
-        return 'Support Verification' if lang == 'en' else '서포트 인증 글'
+        return 'Support' if lang == 'en' else '서포트'
 
 # Static 파일 직접 서빙 (Vercel 환경 대응, 캐싱 최적화)
 @bp.route('/static/<path:filename>')
