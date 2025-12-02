@@ -3,6 +3,7 @@ from flask_login import UserMixin
 from sqlalchemy import Index
 from . import db
 import re
+from urllib.parse import quote, urlparse, parse_qs, unquote
 
 class Setting(db.Model):
     """애플리케이션 설정 저장"""
@@ -116,21 +117,84 @@ class Post(db.Model):
             
         return False
     
-    def get_image_url(self):
+    def get_thumbnail_url(self, width=160, height=108):
+        """티스토리 원본 URL을 티스토리 썸네일 서버 URL로 변환
+        
+        티스토리 썸네일 서버 형식:
+        - 썸네일: https://i1.daumcdn.net/thumb/S{width}x{height}.fwebp.q85/?scode=mtistory2&fname={encoded_url}
+        - 원본(비율 유지): https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname={encoded_url}
+        
+        패턴 분석:
+        - i1.daumcdn.net: 썸네일 서버
+        - img1.daumcdn.net: 원본 이미지 서버
+        - S{width}x{height}: 고정 크기 썸네일
+        - R1280x0: 비율 유지, 최대 너비 1280px
+        """
+        # 티스토리 원본 URL 찾기
+        original_url = None
+        
+        # 1) image_url 필드에 티스토리 URL이 있으면 사용
+        if self.image_url and 'blog.kakaocdn.net' in self.image_url:
+            original_url = self.image_url
+        # 2) 본문에서 티스토리 이미지 URL 추출
+        elif self.content:
+            try:
+                # <img src="..."> 태그에서 추출
+                img_match = re.search(r'<img[^>]+src=[\'\"]([^\'\"]*blog\.kakaocdn\.net[^\'\"]*)[\'\"]', self.content, re.IGNORECASE)
+                if img_match:
+                    original_url = img_match.group(1)
+                # 일반 URL 패턴에서 추출
+                if not original_url:
+                    url_match = re.search(
+                        r'(https?://[^\s\'"]*blog\.kakaocdn\.net[^\s\'"]*\.(?:jpg|jpeg|png|gif|webp))',
+                        self.content,
+                        re.IGNORECASE
+                    )
+                    if url_match:
+                        original_url = url_match.group(1)
+            except Exception:
+                pass
+        
+        if not original_url:
+            return None
+        
+        try:
+            # 티스토리 원본 URL을 인코딩 (이중 인코딩 필요)
+            # fname 파라미터에는 URL이 이미 인코딩된 상태로 들어감
+            encoded_url = quote(original_url, safe='')
+            # 티스토리 썸네일 서버 URL 생성
+            thumbnail_url = f"https://i1.daumcdn.net/thumb/S{width}x{height}.fwebp.q85/?scode=mtistory2&fname={encoded_url}"
+            return thumbnail_url
+        except Exception:
+            return None
+    
+    def get_image_url(self, use_thumbnail=True, thumbnail_size='160x108'):
         """대표 이미지 URL 반환
         
         우선순위:
         1) 외부 image_url (티스토리 등, 별도 필드)
+           - use_thumbnail=True이고 티스토리 URL이면 썸네일 서버 URL 우선 사용
         2) Post.image_data (썸네일용 DB 이미지)
         3) PostImage에 저장된 첫 번째 추가 이미지
         4) 기존 파일 기반 image_filename
         5) 본문(content) 안에 포함된 첫 번째 이미지/티스토리 URL
+        
+        Args:
+            use_thumbnail: True이면 티스토리 URL을 썸네일 서버 URL로 변환
+            thumbnail_size: 썸네일 크기 (예: '160x108', '800x600')
         """
         from flask import url_for
 
-        # 1) 외부 URL이 명시되어 있으면 그대로 사용
+        # 티스토리 원본 URL 찾기
+        tistory_url = None
+        
+        # 1) 외부 URL이 명시되어 있으면
         if self.image_url:
-            return self.image_url
+            # 티스토리 URL이고 썸네일 사용 옵션이 켜져 있으면 썸네일 서버 URL 사용
+            if use_thumbnail and 'blog.kakaocdn.net' in self.image_url:
+                tistory_url = self.image_url
+            else:
+                return self.image_url
 
         # 2) Post 자체에 DB 이미지가 있으면 /image/<post_id> 사용
         if self.image_mimetype or self.image_data:
@@ -154,17 +218,45 @@ class Post(db.Model):
                 # 5-1) <img src="..."> 태그에서 src 우선 추출
                 img_match = re.search(r'<img[^>]+src=[\'\"]([^\'\"]+)[\'\"]', self.content, re.IGNORECASE)
                 if img_match:
-                    return img_match.group(1)
+                    found_url = img_match.group(1)
+                    # 티스토리 URL이면 썸네일 변환 시도
+                    if use_thumbnail and 'blog.kakaocdn.net' in found_url:
+                        tistory_url = found_url
+                    else:
+                        return found_url
 
                 # 5-2) 티스토리/이미지 확장자 링크를 일반 텍스트에서 추출
-                url_match = re.search(
-                    r'(https?://[^\s\'"]+\.(?:jpg|jpeg|png|gif|webp))',
-                    self.content,
-                    re.IGNORECASE
-                )
-                if url_match:
-                    return url_match.group(1)
+                if not tistory_url:
+                    url_match = re.search(
+                        r'(https?://[^\s\'"]*blog\.kakaocdn\.net[^\s\'"]*\.(?:jpg|jpeg|png|gif|webp))',
+                        self.content,
+                        re.IGNORECASE
+                    )
+                    if url_match:
+                        tistory_url = url_match.group(1)
+                    else:
+                        # 일반 이미지 URL 추출
+                        url_match = re.search(
+                            r'(https?://[^\s\'"]+\.(?:jpg|jpeg|png|gif|webp))',
+                            self.content,
+                            re.IGNORECASE
+                        )
+                        if url_match:
+                            return url_match.group(1)
             except Exception:
                 pass
+
+        # 티스토리 URL이 있으면 썸네일 서버 URL로 변환
+        if tistory_url and use_thumbnail:
+            # 썸네일 크기 파싱
+            try:
+                width, height = map(int, thumbnail_size.split('x'))
+                thumbnail_url = self.get_thumbnail_url(width=width, height=height)
+                if thumbnail_url:
+                    return thumbnail_url
+            except Exception:
+                pass
+            # 변환 실패 시 원본 URL 반환
+            return tistory_url
 
         return None

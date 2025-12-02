@@ -1881,6 +1881,22 @@ a:hover {
         padding: 1rem;
         padding-top: calc(60px + 1rem);
     }
+}
+
+/* 화면이 좁아질 때 프로필 사진 숨김 (메뉴와 겹침 방지) */
+@media (max-width: 950px) {
+    .top-profile {
+        display: none;
+    }
+    
+    .top-profile-avatar {
+        display: none;
+    }
+    
+    /* 프로필이 숨겨졌을 때 오른쪽 영역 조정 */
+    .top-header-right {
+        gap: 0.5rem;
+    }
     
     .main-content-index,
     .main-content-gallery,
