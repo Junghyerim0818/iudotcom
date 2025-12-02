@@ -781,13 +781,17 @@ document.addEventListener('DOMContentLoaded', function() {
         window.gallerySliderActiveIndex = activeIndex;
 
         // activeIndex 변경 감지 및 추가 로드 트리거를 위한 래퍼 함수
+        // loadNextBatch는 나중에 정의되므로, 전역 함수로 노출하여 호출 가능하도록 함
         const originalSetActiveIndex = setActiveIndex;
         setActiveIndex = (index) => {
             window.gallerySliderActiveIndex = index;
             originalSetActiveIndex(index);
             // 인덱스 변경 시 다음 배치 로드 필요성 체크
-            if (typeof loadNextBatch === 'function') {
-                loadNextBatch();
+            // loadNextBatch가 전역으로 노출되어 있으면 호출
+            if (window.loadNextBatch && typeof window.loadNextBatch === 'function') {
+                setTimeout(() => {
+                    window.loadNextBatch();
+                }, 100);
             }
         };
 
@@ -931,13 +935,16 @@ document.addEventListener('DOMContentLoaded', function() {
         const loadNextBatch = async () => {
             if (isLoading || allLoaded) return;
             
-            // 현재 보이는 카드 인덱스가 로드된 전체 카드의 80% 지점에 도달했을 때만 로딩 인디케이터 표시 및 로드
-            // 단, 마지막 로드된 배치 근처에 있을 때만 로딩 표시
+            // 현재 보이는 카드 인덱스가 로드된 전체 카드의 근처에 도달했을 때 다음 배치 로드
             const totalLoaded = currentOffset;
-            const remainingCards = totalLoaded - window.gallerySliderActiveIndex;
+            const remainingCards = totalLoaded - (window.gallerySliderActiveIndex || 0);
             
-            // 아직 볼 카드가 충분하면 로딩 표시 안 함
-            if (remainingCards > 5) return;
+            // 아직 볼 카드가 충분하면 로딩 표시 안 함 (5개 이하일 때만 로드)
+            if (remainingCards > 5) {
+                // 다음 배치 로드는 하되, 로딩 인디케이터는 표시하지 않음
+                // 사용자가 마지막 카드 근처에 있을 때만 로딩 표시
+                return;
+            }
             
             isLoading = true;
             if (cardStackLoading) cardStackLoading.classList.add('show');
@@ -1012,16 +1019,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     currentOffset += data.posts.length;
                     
                     // 다음 배치를 조금 후에 로드 (페이지 로딩 부하 분산)
+                    isLoading = false;
+                    if (cardStackLoading) cardStackLoading.classList.remove('show');
+                    
                     if (data.posts.length === batchSize) {
+                        // 더 로드할 게시글이 있을 수 있으므로 다음 배치 로드
                         setTimeout(() => {
-                            isLoading = false;
-                            if (cardStackLoading) cardStackLoading.classList.remove('show');
                             loadNextBatch();
                         }, 500); // 0.5초 후 다음 배치 로드
                     } else {
+                        // 마지막 배치였음
                         allLoaded = true;
-                        isLoading = false;
-                        if (cardStackLoading) cardStackLoading.classList.remove('show');
                     }
                 } else {
                     allLoaded = true;
@@ -1035,10 +1043,14 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         };
 
-        // 첫 배치는 페이지가 완전히 로드되고 첫 페이지가 표시된 후 시작 (더 늦게 시작하여 초기 로딩 부하 감소)
+        // loadNextBatch를 전역으로 노출하여 setActiveIndex에서 호출 가능하도록 함
+        window.loadNextBatch = loadNextBatch;
+        
+        // 초기 로딩 후 첫 배치를 자동으로 로드 (사용자가 카드를 넘기기 전에 미리 로드)
+        // 초기 10개가 로드되었으므로, 추가로 50개를 미리 로드
         setTimeout(() => {
             loadNextBatch();
-        }, 3000); // 3초 후 첫 배치 로드 (초기 로딩 완료 후)
+        }, 1000); // 1초 후 첫 배치 로드
     }
     
     });
