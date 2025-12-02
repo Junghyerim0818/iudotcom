@@ -138,6 +138,32 @@ def api_gallery_posts():
         current_app.logger.error(f"Error in api_gallery_posts: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
+@bp.route('/api/stats')
+@cache.cached(timeout=300, key_prefix='site_stats')  # 5분 캐싱
+def api_stats():
+    """사이트 통계 정보 반환"""
+    try:
+        from datetime import datetime, timedelta
+        from sqlalchemy import func
+        
+        # 총 게시글 수
+        total_posts = db.session.query(func.count(Post.id)).scalar() or 0
+        
+        # 오늘 게시글 수
+        today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+        today_posts = db.session.query(func.count(Post.id)).filter(
+            Post.created_at >= today_start
+        ).scalar() or 0
+        
+        return jsonify({
+            'success': True,
+            'total_posts': total_posts,
+            'today_posts': today_posts
+        })
+    except Exception as e:
+        current_app.logger.error(f"Error in api_stats: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 @bp.route('/login')
 def login():
     if current_user.is_authenticated:

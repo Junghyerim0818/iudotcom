@@ -185,20 +185,58 @@
         </div>
     </header>
 
-    <!-- 메인 콘텐츠 -->
-    <div class="main-content {% if request.endpoint == 'main.gallery' or request.endpoint == 'main.gallery_detail' %}main-content-gallery{% elif request.endpoint == 'main.archive' %}main-content-archive{% elif request.endpoint == 'main.index' %}main-content-index{% elif request.endpoint == 'main.admin' %}main-content-admin{% endif %}">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <!-- 메인 콘텐츠 영역 (원페이지 빌드) -->
+    <div class="main-layout-wrapper">
+        <!-- 왼쪽 사이드바 -->
+        <aside class="left-sidebar" id="leftSidebar">
+            <div class="sidebar-content">
+                <div class="sidebar-stats">
+                    <div class="sidebar-stat-item">
+                        <div class="stat-label">총 게시글</div>
+                        <div class="stat-value" id="totalPostsCount">-</div>
                     </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-        
-        {% block content %}{% endblock %}
+                    <div class="sidebar-stat-item">
+                        <div class="stat-label">오늘 게시글</div>
+                        <div class="stat-value" id="todayPostsCount">-</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 중앙 콘텐츠 영역 -->
+        <main class="main-content-area" id="mainContentArea">
+            <div class="main-content {% if request.endpoint == 'main.gallery' or request.endpoint == 'main.gallery_detail' %}main-content-gallery{% elif request.endpoint == 'main.archive' %}main-content-archive{% elif request.endpoint == 'main.index' %}main-content-index{% elif request.endpoint == 'main.admin' %}main-content-admin{% endif %}">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+                
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+
+        <!-- 오른쪽 사이드바 -->
+        <aside class="right-sidebar" id="rightSidebar">
+            <div class="sidebar-content">
+                <div class="sidebar-brand-vertical">
+                    <div class="brand-text">IU DOTCOM</div>
+                    <div class="brand-subtitle">아이유와 함께하는 공간</div>
+                </div>
+                <div class="sidebar-language">
+                    <div class="language-label">LANGUAGE</div>
+                    <select id="sidebarLanguageSelect" class="form-select form-select-sm sidebar-language-dropdown">
+                        <option value="ko" {% if current_lang == 'ko' %}selected{% endif %}>한국어</option>
+                        <option value="en" {% if current_lang == 'en' %}selected{% endif %}>English</option>
+                    </select>
+                </div>
+            </div>
+        </aside>
     </div>
 
     {# 하단 고정 관리자/글쓰기 네비게이션 (로그인 시에만 표시, 로그아웃은 상단 메뉴에서만) #}

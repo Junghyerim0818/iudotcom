@@ -80,6 +80,60 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
+    // 사이드바 언어 선택 드롭다운 처리
+    const sidebarLanguageSelect = document.getElementById('sidebarLanguageSelect');
+    if (sidebarLanguageSelect) {
+        sidebarLanguageSelect.addEventListener('change', function(e) {
+            const langCode = this.value;
+            if (langCode && (langCode === 'ko' || langCode === 'en')) {
+                // 언어 변경 API 호출 후 즉시 리로드
+                fetch('/lang/' + langCode, {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    credentials: 'same-origin'
+                })
+                .then(response => response.json())
+                .then(() => {
+                    const currentUrl = window.location.pathname + window.location.search;
+                    window.location.href = currentUrl + (currentUrl.includes('?') ? '&' : '?') + '_t=' + Date.now();
+                })
+                .catch(() => {
+                    window.location.reload();
+                });
+            }
+        });
+    }
+    
+    // 사이드바 통계 데이터 로드
+    function loadSidebarStats() {
+        fetch('/api/stats', {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const totalPostsEl = document.getElementById('totalPostsCount');
+                const todayPostsEl = document.getElementById('todayPostsCount');
+                if (totalPostsEl) {
+                    totalPostsEl.textContent = data.total_posts.toLocaleString();
+                }
+                if (todayPostsEl) {
+                    todayPostsEl.textContent = data.today_posts.toLocaleString();
+                }
+            }
+        })
+        .catch(err => {
+            console.error('Failed to load stats:', err);
+        });
+    }
+    
+    // 페이지 로드 시 통계 데이터 로드
+    loadSidebarStats();
+    
     // 활성 메뉴 배경 사각형 위치 업데이트
     function updateActiveMenuBackground(skipTransition = false, targetLeft = null, targetWidth = null) {
         const topMenu = document.querySelector('.top-menu');
@@ -236,7 +290,9 @@ document.addEventListener('DOMContentLoaded', function() {
      */
     function loadPagePartial(url, options) {
         const opts = Object.assign({ push: true }, options || {});
-        const mainContent = document.querySelector('.main-content');
+        // 중앙 콘텐츠 영역 내부의 .main-content를 찾음
+        const mainContentArea = document.querySelector('.main-content-area');
+        const mainContent = mainContentArea ? mainContentArea.querySelector('.main-content') : document.querySelector('.main-content');
         if (!mainContent) {
             window.location.href = url;
             return;
@@ -260,7 +316,8 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(html => {
             const parser = new DOMParser();
             const doc = parser.parseFromString(html, 'text/html');
-            const newMain = doc.querySelector('.main-content');
+            // 새 HTML에서 .main-content 영역 찾기
+            const newMain = doc.querySelector('.main-content-area .main-content') || doc.querySelector('.main-content');
             const newTitle = doc.querySelector('title');
 
             if (newMain) {
@@ -280,7 +337,11 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             // 스크롤 맨 위로
-            window.scrollTo({ top: 0, behavior: 'auto' });
+            if (mainContentArea) {
+                mainContentArea.scrollTo({ top: 0, behavior: 'auto' });
+            } else {
+                window.scrollTo({ top: 0, behavior: 'auto' });
+            }
 
             // 갤러리 페이지 전용 로딩 인디케이터 숨기기 (부분 전환 완료 후)
             if (isGalleryPage) {
@@ -289,6 +350,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     galleryLoader.classList.remove('show');
                 }
             }
+
+            // 통계 데이터 다시 로드 (사이드바 업데이트)
+            loadSidebarStats();
 
             // 부분 전환 후 상단 메뉴 분홍 배경 위치 재계산
             // (디테일 페이지 진입/이탈 시 레이아웃이 변해도 올바른 위치로 다시 정렬)
@@ -587,333 +651,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // 홈 화면 배경 이미지 및 스크롤 효과
-    const indexHeroBackground = document.getElementById('indexHeroBackground');
-    const indexHeroGradient = document.getElementById('indexHeroGradient');
-    const gallerySliderContainer = document.getElementById('gallerySliderContainer');
-    
-    // 배경 이미지가 있는지 확인
-    const hasBackground = indexHeroBackground !== null;
-    
-    if (gallerySliderContainer) {
-        if (hasBackground && indexHeroGradient) {
-            // 배경 이미지가 있는 경우
-            gallerySliderContainer.classList.add('has-background');
-            
-            const bgImageUrl = indexHeroBackground.getAttribute('data-bg-image');
-            if (bgImageUrl) {
-                indexHeroBackground.style.backgroundImage = `url('${bgImageUrl}')`;
-            }
-            
-            let ticking = false;
-            const scrollHandler = function() {
-                if (!ticking) {
-                    window.requestAnimationFrame(function() {
-                        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-                        const windowHeight = window.innerHeight;
-                        const headerHeight = 70;
-                        const availableHeight = windowHeight - headerHeight;
-                        
-                        // 배경 이미지는 고정된 위치에 두고 더 이상 움직이지 않음
-                        if (indexHeroBackground) {
-                            indexHeroBackground.style.transform = 'translateY(0px)';
-                        }
-                        
-                        // 그라데이션 오버레이 표시 (스크롤이 화면의 20% 이상일 때)
-                        if (indexHeroGradient) {
-                            if (scrollTop > availableHeight * 0.2) {
-                                indexHeroGradient.classList.add('scrolled');
-                            } else {
-                                indexHeroGradient.classList.remove('scrolled');
-                            }
-                        }
-                        
-                        // 카드 컨테이너 표시 (스크롤이 화면의 30% 이상일 때 - 더 빨리 나타나도록)
-                        if (scrollTop > availableHeight * 0.3) {
-                            gallerySliderContainer.classList.add('visible');
-                        } else {
-                            gallerySliderContainer.classList.remove('visible');
-                        }
-                        
-                        ticking = false;
-                    });
-                    ticking = true;
-                }
-            };
-            
-            // 초기 상태 설정
-            scrollHandler();
-            
-            // 스크롤 이벤트 리스너 (throttled)
-            window.addEventListener('scroll', scrollHandler, { passive: true });
-            
-            // 리사이즈 이벤트
-            window.addEventListener('resize', scrollHandler, { passive: true });
-        } else {
-            // 배경 이미지가 없는 경우 - 카드를 바로 표시
-            gallerySliderContainer.classList.remove('has-background');
-            gallerySliderContainer.style.opacity = '1';
-            gallerySliderContainer.style.transform = 'translateY(0)';
-            gallerySliderContainer.style.pointerEvents = 'auto';
-            gallerySliderContainer.style.marginTop = '0';
-        }
-    }
-    
-    // 갤러리 카드 슬라이더 기능 (CodingTorque 스타일의 data-pos 기반 캐러셀)
-    const gallerySliderWrapper = document.getElementById('gallerySliderWrapper');
-    const gallerySliderTrack = document.getElementById('gallerySliderTrack');
-    const gallerySliderPrev = document.getElementById('gallerySliderPrev');
-    const gallerySliderNext = document.getElementById('gallerySliderNext');
-    const galleryHomeBtn = document.getElementById('galleryHomeBtn');
-    
-    if (gallerySliderWrapper && gallerySliderTrack) {
-        const cardItems = Array.from(gallerySliderTrack.querySelectorAll('.gallery-card-item'));
-        if (cardItems.length === 0) return;
-        
-
-        // 배경 이미지 lazy loading - 처음에는 중앙 카드와 인접 카드만 로드
-        const loadCardImage = (card, index) => {
-            const bgElement = card.querySelector('.gallery-card-background[data-bg-image]');
-            if (!bgElement || bgElement.dataset.loaded === 'true') return;
-            
-            let imageUrl = bgElement.getAttribute('data-bg-image');
-            // 카드 크기: 최대 500px x 600px
-            // 레티나 디스플레이 대비 2배 = 1000px x 1200px
-            // 하지만 더 가볍게 하기 위해 800px x 960px로 제한
-            // 서버 측 이미지인 경우 크기 파라미터 추가
-            if (imageUrl && imageUrl.includes('/image/')) {
-                try {
-                    const urlObj = new URL(imageUrl, window.location.origin);
-                    // 이미 파라미터가 있으면 유지, 없으면 추가
-                    if (!urlObj.searchParams.has('w')) {
-                        urlObj.searchParams.set('w', '800');
-                    }
-                    if (!urlObj.searchParams.has('h')) {
-                        urlObj.searchParams.set('h', '960');
-                    }
-                    imageUrl = urlObj.pathname + '?' + urlObj.searchParams.toString();
-                } catch (e) {
-                    // URL 파싱 실패 시 원본 사용
-                }
-            }
-            
-            // 이미지 프리로딩
-            const img = new Image();
-            img.onload = () => {
-                bgElement.style.backgroundImage = `url('${imageUrl}')`;
-                bgElement.dataset.loaded = 'true';
-            };
-            img.onerror = () => {
-                // 이미지 로드 실패 시 플레이스홀더 유지
-                bgElement.dataset.loaded = 'error';
-            };
-            img.src = imageUrl;
-        };
-
-        // 초기 로드: 중앙 카드와 앞뒤 2개씩 로드 (총 5개, 다다음 카드까지 미리보기)
-        const loadInitialImages = () => {
-            const visibleRange = 2; // 앞뒤 2개씩 (다다음 카드까지 미리보기)
-            cardItems.forEach((card, index) => {
-                const offset = Math.abs(index - activeIndex);
-                if (offset <= visibleRange) {
-                    loadCardImage(card, index);
-                }
-            });
-        };
-
-        let activeIndex = 0;
-        
-        // 전역으로 노출하여 순차 로딩 코드에서 접근 가능하도록
-        window.gallerySliderActiveIndex = 0;
-
-        // 현재 activeIndex 기준으로 각 카드의 data-pos 설정 및 z-index 설정
-        function assignPositions() {
-            // cardItems를 다시 가져와서 새로 추가된 카드도 포함
-            const allCards = Array.from(gallerySliderTrack.querySelectorAll('.gallery-card-item'));
-            allCards.forEach((card, index) => {
-                // 실제 offset 계산 (제한 없음)
-                const offset = index - activeIndex;
-                card.dataset.pos = String(offset);
-                card.dataset.index = String(index);
-                card.dataset.cardIndex = String(index);
-                
-                // z-index를 data-pos의 절댓값 기반으로 설정
-                // data-pos="0": z-index 10 (최고)
-                // data-pos="-1", "1": z-index 9 (같은 레벨)
-                // data-pos="-2", "2": z-index 8 (같은 레벨)
-                const absOffset = Math.abs(offset);
-                card.style.zIndex = String(10 - absOffset);
-            });
-            
-            // cardItems 업데이트
-            cardItems.length = 0;
-            cardItems.push(...allCards);
-        }
-
-        // 특정 인덱스를 활성화
-        function setActiveIndex(newIndex) {
-            // cardItems를 다시 가져와서 새로 추가된 카드도 포함
-            const allCards = Array.from(gallerySliderTrack.querySelectorAll('.gallery-card-item'));
-            const clamped = Math.max(0, Math.min(allCards.length - 1, newIndex));
-            if (clamped === activeIndex && allCards.length === cardItems.length) return;
-            
-            // cardItems 업데이트
-            cardItems.length = 0;
-            cardItems.push(...allCards);
-            
-            activeIndex = clamped;
-            window.gallerySliderActiveIndex = clamped;
-            assignPositions();
-            
-            // 활성화된 카드 주변 이미지 lazy load (다다음 카드까지 미리보기)
-            const visibleRange = 2; // 앞뒤 2개씩 (다다음 카드까지 미리보기)
-            cardItems.forEach((card, index) => {
-                const offset = Math.abs(index - activeIndex);
-                if (offset <= visibleRange) {
-                    loadCardImage(card, index);
-                }
-            });
-        }
-        
-        // 전역으로 노출하여 순차 로딩 코드에서 접근 가능하도록
-        window.gallerySliderSetActiveIndex = setActiveIndex;
-        window.gallerySliderAssignPositions = assignPositions;
-        window.gallerySliderActiveIndex = activeIndex;
-
-        // activeIndex 변경 감지 및 추가 로드 트리거를 위한 래퍼 함수
-        // loadNextBatch는 나중에 정의되므로, 전역 함수로 노출하여 호출 가능하도록 함
-        const originalSetActiveIndex = setActiveIndex;
-        setActiveIndex = (index) => {
-            window.gallerySliderActiveIndex = index;
-            originalSetActiveIndex(index);
-            // 인덱스 변경 시 다음 배치 로드 필요성 체크
-            // loadNextBatch가 전역으로 노출되어 있으면 호출
-            if (window.loadNextBatch && typeof window.loadNextBatch === 'function') {
-                setTimeout(() => {
-                    window.loadNextBatch();
-                }, 100);
-            }
-        };
-
-        // 초기 위치 설정
-        assignPositions();
-        // 초기 이미지 로드는 HTML 렌더링 후 지연 (HTML 먼저 표시)
-        setTimeout(() => {
-            loadInitialImages();
-        }, 100);
-
-        // 카드 클릭: 중앙이 아니면 중앙으로 이동, 중앙이면 링크 동작
-        cardItems.forEach((card, index) => {
-            const cardLink = card.querySelector('.gallery-card-link');
-            if (!cardLink) return;
-
-            cardLink.addEventListener('click', function(e) {
-                if (index === activeIndex && card.dataset.pos === '0') {
-                    // 이미 중앙 카드이면 그대로 상세 페이지 이동
-                    return;
-                }
-                // 중앙이 아니면 중앙으로만 이동
-                e.preventDefault();
-                setActiveIndex(index);
-            });
-        });
-
-        // 이전 / 다음 버튼
-        if (gallerySliderPrev) {
-            gallerySliderPrev.addEventListener('click', function() {
-                setActiveIndex(activeIndex - 1);
-            });
-        }
-
-        if (gallerySliderNext) {
-            gallerySliderNext.addEventListener('click', function() {
-                setActiveIndex(activeIndex + 1);
-            });
-        }
-
-        // 마우스/트랙패드 스크롤로 카드 스택 이동
-        let wheelLocked = false;
-        const wheelCooldown = 200; // ms 단위, 너무 빠르게 넘기는 것 방지
-
-        gallerySliderWrapper.addEventListener('wheel', function(e) {
-            // 세로 스크롤 기준으로만 처리
-            const delta = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
-            if (!delta) return;
-
-            // 한 번에 여러 번 호출되는 것을 방지
-            if (wheelLocked) return;
-            wheelLocked = true;
-            setTimeout(() => {
-                wheelLocked = false;
-            }, wheelCooldown);
-
-            // 페이지 전체 스크롤 대신 카드 스택만 움직이도록 기본 스크롤 막기
-            e.preventDefault();
-
-            if (delta > 0) {
-                // 아래로 스크롤 → 다음 카드
-                setActiveIndex(activeIndex + 1);
-            } else {
-                // 위로 스크롤 → 이전 카드
-                setActiveIndex(activeIndex - 1);
-            }
-        }, { passive: false });
-
-        // 모바일 터치 스와이프 지원
-        let touchStartX = 0;
-        let touchStartY = 0;
-        let touchEndX = 0;
-        let touchEndY = 0;
-        
-        gallerySliderWrapper.addEventListener('touchstart', function(e) {
-            touchStartX = e.changedTouches[0].clientX;
-            touchStartY = e.changedTouches[0].clientY;
-        }, { passive: true });
-        
-        gallerySliderWrapper.addEventListener('touchmove', function(e) {
-            // 수평 이동이 수직 이동보다 크면 기본 스크롤 막고 스와이프로 처리 가능성 열어둠
-            // 단, passive: false로 설정해야 preventDefault 가능
-            const xDiff = Math.abs(e.changedTouches[0].clientX - touchStartX);
-            const yDiff = Math.abs(e.changedTouches[0].clientY - touchStartY);
-            
-            if (xDiff > yDiff && xDiff > 10) {
-                if (e.cancelable) e.preventDefault();
-            }
-        }, { passive: false });
-        
-        gallerySliderWrapper.addEventListener('touchend', function(e) {
-            touchEndX = e.changedTouches[0].clientX;
-            touchEndY = e.changedTouches[0].clientY;
-            handleSwipe();
-        }, { passive: true });
-        
-        function handleSwipe() {
-            const xDiff = touchEndX - touchStartX;
-            const yDiff = touchEndY - touchStartY;
-            const threshold = 30; // 스와이프 인식 최소 거리 (모바일에서 조금 더 민감하게)
-            
-            // 수직 이동보다 수평 이동이 커야 스와이프로 인정
-            if (Math.abs(xDiff) > Math.abs(yDiff)) {
-                if (Math.abs(xDiff) > threshold) {
-                    if (xDiff > 0) {
-                        // 오른쪽으로 스와이프 -> 이전 카드 (사용자 입장에서는 왼쪽 카드를 당겨오는 느낌)
-                        setActiveIndex(activeIndex - 1);
-                    } else {
-                        // 왼쪽으로 스와이프 -> 다음 카드 (사용자 입장에서는 현재 카드를 왼쪽으로 미는 느낌)
-                        setActiveIndex(activeIndex + 1);
-                    }
-                }
-            }
-        }
-
-        // 홈 버튼: 첫 번째 카드 활성화
-        if (galleryHomeBtn) {
-            galleryHomeBtn.addEventListener('click', function() {
-                setActiveIndex(0);
-            });
-        }
-    }
-
     // 본문 내 이미지에 자동으로 lazy loading 적용 (아직 로드되지 않은 이미지만)
     const contentImages = document.querySelectorAll('.gallery-detail-content img:not([loading])');
     contentImages.forEach(img => {
@@ -921,137 +658,8 @@ document.addEventListener('DOMContentLoaded', function() {
             img.loading = 'lazy';
         }
     });
-
-    // 순차적 로딩: 나머지 갤러리 카드들을 백그라운드에서 순차적으로 로드
-    const gallerySliderTrackForLoading = document.getElementById('gallerySliderTrack');
-    if (gallerySliderTrackForLoading && window.location.pathname === '/') {
-        const initialCards = Array.from(gallerySliderTrackForLoading.querySelectorAll('.gallery-card-item'));
-        let currentOffset = initialCards.length; // 초기에 로드된 카드 개수
-        const batchSize = 50; // 한 번에 50개씩 로드 (최대 개수 제한 없음)
-        let isLoading = false;
-        let allLoaded = false;
-        const cardStackLoading = document.getElementById('cardStackLoading');
-        
-        const loadNextBatch = async () => {
-            if (isLoading || allLoaded) return;
-            
-            // 현재 보이는 카드 인덱스가 로드된 전체 카드의 근처에 도달했을 때 다음 배치 로드
-            const totalLoaded = currentOffset;
-            const remainingCards = totalLoaded - (window.gallerySliderActiveIndex || 0);
-            
-            // 아직 볼 카드가 충분하면 로딩 표시 안 함 (5개 이하일 때만 로드)
-            if (remainingCards > 5) {
-                // 다음 배치 로드는 하되, 로딩 인디케이터는 표시하지 않음
-                // 사용자가 마지막 카드 근처에 있을 때만 로딩 표시
-                return;
-            }
-            
-            isLoading = true;
-            if (cardStackLoading) cardStackLoading.classList.add('show');
-
-            try {
-                const response = await fetch(`/api/gallery-posts?offset=${currentOffset}&limit=${batchSize}`);
-                const data = await response.json();
-                
-                if (data.success && data.posts && data.posts.length > 0) {
-                    // 새 카드들을 DOM에 추가
-                    data.posts.forEach((postData, index) => {
-                        const cardIndex = currentOffset + index;
-                        let imageUrl = postData.image_url || '';
-                        
-                        // 이미지 URL 처리 (카드 스택용 800x960) - 원본 이미지 기준
-                        // 서버에서 이미 원본 URL을 반환하므로 티스토리 썸네일 서버 URL 변환 없이 사용
-                        if (imageUrl && (imageUrl.includes('/image/') || imageUrl.includes('/post/image/'))) {
-                            try {
-                                const urlObj = new URL(imageUrl, window.location.origin);
-                                // 이미 파라미터가 있으면 유지, 없으면 추가
-                                if (!urlObj.searchParams.has('w')) {
-                                    urlObj.searchParams.set('w', '800');
-                                }
-                                if (!urlObj.searchParams.has('h')) {
-                                    urlObj.searchParams.set('h', '960');
-                                }
-                                imageUrl = urlObj.pathname + '?' + urlObj.searchParams.toString();
-                            } catch (e) {
-                                // URL 파싱 실패 시 원본 사용
-                            }
-                        }
-                        // 티스토리 원본 URL은 그대로 사용 (서버에서 use_thumbnail=False로 반환)
-                        
-                        // HTML 이스케이프 처리
-                        const escapeHtml = (text) => {
-                            if (!text) return '';
-                            const div = document.createElement('div');
-                            div.textContent = text;
-                            return div.innerHTML;
-                        };
-                        
-                        const cardHtml = `
-                            <div class="gallery-card-item" data-index="${cardIndex}" data-post-id="${postData.id}" data-card-index="${cardIndex}">
-                                <a href="/gallery/${postData.id}" class="gallery-card-link" data-card-index="${cardIndex}">
-                                    ${imageUrl ? 
-                                        `<div class="gallery-card-background" data-bg-image="${imageUrl}"></div>` :
-                                        `<div class="gallery-card-background gallery-card-placeholder-bg"><i class="bi bi-image"></i></div>`
-                                    }
-                                    <div class="gallery-card-overlay">
-                                        <h3 class="gallery-card-title">${escapeHtml(postData.title)}</h3>
-                                        <div class="gallery-card-meta">
-                                            <span class="gallery-card-author">${escapeHtml(postData.author_name)}</span>
-                                            <span class="gallery-card-date">${escapeHtml(postData.created_at)}</span>
-                                        </div>
-                                    </div>
-                                </a>
-                            </div>
-                        `;
-                        gallerySliderTrackForLoading.insertAdjacentHTML('beforeend', cardHtml);
-                    });
-                    
-                    // 슬라이더의 위치 재설정 함수 호출 (새 카드 포함)
-                    // assignPositions가 전역으로 노출되어 있다면 호출
-                    if (window.gallerySliderAssignPositions) {
-                        window.gallerySliderAssignPositions();
-                    }
-                    // 또는 setActiveIndex를 현재 인덱스로 호출하여 업데이트
-                    if (window.gallerySliderSetActiveIndex && window.gallerySliderActiveIndex !== undefined) {
-                        window.gallerySliderSetActiveIndex(window.gallerySliderActiveIndex);
-                    }
-                    
-                    currentOffset += data.posts.length;
-                    
-                    // 다음 배치를 조금 후에 로드 (페이지 로딩 부하 분산)
-                    isLoading = false;
-                    if (cardStackLoading) cardStackLoading.classList.remove('show');
-                    
-                    if (data.posts.length === batchSize) {
-                        // 더 로드할 게시글이 있을 수 있으므로 다음 배치 로드
-                        setTimeout(() => {
-                            loadNextBatch();
-                        }, 500); // 0.5초 후 다음 배치 로드
-                    } else {
-                        // 마지막 배치였음
-                        allLoaded = true;
-                    }
-                } else {
-                    allLoaded = true;
-                    isLoading = false;
-                    if (cardStackLoading) cardStackLoading.classList.remove('show');
-                }
-            } catch (error) {
-                console.error('카드 로딩 오류:', error);
-                isLoading = false;
-                if (cardStackLoading) cardStackLoading.classList.remove('show');
-            }
-        };
-
-        // loadNextBatch를 전역으로 노출하여 setActiveIndex에서 호출 가능하도록 함
-        window.loadNextBatch = loadNextBatch;
-        
-        // 초기 로딩 후 첫 배치를 자동으로 로드 (사용자가 카드를 넘기기 전에 미리 로드)
-        // 초기 10개가 로드되었으므로, 추가로 50개를 미리 로드
-        setTimeout(() => {
-            loadNextBatch();
-        }, 1000); // 1초 후 첫 배치 로드
-    }
+    
+    // 카드 스택 관련 코드 모두 제거됨 - 원페이지 빌드로 변경
     
     });
 });

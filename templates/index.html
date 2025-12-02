@@ -1,69 +1,46 @@
 {% extends "base.html" %}
 
-
 {% block content %}
-<!-- 갤러리 카드 슬라이더 -->
-<div class="gallery-slider-container" id="gallerySliderContainer">
-    <!-- 네비게이션 버튼 -->
-    <button class="gallery-slider-nav gallery-slider-prev" id="gallerySliderPrev" aria-label="이전">
-        <i class="bi bi-chevron-left"></i>
-    </button>
-    <button class="gallery-slider-nav gallery-slider-next" id="gallerySliderNext" aria-label="다음">
-        <i class="bi bi-chevron-right"></i>
-    </button>
+<div class="home-content-wrapper">
+    <h1 class="page-title">갤러리</h1>
+    <p class="page-subtitle">아이유의 다양한 순간들을 만나보세요</p>
     
-    <!-- 카드 슬라이더 -->
-    <div class="gallery-slider-wrapper" id="gallerySliderWrapper">
-        <div class="gallery-slider-track" id="gallerySliderTrack">
-            {% if gallery_posts %}
-                {% for post in gallery_posts %}
-                    <div class="gallery-card-item" data-index="{{ loop.index0 }}" data-post-id="{{ post.id }}" data-card-index="{{ loop.index0 }}">
-                        <a href="{{ url_for('main.gallery_detail', post_id=post.id) }}" class="gallery-card-link" data-card-index="{{ loop.index0 }}">
-                            {% set image_url = post.get_image_url(use_thumbnail=False) %}
-                            {% if image_url %}
-                                {% if image_url.startswith('/image/') or image_url.startswith('/post/image/') %}
-                                    {% set sep = '&' if '?' in image_url else '?' %}
-                                    {% set image_url = image_url + sep + 'w=800&h=960' %}
-                                {% endif %}
-                                <div class="gallery-card-background" data-bg-image="{{ image_url }}"></div>
-                            {% else %}
-                                <div class="gallery-card-background gallery-card-placeholder-bg">
-                                    <i class="bi bi-image"></i>
-                                </div>
-                            {% endif %}
-                            <div class="gallery-card-overlay">
-                                <h3 class="gallery-card-title">{{ post.title|safe }}</h3>
-                                <div class="gallery-card-meta">
-                                    <span class="gallery-card-author">{% if post.author.is_admin() %}아이유닷컴{% else %}{{ post.author.name }}{% endif %}</span>
-                                    <span class="gallery-card-date">{{ post.created_at.strftime('%Y.%m.%d') }}</span>
-                                </div>
-                            </div>
-                        </a>
+    <div class="gallery-post-list" id="homeGalleryList">
+        {% if gallery_posts %}
+            {% for post in gallery_posts %}
+                <a href="{{ url_for('main.gallery_detail', post_id=post.id) }}" class="gallery-post-item">
+                    <div class="gallery-post-content">
+                        <h5 class="gallery-post-title">{{ post.title|safe }}</h5>
+                        <div class="gallery-post-meta">
+                            <span class="gallery-post-author">{% if post.author.is_admin() %}아이유닷컴{% else %}{{ post.author.name }}{% endif %}</span>
+                            <span class="gallery-post-date">{{ post.created_at.strftime('%Y-%m-%d') }}</span>
+                        </div>
                     </div>
-                {% endfor %}
-            {% else %}
-                <div class="gallery-cards-empty">
-                    <p>갤러리에 글이 없습니다.</p>
-                </div>
-            {% endif %}
-        </div>
-        
-        <!-- 로딩 표시기 (JS로 제어) -->
-        <div class="card-stack-loading" id="cardStackLoading">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
+                    <div class="gallery-post-thumbnail">
+                        {% set image_url = post.get_image_url(use_thumbnail=True, thumbnail_size='160x108') %}
+                        {% if image_url %}
+                            {% if image_url.startswith('/image/') or image_url.startswith('/post/image/') %}
+                                {% set sep = '&' if '?' in image_url else '?' %}
+                                {% set image_url = image_url + sep + 'w=160&h=108' %}
+                            {% endif %}
+                            <img src="{{ image_url }}"
+                                 class="gallery-thumbnail-img"
+                                 alt="{{ post.title }}"
+                                 loading="lazy">
+                        {% else %}
+                            <div class="gallery-thumbnail-placeholder d-flex align-items-center justify-content-center bg-light text-muted">
+                                <i class="bi bi-image"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                </a>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <p>갤러리에 글이 없습니다.</p>
             </div>
-        </div>
+        {% endif %}
     </div>
-    
-    <!-- 홈 버튼 (최신 글로 돌아가기) -->
-    {% if gallery_posts %}
-    <div class="gallery-slider-controls">
-        <button class="gallery-home-btn" id="galleryHomeBtn" aria-label="최신 글로 이동">
-            <span>{% if current_lang == 'en' %}Home{% else %}홈{% endif %}</span>
-        </button>
-    </div>
-    {% endif %}
 </div>
 {% endblock %}
 
