@@ -120,6 +120,22 @@
                         <div class="stat-value" id="todayPostsCount">-</div>
                     </div>
                 </div>
+
+                <!-- 좌측 사이드바 검색 -->
+                <div class="sidebar-search">
+                    <form action="{{ url_for('main.gallery') }}" method="get" class="sidebar-search-form">
+                        <div class="sidebar-search-input-wrapper">
+                            <input
+                                type="text"
+                                name="q"
+                                class="form-control sidebar-search-input"
+                                placeholder="{% if current_lang == 'en' %}Search{% else %}검색{% endif %}">
+                            <button type="submit" class="btn sidebar-search-btn" aria-label="검색">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </aside>
 
