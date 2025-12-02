@@ -52,28 +52,61 @@ document.addEventListener('click', function(e) {
 document.addEventListener('DOMContentLoaded', function() {
     // HTML이 먼저 렌더링되도록 약간 지연
     requestAnimationFrame(function() {
-    // 사이드바 언어 선택 드롭다운 처리
-    const sidebarLanguageSelect = document.getElementById('sidebarLanguageSelect');
-    if (sidebarLanguageSelect) {
-        sidebarLanguageSelect.addEventListener('change', function(e) {
-            const langCode = this.value;
-            if (langCode && (langCode === 'ko' || langCode === 'en')) {
-                // 언어 변경 API 호출 후 즉시 리로드
-                fetch('/lang/' + langCode, {
-                    method: 'GET',
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    credentials: 'same-origin'
-                })
-                .then(response => response.json())
-                .then(() => {
-                    const currentUrl = window.location.pathname + window.location.search;
-                    window.location.href = currentUrl + (currentUrl.includes('?') ? '&' : '?') + '_t=' + Date.now();
-                })
-                .catch(() => {
-                    window.location.reload();
-                });
+    // 커스텀 언어 드롭다운 처리
+    const customLanguageDropdown = document.getElementById('customLanguageDropdown');
+    const customDropdownSelected = document.getElementById('customDropdownSelected');
+    const customDropdownOptions = document.getElementById('customDropdownOptions');
+    
+    if (customLanguageDropdown && customDropdownSelected && customDropdownOptions) {
+        // 드롭다운 열기/닫기
+        customDropdownSelected.addEventListener('click', function(e) {
+            e.stopPropagation();
+            customLanguageDropdown.classList.toggle('active');
+        });
+        
+        // 옵션 클릭 처리
+        const options = customDropdownOptions.querySelectorAll('.custom-dropdown-option');
+        options.forEach(option => {
+            option.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const value = this.getAttribute('data-value');
+                const text = this.textContent.trim();
+                
+                // 선택된 값 업데이트
+                customDropdownSelected.querySelector('.dropdown-text').textContent = text;
+                
+                // 모든 옵션의 selected 속성 제거
+                options.forEach(opt => opt.removeAttribute('data-selected'));
+                this.setAttribute('data-selected', 'true');
+                
+                // 드롭다운 닫기
+                customLanguageDropdown.classList.remove('active');
+                
+                // 언어 변경 API 호출
+                if (value && (value === 'ko' || value === 'en')) {
+                    fetch('/lang/' + value, {
+                        method: 'GET',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        credentials: 'same-origin'
+                    })
+                    .then(response => response.json())
+                    .then(() => {
+                        const currentUrl = window.location.pathname + window.location.search;
+                        window.location.href = currentUrl + (currentUrl.includes('?') ? '&' : '?') + '_t=' + Date.now();
+                    })
+                    .catch(() => {
+                        window.location.reload();
+                    });
+                }
+            });
+        });
+        
+        // 외부 클릭 시 드롭다운 닫기
+        document.addEventListener('click', function(e) {
+            if (!customLanguageDropdown.contains(e.target)) {
+                customLanguageDropdown.classList.remove('active');
             }
         });
     }
@@ -107,7 +140,7 @@ document.addEventListener('DOMContentLoaded', function() {
     loadSidebarStats();
     
     // 활성 메뉴 배경 부드럽게 이동 (KWANGYA 스타일)
-    function updateActiveMenu(activeLink) {
+    function updateActiveMenu(activeLink, animate = true) {
         const menuLinks = document.querySelectorAll('.top-menu-link');
         menuLinks.forEach(link => {
             link.classList.remove('active');
@@ -138,11 +171,19 @@ document.addEventListener('DOMContentLoaded', function() {
             const left = itemRect.left - wrapperRect.left;
             const width = itemRect.width;
             
-            // 부드러운 애니메이션을 위해 requestAnimationFrame 사용
-            requestAnimationFrame(() => {
+            if (animate) {
+                // 애니메이션 적용
+                requestAnimationFrame(() => {
+                    menuBackground.style.transition = 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+                    menuBackground.style.transform = `translateX(${left}px)`;
+                    menuBackground.style.width = `${width}px`;
+                });
+            } else {
+                // 애니메이션 없이 즉시 위치 설정 (로딩 완료 시)
+                menuBackground.style.transition = 'none';
                 menuBackground.style.transform = `translateX(${left}px)`;
                 menuBackground.style.width = `${width}px`;
-            });
+            }
         }
     }
     
@@ -166,18 +207,18 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // 초기 활성 메뉴 배경 위치 설정
-    function initActiveMenuBackground() {
+    function initActiveMenuBackground(animate = false) {
         const activeLink = document.querySelector('.top-menu-link.active');
         if (activeLink) {
-            // 약간의 지연을 두어 DOM이 완전히 렌더링된 후 실행
-            setTimeout(() => {
-                updateActiveMenu(activeLink);
-            }, 50);
+            // DOM이 완전히 렌더링된 후 실행
+            requestAnimationFrame(() => {
+                updateActiveMenu(activeLink, animate);
+            });
         }
     }
     
-    // 초기화
-    initActiveMenuBackground();
+    // 초기화 - 애니메이션 없이 즉시 위치 설정
+    initActiveMenuBackground(false);
     
     // 페이지 이동 속도 최적화: 내부 링크를 부분 전환(Partial Navigation)으로 처리
     /**
@@ -238,11 +279,14 @@ document.addEventListener('DOMContentLoaded', function() {
             // 통계 데이터 다시 로드 (사이드바 업데이트)
             loadSidebarStats();
             
-            // 새 콘텐츠에서 활성 메뉴 업데이트
+            // 새 콘텐츠에서 활성 메뉴 업데이트 (로딩 완료 후이므로 애니메이션 없이)
             const urlPath = url.split('?')[0];
             const activeLink = findActiveMenuByUrl(urlPath);
             if (activeLink) {
-                updateActiveMenu(activeLink);
+                // 로딩 중에는 이미 애니메이션이 실행되었으므로, 완료 시에는 즉시 위치만 맞춤
+                setTimeout(() => {
+                    updateActiveMenu(activeLink, false);
+                }, 100);
             }
         })
         .catch(() => {
@@ -285,8 +329,8 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             e.stopPropagation();
             
-            // 활성 메뉴 업데이트
-            updateActiveMenu(link);
+            // 활성 메뉴 업데이트 (애니메이션 적용)
+            updateActiveMenu(link, true);
             
             // 콘텐츠 로드
             if (href.startsWith('/')) {

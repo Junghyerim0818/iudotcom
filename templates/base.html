@@ -134,11 +134,13 @@
                                 <span class="top-menu-text">{% if current_lang == 'en' %}Home{% else %}홈{% endif %}</span>
                             </a>
                         </li>
+                        {% if request.endpoint != 'main.index' %}
                         <li class="top-menu-item">
                             <a href="{{ url_for('main.gallery') }}" class="top-menu-link {% if request.endpoint == 'main.gallery' %}active{% endif %}">
                                 <span class="top-menu-text">{% if current_lang == 'en' %}Gallery{% else %}갤러리{% endif %}</span>
                             </a>
                         </li>
+                        {% endif %}
                         <li class="top-menu-item">
                             <a href="{{ url_for('main.archive', type_name='archive_1') }}" class="top-menu-link {% if request.endpoint == 'main.archive' and request.view_args.type_name == 'archive_1' %}active{% endif %}">
                                 <span class="top-menu-text">{% if current_lang == 'en' %}IU Verification{% else %}아이유 인증 글{% endif %}</span>
@@ -201,16 +203,22 @@
                     </a>
                 </div>
                 
+                <div class="sidebar-language">
+                    <div class="custom-language-dropdown" id="customLanguageDropdown">
+                        <div class="custom-dropdown-selected" id="customDropdownSelected">
+                            <span class="dropdown-text">{% if current_lang == 'ko' %}KR{% else %}EN{% endif %}</span>
+                            <i class="bi bi-chevron-up dropdown-arrow"></i>
+                        </div>
+                        <div class="custom-dropdown-options" id="customDropdownOptions">
+                            <div class="custom-dropdown-option" data-value="ko" {% if current_lang == 'ko' %}data-selected="true"{% endif %}>KR</div>
+                            <div class="custom-dropdown-option" data-value="en" {% if current_lang == 'en' %}data-selected="true"{% endif %}>EN</div>
+                        </div>
+                    </div>
+                </div>
+                
                 <div class="sidebar-brand-vertical">
                     <div class="brand-text">IU DOTCOM</div>
                     <div class="brand-subtitle">아이유와 함께하는 공간</div>
-                </div>
-                
-                <div class="sidebar-language">
-                    <select id="sidebarLanguageSelect" class="form-select form-select-sm sidebar-language-dropdown">
-                        <option value="ko" {% if current_lang == 'ko' %}selected{% endif %}>KR</option>
-                        <option value="en" {% if current_lang == 'en' %}selected{% endif %}>EN</option>
-                    </select>
                 </div>
             </div>
         </aside>

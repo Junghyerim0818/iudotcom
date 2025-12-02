@@ -324,8 +324,13 @@ a:hover {
     }
 }
 
-/* 중앙: 메뉴 (KWANGYA 스타일 - 하나의 라운드 박스) - 메인 영역 안으로 이동 */
+/* 중앙: 메뉴 (KWANGYA 스타일 - 하나의 라운드 박스) - 오버레이 형식 */
 .main-menu-nav {
+    position: fixed;
+    top: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 200;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -553,7 +558,7 @@ a:hover {
 /* 원페이지 빌드 레이아웃 - KWANGYA 119 스타일 */
 .main-layout-wrapper {
     display: grid;
-    grid-template-columns: 200px 1fr 100px;
+    grid-template-columns: 160px 1fr 100px;
     min-height: 100vh;
     position: relative;
     background-color: #f8f8f8; /* 배경색 변경 */
@@ -566,7 +571,7 @@ a:hover {
     position: fixed;
     left: 1rem;
     top: 1rem;
-    width: 200px;
+    width: 160px;
     height: calc(100vh - 2rem);
     background-color: #f5f5f5; /* 밝은 회색 배경 */
     border-radius: 20px;
@@ -626,18 +631,7 @@ a:hover {
     display: flex;
     flex-direction: column;
     overflow: hidden;
-}
-
-/* 메인 영역 내부 메뉴 */
-.main-menu-nav {
-    flex-shrink: 0;
-    padding: 1.5rem 2rem 1rem;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.main-menu-nav .top-menu-wrapper {
-    margin: 0 auto;
-    max-width: fit-content;
+    position: relative;
 }
 
 /* 메인 콘텐츠 스크롤 가능 영역 */
@@ -645,7 +639,7 @@ a:hover {
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
-    padding: 0 3rem 2rem;
+    padding: 4rem 3rem 2rem;
 }
 
 /* 모든 스크롤바 숨김 */
@@ -770,7 +764,16 @@ html {
     margin-top: 1rem;
 }
 
-.sidebar-language-dropdown {
+/* 커스텀 언어 드롭다운 */
+.custom-language-dropdown {
+    position: relative;
+    width: 100%;
+}
+
+.custom-dropdown-selected {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 20px;
     padding: 0.5rem 0.75rem;
@@ -778,35 +781,89 @@ html {
     font-weight: 600;
     background-color: rgba(255, 255, 255, 0.1);
     color: #ffffff;
-    transition: all 0.2s ease;
-    width: 100%;
-    text-align: center;
     cursor: pointer;
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%23ffffff' d='M5 7L1 3h8z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 0.5rem center;
-    background-size: 10px;
-    padding-right: 2rem;
+    transition: all 0.2s ease;
+    user-select: none;
 }
 
-.sidebar-language-dropdown:hover {
+.custom-dropdown-selected:hover {
     background-color: rgba(255, 255, 255, 0.15);
     border-color: rgba(255, 255, 255, 0.3);
 }
 
-.sidebar-language-dropdown:focus {
+.custom-language-dropdown.active .custom-dropdown-selected {
     background-color: rgba(255, 255, 255, 0.15);
     border-color: rgba(255, 255, 255, 0.3);
-    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
-    outline: none;
 }
 
-.sidebar-language-dropdown option {
-    background-color: #2a2a2a;
-    color: #ffffff;
+.dropdown-text {
+    flex: 1;
     text-align: center;
-    padding: 0.5rem;
+}
+
+.dropdown-arrow {
+    font-size: 0.625rem;
+    transition: transform 0.2s ease;
+    margin-left: 0.5rem;
+}
+
+.custom-language-dropdown.active .dropdown-arrow {
+    transform: rotate(0deg);
+}
+
+.custom-dropdown-options {
+    position: absolute;
+    bottom: calc(100% + 0.5rem);
+    left: 0;
+    right: 0;
+    background-color: #2a2a2a;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    overflow: hidden;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: all 0.2s ease;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.custom-language-dropdown.active .custom-dropdown-options {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.custom-language-dropdown.active .dropdown-arrow {
+    transform: rotate(180deg);
+}
+
+.custom-dropdown-option {
+    padding: 0.625rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #ffffff;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.15s ease;
+}
+
+.custom-dropdown-option:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.custom-dropdown-option[data-selected="true"] {
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+.custom-dropdown-option:first-child {
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+}
+
+.custom-dropdown-option:last-child {
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
 }
 
 .main-content {
@@ -1606,24 +1663,7 @@ html {
     padding: 0.5rem 1rem;
 }
 
-.sidebar-language-dropdown {
-    background-color: rgba(0, 0, 0, 0.05);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    color: var(--sidebar-text);
-    border-radius: 0.25rem;
-}
-
-.sidebar-language-dropdown:focus {
-    background-color: rgba(0, 0, 0, 0.08);
-    border-color: rgba(0, 0, 0, 0.2);
-    color: var(--sidebar-text);
-    box-shadow: 0 0 0 0.2rem rgba(0, 0, 0, 0.05);
-}
-
-.sidebar-language-dropdown option {
-    background-color: var(--sidebar-bg);
-    color: var(--sidebar-text);
-}
+/* 기존 select 스타일 제거됨 - 커스텀 드롭다운 사용 */
 
 /* 언어 선택 항상 표시 */
 
