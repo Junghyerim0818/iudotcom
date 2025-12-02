@@ -52,34 +52,6 @@ document.addEventListener('click', function(e) {
 document.addEventListener('DOMContentLoaded', function() {
     // HTML이 먼저 렌더링되도록 약간 지연
     requestAnimationFrame(function() {
-    // 언어 선택 드롭다운 처리 (즉시 반영)
-    const languageSelect = document.getElementById('languageSelect');
-    if (languageSelect) {
-        languageSelect.addEventListener('change', function(e) {
-            const langCode = this.value;
-            if (langCode && (langCode === 'ko' || langCode === 'en')) {
-                // 언어 변경 API 호출 후 즉시 리로드
-                fetch('/lang/' + langCode, {
-                    method: 'GET',
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    credentials: 'same-origin' // 쿠키 포함
-                })
-                .then(response => response.json())
-                .then(() => {
-                    // 캐시 무효화를 위해 타임스탬프 추가하여 리로드
-                    const currentUrl = window.location.pathname + window.location.search;
-                    window.location.href = currentUrl + (currentUrl.includes('?') ? '&' : '?') + '_t=' + Date.now();
-                })
-                .catch(() => {
-                    // 실패 시 전체 리로드
-                    window.location.reload();
-                });
-            }
-        });
-    }
-    
     // 사이드바 언어 선택 드롭다운 처리
     const sidebarLanguageSelect = document.getElementById('sidebarLanguageSelect');
     if (sidebarLanguageSelect) {
@@ -134,153 +106,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // 페이지 로드 시 통계 데이터 로드
     loadSidebarStats();
     
-    // 활성 메뉴 배경 사각형 위치 업데이트
-    function updateActiveMenuBackground(skipTransition = false, targetLeft = null, targetWidth = null) {
-        const topMenu = document.querySelector('.top-menu');
-        const activeLink = document.querySelector('.top-menu-link.active');
-        
-        if (topMenu) {
-            let left, width;
-            
-            if (targetLeft !== null && targetWidth !== null) {
-                // 저장된 위치 사용
-                left = targetLeft;
-                width = targetWidth;
-            } else if (activeLink) {
-                // 활성 메뉴 위치 계산
-                const menuRect = topMenu.getBoundingClientRect();
-                const linkRect = activeLink.getBoundingClientRect();
-                left = linkRect.left - menuRect.left;
-                width = linkRect.width;
-            } else {
-                // 활성 메뉴가 없으면 숨김
-                topMenu.style.setProperty('--active-menu-left', '0px');
-                topMenu.style.setProperty('--active-menu-width', '0px');
-                topMenu.classList.remove('menu-initialized');
-                return;
-            }
-            
-            if (skipTransition) {
-                // 초기 로드 시 transition 일시적으로 비활성화하고 위치 설정
-                topMenu.style.setProperty('--active-menu-left', left + 'px');
-                topMenu.style.setProperty('--active-menu-width', width + 'px');
-                // 다음 프레임에서 transition 활성화 및 표시
-                requestAnimationFrame(() => {
-                    topMenu.classList.add('menu-initialized');
-                });
-            } else {
-                // 메뉴 변경 시 부드럽게 이동
-                // 먼저 위치를 설정하고, 그 다음 transition 활성화
-                topMenu.style.setProperty('--active-menu-left', left + 'px');
-                topMenu.style.setProperty('--active-menu-width', width + 'px');
-                // transition이 활성화되도록 클래스 추가
-                if (!topMenu.classList.contains('menu-initialized')) {
-                    topMenu.classList.add('menu-initialized');
-                }
-            }
-        }
-    }
-    
-    // 페이지 전환 시 저장된 위치 확인
-    const savedLeft = sessionStorage.getItem('menu-background-left');
-    const savedWidth = sessionStorage.getItem('menu-background-width');
-    
-    if (savedLeft && savedWidth) {
-        // 저장된 위치에서 시작 (transition 없이)
-        const savedLeftNum = parseFloat(savedLeft);
-        const savedWidthNum = parseFloat(savedWidth);
-        updateActiveMenuBackground(true, savedLeftNum, savedWidthNum);
-        
-        // sessionStorage 정리
-        sessionStorage.removeItem('menu-background-left');
-        sessionStorage.removeItem('menu-background-width');
-        
-        // 올바른 활성 메뉴 위치 확인
-        const topMenu = document.querySelector('.top-menu');
-        const activeLink = document.querySelector('.top-menu-link.active');
-        
-        if (topMenu && activeLink) {
-            const menuRect = topMenu.getBoundingClientRect();
-            const linkRect = activeLink.getBoundingClientRect();
-            const correctLeft = linkRect.left - menuRect.left;
-            const correctWidth = linkRect.width;
-            
-            // 저장된 위치와 올바른 위치가 다르면 이동
-            if (Math.abs(savedLeftNum - correctLeft) > 1 || Math.abs(savedWidthNum - correctWidth) > 1) {
-                // 다음 프레임에서 올바른 위치로 이동 (transition 있이)
-                requestAnimationFrame(() => {
-                    setTimeout(() => {
-                        updateActiveMenuBackground(false);
-                    }, 50);
-                });
-            } else {
-                // 위치가 같으면 transition만 활성화
-                requestAnimationFrame(() => {
-                    topMenu.classList.add('menu-initialized');
-                });
-            }
-        }
-    } else {
-        // 초기 위치 설정 (transition 없이)
-        updateActiveMenuBackground(true);
-    }
-    
-    // 리사이즈 시 위치 업데이트
-    let resizeTimeout;
-    window.addEventListener('resize', function() {
-        clearTimeout(resizeTimeout);
-        resizeTimeout = setTimeout(() => {
-            updateActiveMenuBackground(false);
-        }, 100);
-    });
-    
-    // 메뉴 링크 클릭 시 배경 이동 (페이지 전환 전에 애니메이션 시작)
-    const menuLinks = document.querySelectorAll('.top-menu-link');
-    menuLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-            // 모달이나 외부 링크는 제외
-            if (this.getAttribute('data-bs-toggle') || 
-                this.getAttribute('target') === '_blank') {
-                return;
-            }
-            
-            // 같은 페이지 내 링크가 아니면 처리하지 않음
-            const href = this.getAttribute('href');
-            if (!href || href === '#' || !href.startsWith('/')) {
-                return;
-            }
-            
-            // 현재 페이지와 같은 링크면 처리하지 않음
-            if (this.classList.contains('active')) {
-                return;
-            }
-            
-            const topMenu = document.querySelector('.top-menu');
-            if (topMenu && topMenu.classList.contains('menu-initialized')) {
-                const menuRect = topMenu.getBoundingClientRect();
-                const linkRect = this.getBoundingClientRect();
-                
-                const left = linkRect.left - menuRect.left;
-                const width = linkRect.width;
-                
-                // 목적지 위치를 sessionStorage에 저장 (새 페이지에서 사용)
-                sessionStorage.setItem('menu-background-left', left);
-                sessionStorage.setItem('menu-background-width', width);
-                
-                // 페이지 전환을 잠시 막고 애니메이션 시작
-                e.preventDefault();
-                
-                // 클릭한 메뉴 위치로 배경 이동 (애니메이션 시작)
-                topMenu.style.setProperty('--active-menu-left', left + 'px');
-                topMenu.style.setProperty('--active-menu-width', width + 'px');
-                
-                // 애니메이션이 시작된 후 페이지 이동
-                setTimeout(() => {
-                    window.location.href = href;
-                }, 250); // 애니메이션이 보이도록 적절한 딜레이
-            }
-        });
-    });
+    // 활성 메뉴 배경 관련 코드 제거됨 - KWANGYA 스타일로 변경
     
     // 페이지 이동 속도 최적화: 내부 링크를 부분 전환(Partial Navigation)으로 처리
     /**
@@ -353,12 +179,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // 통계 데이터 다시 로드 (사이드바 업데이트)
             loadSidebarStats();
-
-            // 부분 전환 후 상단 메뉴 분홍 배경 위치 재계산
-            // (디테일 페이지 진입/이탈 시 레이아웃이 변해도 올바른 위치로 다시 정렬)
-            requestAnimationFrame(() => {
-                updateActiveMenuBackground(false);
-            });
         })
         .catch(() => {
             // 에러 시에는 일반 페이지 이동으로 폴백

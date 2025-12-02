@@ -251,16 +251,7 @@ a:hover {
     padding: 0 2rem;
 }
 
-/* 왼쪽: 언어 선택 */
-.top-header-left {
-    position: absolute;
-    left: 2rem;
-    top: 50%;
-    transform: translateY(-50%);
-    display: flex;
-    align-items: center;
-    z-index: 10;
-}
+/* 왼쪽: 언어 선택 - 제거됨 (사이드바로 이동) */
 
 .top-language-select {
     display: flex;
@@ -340,7 +331,7 @@ a:hover {
     }
 }
 
-/* 중앙: 메뉴 */
+/* 중앙: 메뉴 (KWANGYA 스타일 - 하나의 라운드 박스) */
 .top-header-center {
     display: flex;
     justify-content: center;
@@ -352,10 +343,17 @@ a:hover {
     z-index: 5;
 }
 
+.top-menu-wrapper {
+    background-color: #f5f5f5;
+    border-radius: 50px;
+    padding: 0.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
 .top-menu {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.25rem;
     list-style: none;
     margin: 0;
     padding: 0;
@@ -369,74 +367,37 @@ a:hover {
 .top-menu-link {
     display: flex;
     align-items: center;
-    padding: 0.625rem 1.25rem;
-    color: var(--sidebar-text);
+    padding: 0.625rem 1.5rem;
+    color: var(--text-secondary);
     text-decoration: none;
-    transition: color 0.3s ease;
+    transition: all 0.3s ease;
     white-space: nowrap;
     font-weight: 500;
     font-size: 0.9375rem;
     letter-spacing: -0.01em;
     position: relative;
     z-index: 1;
+    border-radius: 50px;
 }
 
 .top-menu-link:hover {
     color: var(--text-primary);
+    background-color: rgba(255, 255, 255, 0.8);
 }
 
-/* 활성 메뉴 배경 사각형 (애니메이션용) */
-.top-menu::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: var(--active-menu-left, -9999px); /* 초기값을 화면 밖으로 */
-    width: var(--active-menu-width, 0px);
-    height: 2.5rem;
-    background-color: rgba(255, 107, 157, 0.15);
-    border-radius: 1.5rem;
-    transform: translateY(-50%);
-    transition: none; /* 초기에는 transition 없음 */
-    z-index: 0;
-    pointer-events: none;
-    opacity: 0;
-    visibility: hidden; /* 초기에는 완전히 숨김 */
-}
-
-.top-menu.menu-initialized::before {
-    opacity: 1;
-    visibility: visible;
-    transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1), width 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
-}
-
-.top-menu:has(.top-menu-link.active)::before {
-    opacity: 1;
-    visibility: visible;
-}
-
+/* 활성 메뉴 배경 (KWANGYA 스타일) */
 .top-menu-link.active {
     color: var(--text-primary);
     font-weight: 600;
-    position: relative;
-    z-index: 1;
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .top-menu-text {
     opacity: 1;
 }
 
-/* 오른쪽: 로그인/프로필 */
-.top-header-right {
-    position: absolute;
-    right: 2rem;
-    top: 50%;
-    transform: translateY(-50%);
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 1rem;
-    z-index: 10;
-}
+/* 오른쪽: 로그인/프로필 - 제거됨 (사이드바로 이동) */
 
 .top-login-link {
     display: flex;
@@ -596,21 +557,24 @@ a:hover {
     min-height: calc(100vh - 70px);
     margin-top: 70px;
     position: relative;
-    background-color: var(--bg-primary);
+    background-color: #f8f8f8; /* 배경색 변경 */
+    padding: 0 1rem;
+    gap: 1rem;
 }
 
-/* 왼쪽 사이드바 - KWANGYA 119 스타일 */
+/* 왼쪽 사이드바 - KWANGYA 119 스타일 (둥근 박스) */
 .left-sidebar {
     position: fixed;
-    left: 0;
-    top: 70px;
+    left: 1rem;
+    top: calc(70px + 1rem);
     width: 200px;
-    height: calc(100vh - 70px);
+    height: calc(100vh - 70px - 2rem);
     background-color: #f5f5f5; /* 밝은 회색 배경 */
-    border-right: 1px solid var(--border-color);
+    border-radius: 20px;
     padding: 2rem 1.5rem;
     overflow-y: auto;
     z-index: 100;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
 }
 
 .sidebar-content {
@@ -653,26 +617,70 @@ a:hover {
     line-height: 1.2;
 }
 
-/* 중앙 콘텐츠 영역 */
+/* 중앙 콘텐츠 영역 (둥근 박스) */
 .main-content-area {
     grid-column: 2;
-    min-height: calc(100vh - 70px);
-    background-color: var(--bg-primary);
+    min-height: calc(100vh - 70px - 2rem);
+    margin: 1rem 0;
+    background-color: #ffffff;
+    border-radius: 20px;
     overflow-y: auto;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    padding: 2rem 3rem;
 }
 
-/* 오른쪽 사이드바 - KWANGYA 119 스타일 (어두운 배경) */
+/* 오른쪽 사이드바 - KWANGYA 119 스타일 (어두운 배경, 둥근 박스) */
 .right-sidebar {
     position: fixed;
-    right: 0;
-    top: 70px;
+    right: 1rem;
+    top: calc(70px + 1rem);
     width: 200px;
-    height: calc(100vh - 70px);
+    height: calc(100vh - 70px - 2rem);
     background-color: #2a2a2a; /* 어두운 회색 배경 */
-    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
     padding: 2rem 1.5rem;
     overflow-y: auto;
     z-index: 100;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* 사이드바 아이콘 메뉴 */
+.sidebar-icons {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-icon-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    font-size: 1.25rem;
+}
+
+.sidebar-icon-link:hover {
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-icon-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.sidebar-profile-icon {
+    cursor: pointer;
 }
 
 .sidebar-brand-vertical {
@@ -725,9 +733,9 @@ a:hover {
 
 .main-content {
     margin-left: 0;
-    padding: 2rem 3rem;
-    min-height: calc(100vh - 70px);
-    background-color: var(--bg-primary);
+    padding: 0;
+    min-height: auto;
+    background-color: transparent;
     color: var(--text-primary);
     max-width: 1200px;
     margin: 0 auto;
@@ -738,8 +746,8 @@ a:hover {
 .main-content-gallery,
 .main-content-archive,
 .main-content-admin {
-    padding: 2rem 3rem;
-    background-color: #ffffff;
+    padding: 0;
+    background-color: transparent;
     max-width: 1200px;
     margin: 0 auto;
 }
@@ -789,6 +797,8 @@ a:hover {
 @media (max-width: 1024px) {
     .main-layout-wrapper {
         grid-template-columns: 0 1fr 0;
+        padding: 0;
+        gap: 0;
     }
     
     .left-sidebar,
@@ -798,10 +808,15 @@ a:hover {
     
     .main-content-area {
         grid-column: 1 / -1;
+        margin: 0;
+        border-radius: 0;
+        box-shadow: none;
+        padding: 2rem 1.5rem;
+        min-height: calc(100vh - 70px);
     }
     
     .main-content {
-        padding: 2rem 1.5rem;
+        padding: 0;
     }
 }
 
@@ -1416,20 +1431,24 @@ a:hover {
 }
 
 .mobile-menu-toggle {
-    background: none;
+    background-color: #f5f5f5;
     border: none;
     color: var(--text-primary);
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     cursor: pointer;
-    padding: 0.5rem;
+    padding: 0.625rem;
+    width: 40px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: color 0.2s ease;
+    transition: all 0.2s ease;
+    border-radius: 50%;
 }
 
 .mobile-menu-toggle:hover {
-    color: var(--accent-color);
+    background-color: #e9e9e9;
+    color: var(--text-primary);
 }
 
 .mobile-header-brand {
@@ -1444,11 +1463,16 @@ a:hover {
     display: flex;
     align-items: center;
     justify-content: center;
+    width: 40px;
+    height: 40px;
+    background-color: #f5f5f5;
+    border-radius: 50%;
+    overflow: hidden;
 }
 
 .mobile-profile-avatar {
-    width: 32px;
-    height: 32px;
+    width: 100%;
+    height: 100%;
     border-radius: 50%;
     object-fit: cover;
 }
@@ -1508,61 +1532,73 @@ a:hover {
     
     .mobile-overlay {
         display: block;
+        background-color: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
     }
     
-    /* 모바일 메뉴 (드롭다운) */
+    /* 모바일 메뉴 (KWANGYA 스타일 - 둥근 박스) */
     .mobile-menu {
         display: block;
         position: fixed;
-        top: 60px;
-        left: 0;
-        right: 0;
+        top: 70px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: calc(100% - 2rem);
+        max-width: 400px;
         background-color: #ffffff;
-        border-bottom: 1px solid var(--border-color);
-        box-shadow: var(--shadow-md);
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
         max-height: 0;
         overflow: hidden;
-        transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+        opacity: 0;
         z-index: 1000;
     }
     
     .mobile-menu.mobile-open {
         max-height: 500px;
         overflow-y: auto;
+        opacity: 1;
     }
     
     .mobile-menu-list {
         list-style: none;
         margin: 0;
-        padding: 0.5rem 0;
+        padding: 0.75rem;
     }
     
     .mobile-menu-item {
-        margin: 0;
+        margin: 0.25rem 0;
     }
     
     .mobile-menu-link {
         display: block;
-        padding: 0.875rem 1.5rem;
+        padding: 0.875rem 1.25rem;
         color: var(--text-primary);
         text-decoration: none;
         font-weight: 500;
         font-size: 0.9375rem;
-        transition: background-color 0.2s ease;
-        border-left: 3px solid transparent;
+        transition: all 0.2s ease;
+        border-radius: 12px;
     }
     
     .mobile-menu-link:hover,
     .mobile-menu-link.active {
-        background-color: rgba(255, 107, 157, 0.1);
-        border-left-color: var(--accent-color);
+        background-color: #f5f5f5;
         color: var(--text-primary);
+    }
+    
+    .mobile-menu-link.active {
+        background-color: #ffffff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        font-weight: 600;
     }
     
     .mobile-menu-divider {
         height: 1px;
         background-color: var(--border-color);
-        margin: 0.5rem 0;
+        margin: 0.5rem 0.75rem;
     }
 
     /* 모바일 카드 스택 크기 조정 */
@@ -1587,21 +1623,36 @@ a:hover {
         border-top: 1px solid var(--border-color);
     }
     
+    .mobile-menu-footer .top-language-select {
+        display: flex;
+        justify-content: center;
+    }
+    
+    .mobile-menu-footer .top-language-dropdown {
+        background-color: #f5f5f5;
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 0.625rem 1rem;
+        font-size: 0.875rem;
+        min-width: 120px;
+    }
+    
     .mobile-login-link {
         display: block;
-        padding: 0.75rem 1.5rem;
+        padding: 0.875rem 1.25rem;
         text-align: center;
-        background-color: var(--accent-color);
-        color: #ffffff;
+        background-color: #f5f5f5;
+        color: var(--text-primary);
         text-decoration: none;
-        border-radius: 0.5rem;
+        border-radius: 12px;
         font-weight: 500;
-        transition: background-color 0.2s ease;
+        transition: all 0.2s ease;
+        margin: 0.25rem 0;
     }
     
     .mobile-login-link:hover {
-        background-color: var(--accent-color-dark);
-        color: #ffffff;
+        background-color: #e9e9e9;
+        color: var(--text-primary);
     }
     
     .top-header-container {

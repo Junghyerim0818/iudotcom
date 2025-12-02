@@ -120,68 +120,33 @@
     <!-- 상단 헤더 네비게이션 -->
     <header class="top-header" id="topHeader">
         <div class="top-header-container">
-            <!-- 왼쪽: 언어 선택 -->
-            <div class="top-header-left">
-                <div class="top-language-select">
-                    <select id="languageSelect" class="form-select form-select-sm top-language-dropdown">
-                        <option value="ko" {% if current_lang == 'ko' %}selected{% endif %}>한국어</option>
-                        <option value="en" {% if current_lang == 'en' %}selected{% endif %}>English</option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- 중앙: 메뉴 -->
+            <!-- 중앙: 메뉴 (하나의 라운드 박스로 묶음) -->
             <nav class="top-header-center">
-                <ul class="top-menu">
-                    <li class="top-menu-item">
-                        <a href="{{ url_for('main.index') }}" class="top-menu-link {% if request.endpoint == 'main.index' %}active{% endif %}">
-                            <span class="top-menu-text">{% if current_lang == 'en' %}Home{% else %}홈{% endif %}</span>
-                        </a>
-                    </li>
-                    <li class="top-menu-item">
-                        <a href="{{ url_for('main.gallery') }}" class="top-menu-link {% if request.endpoint == 'main.gallery' %}active{% endif %}">
-                            <span class="top-menu-text">{% if current_lang == 'en' %}Gallery{% else %}갤러리{% endif %}</span>
-                        </a>
-                    </li>
-                    <li class="top-menu-item">
-                        <a href="{{ url_for('main.archive', type_name='archive_1') }}" class="top-menu-link {% if request.endpoint == 'main.archive' and request.view_args.type_name == 'archive_1' %}active{% endif %}">
-                            <span class="top-menu-text">{% if current_lang == 'en' %}IU Verification{% else %}아이유 인증 글{% endif %}</span>
-                        </a>
-                    </li>
-                    <li class="top-menu-item">
-                        <a href="{{ url_for('main.archive', type_name='archive_2') }}" class="top-menu-link {% if request.endpoint == 'main.archive' and request.view_args.type_name == 'archive_2' %}active{% endif %}">
-                            <span class="top-menu-text">{% if current_lang == 'en' %}Support Verification{% else %}서포트 인증 글{% endif %}</span>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-
-            <!-- 오른쪽: 로그인/프로필 -->
-            <div class="top-header-right">
-                {% if current_user.is_authenticated %}
-                    <div class="top-profile">
-                        {% if current_user.profile_pic %}
-                            <img src="{{ url_for('static', filename='uploads/profiles/' + current_user.profile_pic) if current_user.profile_pic.startswith('profile_') else current_user.profile_pic }}" alt="프로필" class="top-profile-avatar" width="40" height="40">
-                        {% else %}
-                            <div class="top-profile-avatar bg-secondary d-flex align-items-center justify-content-center">
-                                <i class="bi bi-person-fill text-white"></i>
-                            </div>
-                        {% endif %}
-                        <div class="top-profile-dropdown">
-                            <a href="{{ url_for('main.logout') }}" class="top-dropdown-link">
-                                <span>{% if current_lang == 'en' %}Logout{% else %}로그아웃{% endif %}</span>
+                <div class="top-menu-wrapper">
+                    <ul class="top-menu">
+                        <li class="top-menu-item">
+                            <a href="{{ url_for('main.index') }}" class="top-menu-link {% if request.endpoint == 'main.index' %}active{% endif %}">
+                                <span class="top-menu-text">{% if current_lang == 'en' %}Home{% else %}홈{% endif %}</span>
                             </a>
-                        </div>
-                    </div>
-                {% else %}
-                    <a href="#" class="top-login-link" data-bs-toggle="modal" data-bs-target="#loginModal">
-                        <span>{% if current_lang == 'en' %}Login{% else %}로그인{% endif %}</span>
-                    </a>
-                {% endif %}
-                <a href="https://twitter.com/IUdotcom" target="_blank" rel="noopener noreferrer" class="top-social-link" aria-label="Twitter">
-                    <i class="bi bi-twitter-x"></i>
-                </a>
-            </div>
+                        </li>
+                        <li class="top-menu-item">
+                            <a href="{{ url_for('main.gallery') }}" class="top-menu-link {% if request.endpoint == 'main.gallery' %}active{% endif %}">
+                                <span class="top-menu-text">{% if current_lang == 'en' %}Gallery{% else %}갤러리{% endif %}</span>
+                            </a>
+                        </li>
+                        <li class="top-menu-item">
+                            <a href="{{ url_for('main.archive', type_name='archive_1') }}" class="top-menu-link {% if request.endpoint == 'main.archive' and request.view_args.type_name == 'archive_1' %}active{% endif %}">
+                                <span class="top-menu-text">{% if current_lang == 'en' %}IU Verification{% else %}아이유 인증 글{% endif %}</span>
+                            </a>
+                        </li>
+                        <li class="top-menu-item">
+                            <a href="{{ url_for('main.archive', type_name='archive_2') }}" class="top-menu-link {% if request.endpoint == 'main.archive' and request.view_args.type_name == 'archive_2' %}active{% endif %}">
+                                <span class="top-menu-text">{% if current_lang == 'en' %}Support Verification{% else %}서포트 인증 글{% endif %}</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
         </div>
     </header>
 
@@ -224,10 +189,37 @@
         <!-- 오른쪽 사이드바 -->
         <aside class="right-sidebar" id="rightSidebar">
             <div class="sidebar-content">
+                <!-- 상단 아이콘 메뉴 -->
+                <div class="sidebar-icons">
+                    <a href="{{ url_for('main.index') }}" class="sidebar-icon-link" aria-label="홈">
+                        <i class="bi bi-house"></i>
+                    </a>
+                    {% if current_user.is_authenticated %}
+                        <div class="sidebar-icon-link sidebar-profile-icon" aria-label="프로필">
+                            {% if current_user.profile_pic %}
+                                <img src="{{ url_for('static', filename='uploads/profiles/' + current_user.profile_pic) if current_user.profile_pic.startswith('profile_') else current_user.profile_pic }}" alt="프로필" class="sidebar-icon-img">
+                            {% else %}
+                                <i class="bi bi-person-fill"></i>
+                            {% endif %}
+                        </div>
+                        <a href="{{ url_for('main.logout') }}" class="sidebar-icon-link" aria-label="로그아웃">
+                            <i class="bi bi-box-arrow-right"></i>
+                        </a>
+                    {% else %}
+                        <a href="#" class="sidebar-icon-link" data-bs-toggle="modal" data-bs-target="#loginModal" aria-label="로그인">
+                            <i class="bi bi-person"></i>
+                        </a>
+                    {% endif %}
+                    <a href="https://twitter.com/IUdotcom" target="_blank" rel="noopener noreferrer" class="sidebar-icon-link" aria-label="Twitter">
+                        <i class="bi bi-twitter-x"></i>
+                    </a>
+                </div>
+                
                 <div class="sidebar-brand-vertical">
                     <div class="brand-text">IU DOTCOM</div>
                     <div class="brand-subtitle">아이유와 함께하는 공간</div>
                 </div>
+                
                 <div class="sidebar-language">
                     <div class="language-label">LANGUAGE</div>
                     <select id="sidebarLanguageSelect" class="form-select form-select-sm sidebar-language-dropdown">
