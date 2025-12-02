@@ -554,8 +554,10 @@ a:hover {
     }
 
     .main-layout-wrapper {
-        grid-template-columns: 1fr;
+        display: flex;
+        flex-direction: column;
         padding: 0;
+        width: 100%;
     }
 
     .main-content-area {
@@ -1289,7 +1291,6 @@ html {
     .main-menu-nav {
         position: fixed;
         left: 50%;
-        bottom: 0.75rem;
         transform: translateX(-50%);
         width: 100%;
         pointer-events: none;
@@ -1302,7 +1303,6 @@ html {
 
     .main-menu-nav .top-menu-wrapper {
         pointer-events: all;
-        width: calc(100% - 2.5rem);
         max-width: 420px;
     }
     
