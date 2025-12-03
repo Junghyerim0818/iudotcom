@@ -589,7 +589,7 @@ a:hover {
 
     .main-content {
         margin-left: 0;
-        padding-top: 2rem !important;
+        margin-top: 2rem !important;
     }
 
     /* 모바일에서 갤러리/아카이브 리스트 카드 정렬 */
