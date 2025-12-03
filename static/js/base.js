@@ -16,7 +16,12 @@ function handleGoogleLogin(btn) {
                 const modal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
                 if (modal) modal.hide();
                 window.removeEventListener('message', messageHandler);
-                window.location.reload();
+
+                // 캐시된 HTML 때문에 비로그인 화면이 남는 경우를 방지하기 위해
+                // 현재 URL에 타임스탬프 쿼리를 추가해서 완전히 새로 요청
+                const currentUrl = window.location.pathname + window.location.search;
+                const sep = currentUrl.includes('?') ? '&' : '?';
+                window.location.href = currentUrl + sep + '_login_ts=' + Date.now();
             } else {
                 alert(event.data.message || '로그인에 실패했습니다.');
             }
