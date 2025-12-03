@@ -84,7 +84,6 @@ def load_user(user_id):
     return User.query.get(user_id)
 
 @bp.route('/')
-@cache.cached(timeout=60, key_prefix='index_gallery_posts')  # 1분 캐싱
 def index():
     try:
         # 순차 로딩: 처음에는 첫 10개를 빠르게 로드하여 즉시 표시
