@@ -258,9 +258,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const menuHeight = menuRect.height;
         const menuTop = parseFloat(getComputedStyle(menuNav).top) || 32; // 2rem = 32px
         
-        // 콘텐츠 영역의 상단 패딩을 메뉴탭 높이 + 여백으로 설정
-        const contentPaddingTop = menuTop + menuHeight + 1.5 * 16; // 1.5rem 여백 추가
-        scrollableArea.style.paddingTop = `${contentPaddingTop}px`;
     }
     
     // 윈도우 리사이즈 시 메뉴 위치 업데이트
