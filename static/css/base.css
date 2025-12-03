@@ -1888,36 +1888,3 @@ html {
     opacity: 1;
     pointer-events: all;
 }
-
-/* 강제 데스크톱 레이아웃 제거: 작은 화면에서는 사이드바 숨기고 모바일 전용 UI 사용 */
-
-/* 화면이 좁아질 때 프로필 사진 숨김 (메뉴와 겹침 방지) */
-@media (max-width: 950px) {
-    .top-profile {
-        display: none;
-    }
-    
-    .top-profile-avatar {
-        display: none;
-    }
-    
-    /* 프로필이 숨겨졌을 때 오른쪽 영역 조정 */
-    .top-header-right {
-        gap: 0.5rem;
-    }
-    
-    .main-content-index,
-    .main-content-gallery,
-    .main-content-archive,
-    .main-content-admin {
-        padding: 1rem;
-    }
-}
-
-.gallery-detail-content {
-    padding-top: 0;
-}
-
-.gallery-detail-content > :first-child {
-    margin-top: 0;
-}
