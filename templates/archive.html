@@ -23,9 +23,9 @@
                          alt="{{ post.title }}"
                          loading="lazy">
                 {% else %}
-                    {# 대표 이미지가 없을 때는 심플한 플레이스홀더 표시 #}
+                    {# 대표 이미지가 없을 때는 "없음" 아이콘 표시 #}
                     <div class="gallery-thumbnail-placeholder d-flex align-items-center justify-content-center bg-light text-muted">
-                        <i class="bi bi-image"></i>
+                        <i class="bi bi-image-off"></i>
                     </div>
                 {% endif %}
             </div>
