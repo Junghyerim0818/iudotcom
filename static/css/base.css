@@ -85,168 +85,6 @@ a:hover {
     opacity: 0.8;
 }
 
-.sidebar {
-    display: none; /* 사이드바 숨김 - 상단 헤더로 대체 */
-}
-
-/* 항상 펼쳐진 상태 */
-.sidebar.expanded {
-    width: var(--sidebar-width);
-}
-
-
-.sidebar-header {
-    padding: 1.5rem 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    border-bottom: 1px solid var(--border-color);
-    min-height: 70px;
-    position: relative;
-}
-
-/* 토글 버튼 제거됨 */
-
-.sidebar-brand {
-    font-size: 1.25rem;
-    font-weight: 700;
-    white-space: nowrap;
-    opacity: 1;
-    letter-spacing: -0.02em;
-    font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
-}
-
-.sidebar-menu {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.sidebar-menu-item {
-    margin: 0.25rem 0;
-}
-
-.sidebar-menu-link {
-    display: flex;
-    align-items: center;
-    padding: 0.875rem 1rem;
-    color: var(--sidebar-text);
-    text-decoration: none;
-    transition: background-color 0.3s ease, color 0.2s ease;
-    white-space: nowrap;
-    font-weight: 500;
-    font-size: 0.9375rem;
-    letter-spacing: -0.01em;
-    border-radius: 16px;
-    margin: 0.125rem 0.5rem;
-}
-
-
-.sidebar-menu-link:hover {
-    background-color: rgba(255, 107, 157, 0.1); /* Accent color with transparency */
-    color: var(--accent-color); /* Same as active indicator */
-    transform: translateX(2px);
-}
-
-.sidebar-menu-link.active {
-    background-color: rgba(0, 0, 0, 0.05);
-    font-weight: 600;
-    position: relative;
-}
-
-.sidebar-menu-link.active::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 3px;
-    height: 60%;
-    background: var(--accent-color);
-    border-radius: 0 2px 2px 0;
-}
-
-/* 아이콘 제거됨 */
-
-.sidebar-menu-text {
-    opacity: 1;
-}
-
-.sidebar-divider {
-    height: 1px;
-    background-color: rgba(0, 0, 0, 0.1);
-    margin: 0.5rem 0;
-}
-
-.sidebar-section-title {
-    padding: 1rem 1rem 0.5rem;
-    font-size: 0.6875rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    opacity: 0.5;
-    white-space: nowrap;
-    font-weight: 600;
-    font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
-}
-
-.sidebar-profile {
-    padding: 1rem;
-    margin-top: auto;
-}
-
-.sidebar-profile-content {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-.sidebar-profile-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    object-fit: cover;
-    flex-shrink: 0;
-}
-
-.sidebar-profile-info {
-    flex: 1;
-    min-width: 0;
-}
-
-.sidebar-profile-name {
-    font-size: 0.875rem;
-    font-weight: 500;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.sidebar-profile-email {
-    font-size: 0.75rem;
-    opacity: 0.7;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.sidebar-profile-info {
-    flex: 1;
-    min-width: 0;
-}
-
-.top-header-container {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    width: 100%;
-    margin: 0 auto;
-    padding: 0 2rem;
-}
-
-/* 왼쪽: 언어 선택 - 제거됨 (사이드바로 이동) */
-
 .top-language-select {
     display: flex;
     align-items: center;
@@ -413,8 +251,6 @@ a:hover {
     opacity: 1;
 }
 
-/* 오른쪽: 로그인/프로필 - 제거됨 (사이드바로 이동) */
-
 .top-login-link {
     display: flex;
     align-items: center;
@@ -534,7 +370,6 @@ a:hover {
 
 /* 모바일 공통 스타일 */
 @media (max-width: 768px) {
-
 
     /* 모바일 헤더/오버레이/메뉴 활성화 */
     .mobile-header {
@@ -717,14 +552,6 @@ a:hover {
         margin: 0.5rem 0.75rem;
     }
 
-    /* 모바일 카드 스택 크기 조정 (현재 카드스택 제거 상태지만 남겨둠) */
-    .gallery-card-item {
-        width: 80vw;
-        height: 65vh;
-        max-width: 80vw;
-        max-height: 65vh;
-    }
-
     .mobile-menu-footer {
         padding: 1rem 1.5rem;
         border-top: 1px solid var(--border-color);
@@ -828,7 +655,6 @@ a:hover {
     color: #1DA1F2;
 }
 
-/* 원페이지 빌드 레이아웃 - KWANGYA 119 스타일 */
 .main-layout-wrapper {
     display: grid;
     grid-template-columns: 160px 1fr 100px;
@@ -1432,14 +1258,6 @@ html {
     color: var(--text-secondary);
 }
 
-.card-img-top {
-    width: 160px;
-    height: 108px;
-    max-width: 160px;
-    max-height: 108px;
-    object-fit: cover;
-}
-
 /* 갤러리/아카이브 페이지 리스트 스타일 - 세로로 긴 게시글 형태 */
 .gallery-post-list {
     display: flex;
@@ -1765,39 +1583,6 @@ html {
 /* 언어 선택 드롭다운 스타일 */
 .sidebar-language-select {
     padding: 0.5rem 1rem;
-}
-
-/* 기존 select 스타일 제거됨 - 커스텀 드롭다운 사용 */
-
-/* 언어 선택 항상 표시 */
-
-/* 소셜 미디어 링크 스타일 */
-.sidebar-social-section {
-    margin-top: 0.5rem;
-}
-
-.sidebar-social-link {
-    display: flex;
-    align-items: center;
-    padding: 0.875rem 1rem;
-    color: var(--sidebar-text);
-    text-decoration: none;
-    transition: all var(--transition-speed) var(--transition-easing);
-}
-
-.sidebar-social-link:hover {
-    background-color: var(--sidebar-hover);
-    color: #1DA1F2; /* Twitter 색상 */
-    transform: translateX(2px);
-}
-
-.sidebar-social-link i {
-    font-size: 1.25rem;
-    margin-right: 0.75rem;
-    width: 1.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
 /* 모바일 헤더 */
