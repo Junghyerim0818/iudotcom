@@ -276,22 +276,33 @@
         </aside>
     </div>
 
-    {# 하단 고정 관리자/글쓰기 네비게이션 (로그인 시에만 표시, 로그아웃은 상단 메뉴에서만) #}
+    {# 하단 고정 관리자/글쓰기 네비게이션 (로그인 시에만 표시) #}
     {% if current_user.is_authenticated and (current_user.is_writer() or current_user.is_admin()) %}
-    <nav class="floating-admin-nav">
-        {% if current_user.is_writer() %}
-        <a href="#" class="floating-nav-btn floating-nav-btn-write" data-bs-toggle="modal" data-bs-target="#newPostModal">
-            <i class="bi bi-pencil-square"></i>
-            <span>{% if current_lang == 'en' %}Write{% else %}글쓰기{% endif %}</span>
-        </a>
-        {% endif %}
-        {% if current_user.is_admin() %}
-        <a href="{{ url_for('main.admin') }}" class="floating-nav-btn floating-nav-btn-admin">
-            <i class="bi bi-gear-fill"></i>
-            <span>{% if current_lang == 'en' %}Admin{% else %}관리자{% endif %}</span>
-        </a>
-        {% endif %}
-    </nav>
+        <nav class="floating-admin-nav">
+            {% if current_user.is_writer() %}
+            <a href="#" class="floating-nav-btn floating-nav-btn-write" data-bs-toggle="modal" data-bs-target="#newPostModal">
+                <i class="bi bi-pencil-square"></i>
+                <span>{% if current_lang == 'en' %}Write{% else %}글쓰기{% endif %}</span>
+            </a>
+            {% endif %}
+            {% if current_user.is_admin() %}
+            <a href="{{ url_for('main.admin') }}" class="floating-nav-btn floating-nav-btn-admin">
+                <i class="bi bi-gear-fill"></i>
+                <span>{% if current_lang == 'en' %}Admin{% else %}관리자{% endif %}</span>
+            </a>
+            {% endif %}
+        </nav>
+    {% endif %}
+
+    {# 비로그인 시 하단 고정 로그인 버튼 (원형) #}
+    {% if not current_user.is_authenticated %}
+        <nav class="floating-login-nav">
+            <a href="#" class="floating-nav-btn floating-nav-btn-login"
+               data-bs-toggle="modal" data-bs-target="#loginModal"
+               aria-label="{% if current_lang == 'en' %}Login{% else %}로그인{% endif %}">
+                <i class="bi bi-person"></i>
+            </a>
+        </nav>
     {% endif %}
 
     <!-- 로그인 모달 -->

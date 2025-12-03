@@ -350,6 +350,31 @@ a:hover {
     font-size: 1rem;
 }
 
+/* 비로그인 시 하단 고정 로그인 버튼 (동그라미)
+   - 기본: 데스크톱에서 숨김
+   - 모바일(@max-width: 768px)에서만 표시 */
+.floating-login-nav {
+    display: none;
+    position: fixed;
+    right: 1.75rem;
+    bottom: 1.75rem;
+    z-index: 1300;
+}
+
+.floating-nav-btn-login {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.floating-nav-btn-login i {
+    font-size: 1.4rem;
+}
+
 .floating-nav-btn:hover {
     background-color: rgba(255, 107, 157, 0.12);
     box-shadow: 0 16px 40px rgba(15, 23, 42, 0.28);
@@ -370,19 +395,6 @@ a:hover {
 
 /* 모바일 공통 스타일 */
 @media (max-width: 768px) {
-
-    /* 모바일 헤더/오버레이/메뉴 활성화 */
-    .mobile-header {
-        display: flex;
-    }
-
-    .mobile-overlay {
-        display: none; /* JS에서 active 클래스 붙일 때만 표시 */
-    }
-
-    .mobile-menu {
-        display: none; /* JS에서 mobile-open 클래스 붙일 때 높이/투명도로 표시 */
-    }
 
     /* 작은 화면에서는 사이드바 숨기고 메인 영역만 사용 */
     .left-sidebar,
@@ -634,6 +646,11 @@ a:hover {
     
     .top-profile-info {
         display: none; /* 모바일에서 프로필 이름 숨김 */
+    }
+
+    /* 모바일에서만 하단 고정 로그인 버튼 표시 */
+    .floating-login-nav {
+        display: block;
     }
 }
 
@@ -1583,20 +1600,6 @@ html {
 /* 언어 선택 드롭다운 스타일 */
 .sidebar-language-select {
     padding: 0.5rem 1rem;
-}
-
-/* 모바일 헤더 */
-/* 데스크톱 기본값: 모바일 헤더/메뉴/오버레이 숨김 */
-.mobile-header {
-    display: none;
-}
-
-.mobile-menu {
-    display: none;
-}
-
-.mobile-overlay {
-    display: none;
 }
 
 .mobile-menu-toggle {
