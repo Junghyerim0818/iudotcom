@@ -1167,7 +1167,7 @@ html {
 
 .custom-dropdown-option[data-selected="true"] {
     background-color: rgba(255, 255, 255, 0.15);
-}
+} 
 
 .custom-dropdown-option:first-child {
     border-top-left-radius: 12px;
@@ -1195,7 +1195,6 @@ html {
 .main-content-gallery,
 .main-content-archive,
 .main-content-admin {
-    margin-top: 7.5rem;
     padding: 0;
     background-color: transparent;
     max-width: 1200px;
