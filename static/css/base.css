@@ -570,7 +570,7 @@ a:hover {
 
     .main-menu-nav {
         bottom: 2rem;
-        top: 0; !important;
+        top: 0 !important;
     }
     /* 플로팅 관리자 버튼 */
     .floating-admin-nav {
@@ -588,9 +588,8 @@ a:hover {
     }
 
     .main-content {
-        padding-top: 0;
         margin-left: 0;
-        padding: 0.75rem 0 0;
+        padding-top: 2rem !important;
     }
 
     /* 모바일에서 갤러리/아카이브 리스트 카드 정렬 */
@@ -1195,6 +1194,7 @@ html {
 .main-content-archive,
 .main-content-admin {
     padding: 0;
+    margin-top: 7.5rem;
     background-color: transparent;
     max-width: 1200px;
 }
