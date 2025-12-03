@@ -554,10 +554,10 @@ a:hover {
     }
 
     .main-layout-wrapper {
-        display: flex; !important;
-        flex-direction: column; !important;
-        padding: 0; !important
-        width: 100%; !important;
+        display: flex !important;
+        flex-direction: column !important;
+        padding: 0 !important;
+        width: 100% !important;
     }
 
     .main-content-area {
