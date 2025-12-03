@@ -396,6 +396,19 @@ a:hover {
 /* 모바일 공통 스타일 */
 @media (max-width: 768px) {
 
+    /* 모바일 헤더/오버레이/메뉴 활성화 */
+    .mobile-header {
+        display: none !important;
+    }
+
+    .mobile-overlay {
+        display: none; /* JS에서 active 클래스 붙일 때만 표시 */
+    }
+
+    .mobile-menu {
+        display: none !important; /* 모바일 메뉴는 사용하지 않음 */
+    }
+
     /* 작은 화면에서는 사이드바 숨기고 메인 영역만 사용 */
     .left-sidebar,
     .right-sidebar {
@@ -1600,6 +1613,20 @@ html {
 /* 언어 선택 드롭다운 스타일 */
 .sidebar-language-select {
     padding: 0.5rem 1rem;
+}
+
+/* 모바일 헤더 */
+/* 데스크톱 기본값: 모바일 헤더/메뉴/오버레이 숨김 */
+.mobile-header {
+    display: none;
+}
+
+.mobile-menu {
+    display: none;
+}
+
+.mobile-overlay {
+    display: none;
 }
 
 .mobile-menu-toggle {
