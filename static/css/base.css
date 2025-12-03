@@ -22,6 +22,7 @@
 /* 관리자 페이지 테이블 스타일 */
 .table-no-stripe {
     background-color: #ffffff;
+    width: -webkit-fill-available !important;
 }
 
 /* 관리자 페이지 권한 수정 드롭박스 너비 */
@@ -60,7 +61,6 @@ html {
     overflow-y: auto; /* 필요할 때만 스크롤바 표시 */
 }
 
-/* 타이포그래피 개선 (NHN 스타일) */
 h1, h2, h3, h4, h5, h6 {
     font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
     font-weight: 700;
@@ -163,7 +163,6 @@ a:hover {
     }
 }
 
-/* 중앙: 메뉴 (KWANGYA 스타일 - 하나의 라운드 박스) - 오버레이 형식, 메인 영역 기준 중앙 정렬 (데스크톱) */
 .main-menu-nav {
     position: absolute;
     top: 2rem;
@@ -394,7 +393,7 @@ a:hover {
 }
 
 /* 모바일 공통 스타일 */
-@media (max-width: 768px) {
+@media (max-width: 1000px) {
 
     /* 모바일 헤더/오버레이/메뉴 활성화 */
     .mobile-header {
@@ -1596,7 +1595,8 @@ html {
 .card {
     background-color: var(--bg-secondary);
     border: 1px solid var(--border-color);
-    border-radius: 32px;
+    /* border-radius: 32px; */
+    margin: 1rem !important;
     box-shadow: var(--shadow-md);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
