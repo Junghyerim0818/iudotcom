@@ -1114,9 +1114,8 @@ html {
 
 /* 홈 검색창 */
 .home-search-container {
-    margin-bottom: 3rem;
     width: 50%;
-    margin: 0 auto 3rem;
+    margin: auto 3rem;
 }
 
 .home-search-form {
@@ -1264,7 +1263,7 @@ html {
 /* 모바일 스타일 */
 @media (max-width: 1000px) {
     .home-content-wrapper {
-        padding: 2rem 1rem 1rem;
+        padding: 2rem 1rem 1rem !important;
     }
 
     .home-title {
@@ -1282,6 +1281,8 @@ html {
 
     .home-search-input-wrapper {
         padding: 0.625rem 1rem;
+        width: 60%;
+        margin: auto;
     }
 
     .home-search-input {
@@ -1299,10 +1300,6 @@ html {
 
     .home-schedule-item {
         width: auto;
-        min-width: 180px;
-        max-width: 300px;
-        padding: 1rem 1.25rem;
-        border-radius: 20px;
     }
 
     .home-schedules-track {
