@@ -744,7 +744,7 @@ a:hover {
 }
 
 .sidebar-search-input-wrapper {
-    display: flex;
+    display: none;
     align-items: center;
     gap: 0.5rem;
 }
@@ -1085,6 +1085,21 @@ html {
     width: 100%;
 }
 
+/* 홈 타이틀 */
+.home-title-container {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.home-title {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.03em;
+    line-height: 1.2;
+    margin: 0;
+}
+
 /* 홈 검색창 */
 .home-search-container {
     margin-bottom: 3rem;
@@ -1240,8 +1255,17 @@ html {
         padding: 2rem 1rem 1rem;
     }
 
+    .home-title {
+        font-size: 2rem;
+    }
+
+    .home-title-container {
+        margin-bottom: 1.5rem;
+    }
+
     .home-search-container {
         margin-bottom: 2rem;
+        width: 90%;
     }
 
     .home-search-input-wrapper {

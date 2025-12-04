@@ -2,6 +2,11 @@
 
 {% block content %}
 <div class="home-content-wrapper">
+    <!-- 메인 타이틀 -->
+    <div class="home-title-container">
+        <h1 class="home-title">{% if current_lang == 'en' %}IU DOTCOM{% else %}아이유 닷컴{% endif %}</h1>
+    </div>
+    
     <!-- 검색창 -->
     <div class="home-search-container">
         <form action="{{ url_for('main.gallery') }}" method="get" class="home-search-form">
