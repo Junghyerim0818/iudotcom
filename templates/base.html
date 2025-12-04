@@ -279,6 +279,11 @@
     {# 하단 고정 관리자/글쓰기 네비게이션 (로그인 시에만 표시) #}
     {% if current_user.is_authenticated and (current_user.is_writer() or current_user.is_admin()) %}
         <nav class="floating-admin-nav">
+            {# 모바일 전용 로그아웃 버튼 #}
+            <a href="{{ url_for('main.logout') }}" class="floating-nav-btn floating-nav-btn-logout mobile-only-logout">
+                <i class="bi bi-box-arrow-right"></i>
+                <span>{% if current_lang == 'en' %}Logout{% else %}로그아웃{% endif %}</span>
+            </a>
             {% if current_user.is_writer() %}
             <a href="#" class="floating-nav-btn floating-nav-btn-write" data-bs-toggle="modal" data-bs-target="#newPostModal">
                 <i class="bi bi-pencil-square"></i>
@@ -301,6 +306,7 @@
                data-bs-toggle="modal" data-bs-target="#loginModal"
                aria-label="{% if current_lang == 'en' %}Login{% else %}로그인{% endif %}">
                 <i class="bi bi-person"></i>
+                <span>{% if current_lang == 'en' %}Login{% else %}로그인{% endif %}</span>
             </a>
         </nav>
     {% endif %}

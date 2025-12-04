@@ -405,6 +405,12 @@ document.addEventListener('DOMContentLoaded', function() {
         if (link.getAttribute('target') === '_blank') return;
         if (link.getAttribute('data-bs-toggle')) return; // 모달/드롭다운 등 부트스트랩 트리거는 그대로 둠
 
+        // 로그아웃은 항상 전체 페이지 이동으로 처리 (세션/템플릿 전체 갱신 필요)
+        // href에 '/logout'이 포함되어 있으면 전체 새로고침 (쿼리 파라미터 포함 대응)
+        if (href && href.includes('/logout')) {
+            return; // 브라우저 기본 동작(리다이렉트 후 전체 새로고침)에 맡김
+        }
+
         // 외부 도메인은 건드리지 않음
         if (link.href && link.href.startsWith('http') && !link.href.includes(window.location.hostname)) {
             return;

@@ -446,6 +446,11 @@ a:hover {
         white-space: nowrap;
     }
 
+    /* 모바일 전용 로그아웃 버튼 (데스크톱에서는 숨김) */
+    .mobile-only-logout {
+        display: none;
+    }
+
     .main-content {
         margin-bottom: 2rem !important;
     }
@@ -664,6 +669,25 @@ a:hover {
     .floating-login-nav {
         display: block;
     }
+
+    /* 모바일에서 로그인 버튼 텍스트 포함 형태로 변경 */
+    .floating-nav-btn-login {
+        width: auto !important;
+        height: auto !important;
+        padding: 0.55rem 0.9rem !important;
+        border-radius: 999px !important;
+    }
+
+    .floating-nav-btn-login span {
+        display: inline;
+        margin-left: 0.4rem;
+        white-space: nowrap;
+    }
+
+    /* 모바일에서 로그아웃 버튼 표시 */
+    .mobile-only-logout {
+        display: inline-flex !important;
+    }
 }
 
 .top-social-link {
@@ -835,7 +859,7 @@ html {
     scrollbar-width: none;
 }
 
-/* 오른쪽 사이드바 - KWANGYA 119 스타일 (어두운 배경, 둥근 박스, 얇게) */
+
 .right-sidebar {
     position: fixed;
     right: 1rem;
@@ -1053,7 +1077,7 @@ html {
     text-align: center;
 }
 
-/* 홈 페이지 콘텐츠 - KWANGYA 119 스타일 */
+
 .home-content-wrapper {
     padding: 3rem 0 2rem;
 }
