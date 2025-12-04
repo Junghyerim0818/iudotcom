@@ -1,7 +1,13 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2 class="mb-4">갤러리</h2>
+<h2 class="mb-4">{% if search_query %}{% if current_lang == 'en' %}Search Results{% else %}검색 결과{% endif %}{% else %}{% if current_lang == 'en' %}Gallery{% else %}갤러리{% endif %}{% endif %}</h2>
+
+{% if search_query %}
+<div class="search-results-info mb-3">
+    <p class="text-muted">{% if current_lang == 'en' %}Searching for: "{{ search_query }}"{% else %}"{{ search_query }}" 검색 결과{% endif %}</p>
+</div>
+{% endif %}
 
 <div class="gallery-page-wrapper">
     <!-- 갤러리 리스트 -->
@@ -34,7 +40,9 @@
             </div>
         </a>
         {% else %}
-        <p>게시물이 없습니다.</p>
+        <div class="gallery-empty">
+            <p>{% if search_query %}{% if current_lang == 'en' %}No posts found matching "{{ search_query }}".{% else %}"{{ search_query }}"에 해당하는 게시물이 없습니다.{% endif %}{% else %}{% if current_lang == 'en' %}No posts yet.{% else %}게시물이 없습니다.{% endif %}{% endif %}</p>
+        </div>
         {% endfor %}
     </div>
 
@@ -44,7 +52,7 @@
         <ul class="pagination justify-content-center">
             {% if pagination.has_prev %}
             <li class="page-item">
-                <a class="page-link gallery-page-link" href="{{ url_for('main.gallery', page=pagination.prev_num) }}">이전</a>
+                <a class="page-link gallery-page-link" href="{{ url_for('main.gallery', page=pagination.prev_num, q=search_query if search_query else '') }}">이전</a>
             </li>
             {% else %}
             <li class="page-item disabled">
@@ -60,7 +68,7 @@
                     </li>
                     {% else %}
                     <li class="page-item">
-                        <a class="page-link gallery-page-link" href="{{ url_for('main.gallery', page=page_num) }}">{{ page_num }}</a>
+                        <a class="page-link gallery-page-link" href="{{ url_for('main.gallery', page=page_num, q=search_query if search_query else '') }}">{{ page_num }}</a>
                     </li>
                     {% endif %}
                 {% else %}
@@ -72,7 +80,7 @@
             
             {% if pagination.has_next %}
             <li class="page-item">
-                <a class="page-link gallery-page-link" href="{{ url_for('main.gallery', page=pagination.next_num) }}">다음</a>
+                <a class="page-link gallery-page-link" href="{{ url_for('main.gallery', page=pagination.next_num, q=search_query if search_query else '') }}">다음</a>
             </li>
             {% else %}
             <li class="page-item disabled">

@@ -86,19 +86,17 @@ def load_user(user_id):
 @bp.route('/')
 def index():
     try:
-        # 순차 로딩: 처음에는 첫 10개를 빠르게 로드하여 즉시 표시
-        # 나머지는 JavaScript에서 AJAX로 순차적으로 로드
-        initial_count = 10  # 초기 로드 개수
-        gallery_posts = db.session.query(Post).options(
+        # 최근 스케줄 20개를 가져옴 (모든 카테고리에서 최신순)
+        recent_schedules = db.session.query(Post).options(
             joinedload(Post.author),
-            defer(Post.image_data),  # 대용량 이미지 데이터 제외 (메모리 및 네트워크 대역폭 절약)
-            defer(Post.content)  # content는 필요할 때만 get_image_url()에서 DB에서 가져옴
-        ).filter_by(category='gallery').order_by(Post.created_at.desc()).limit(initial_count).all()
-        return render_template('index.html', gallery_posts=gallery_posts)
+            defer(Post.image_data),  # 대용량 이미지 데이터 제외
+            defer(Post.content)  # content는 필요할 때만 가져옴
+        ).order_by(Post.created_at.desc()).limit(20).all()
+        return render_template('index.html', recent_schedules=recent_schedules)
     except Exception as e:
         current_app.logger.error(f"Error in index route: {str(e)}")
         # DB 스키마가 업데이트되지 않은 경우를 대비해 빈 결과 반환
-        return render_template('index.html', gallery_posts=[])
+        return render_template('index.html', recent_schedules=[])
 
 @bp.route('/api/gallery-posts')
 def api_gallery_posts():
@@ -582,12 +580,17 @@ def gallery():
         page = request.args.get('page', 1, type=int)
         per_page = 8
         
-        # 순차 로딩: 첫 페이지만 먼저 빠르게 로드
-        # 첫 페이지가 아닌 경우에도 캐시 활용
-        cache_key = f'gallery_posts_page_{page}'
-        cached_result = cache.get(cache_key)
-        if cached_result:
-            return cached_result
+        # 검색어 가져오기
+        search_query = request.args.get('q', '').strip()
+        
+        # 검색어가 있으면 캐시 사용하지 않음 (동적 검색 결과)
+        use_cache = not search_query
+        
+        if use_cache:
+            cache_key = f'gallery_posts_page_{page}'
+            cached_result = cache.get(cache_key)
+            if cached_result:
+                return cached_result
         
         # 이미지 데이터는 제외하고 메타데이터만 가져오기 (성능 최적화)
         # content는 썸네일 이미지 추출을 위해 로드 필요
@@ -595,29 +598,33 @@ def gallery():
             joinedload(Post.author),
             defer(Post.image_data)  # 대용량 이미지 데이터 제외
             # content는 썸네일 이미지 추출을 위해 로드
-        ).filter_by(category='gallery').order_by(Post.created_at.desc())
+        ).filter_by(category='gallery')
+        
+        # 검색어가 있으면 제목으로 필터링 (대소문자 구분 없음)
+        if search_query:
+            posts_query = posts_query.filter(Post.title.ilike(f'%{search_query}%'))
+        
+        posts_query = posts_query.order_by(Post.created_at.desc())
         
         posts = posts_query.paginate(page=page, per_page=per_page, error_out=False)
         
-        # 첫 페이지인 경우 즉시 반환 (나머지 페이지는 백그라운드에서 캐싱)
-        if page == 1:
-            result = render_template('gallery.html', posts=posts.items, pagination=posts)
+        # 검색어가 없을 때만 캐싱
+        if use_cache and page == 1:
+            result = render_template('gallery.html', posts=posts.items, pagination=posts, search_query=search_query)
             # 첫 페이지 캐싱
             cache.set(cache_key, result, timeout=120)
-            
-            # 백그라운드에서 다음 페이지들을 미리 캐싱 (비동기, 블로킹하지 않음)
-            # 이 부분은 실제로는 클라이언트 측에서 AJAX로 처리하거나
-            # 별도의 백그라운드 작업으로 처리하는 것이 좋습니다
-            
             return result
         
-        # 첫 페이지가 아닌 경우 정상적으로 반환
-        result = render_template('gallery.html', posts=posts.items, pagination=posts)
-        cache.set(cache_key, result, timeout=120)  # 2분 캐싱
-        return result
+        if use_cache:
+            result = render_template('gallery.html', posts=posts.items, pagination=posts, search_query=search_query)
+            cache.set(cache_key, result, timeout=120)  # 2분 캐싱
+            return result
+        
+        # 검색어가 있을 때는 캐시 없이 반환
+        return render_template('gallery.html', posts=posts.items, pagination=posts, search_query=search_query)
     except Exception as e:
         current_app.logger.error(f"Error in gallery route: {str(e)}")
-        return render_template('gallery.html', posts=[], pagination=None)
+        return render_template('gallery.html', posts=[], pagination=None, search_query='')
 
 @bp.route('/gallery/<int:post_id>')
 def gallery_detail(post_id):

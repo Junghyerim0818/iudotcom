@@ -167,7 +167,8 @@
                                 type="text"
                                 name="q"
                                 class="form-control sidebar-search-input"
-                                placeholder="{% if current_lang == 'en' %}Search{% else %}검색{% endif %}">
+                                placeholder="{% if current_lang == 'en' %}Search{% else %}검색{% endif %}"
+                                value="{{ request.args.get('q', '') }}">
                             <button type="submit" class="btn sidebar-search-btn" aria-label="검색">
                                 <i class="bi bi-search"></i>
                             </button>
