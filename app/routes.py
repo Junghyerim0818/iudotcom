@@ -86,12 +86,12 @@ def load_user(user_id):
 @bp.route('/')
 def index():
     try:
-        # 최근 스케줄 20개를 가져옴 (모든 카테고리에서 최신순)
+        # 최근 스케줄 30개를 가져옴 (모든 카테고리에서 최신순)
         recent_schedules = db.session.query(Post).options(
             joinedload(Post.author),
             defer(Post.image_data),  # 대용량 이미지 데이터 제외
             defer(Post.content)  # content는 필요할 때만 가져옴
-        ).order_by(Post.created_at.desc()).limit(20).all()
+        ).order_by(Post.created_at.desc()).limit(30).all()
         return render_template('index.html', recent_schedules=recent_schedules)
     except Exception as e:
         current_app.logger.error(f"Error in index route: {str(e)}")
