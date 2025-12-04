@@ -7,22 +7,6 @@
         <h1 class="home-title">{% if current_lang == 'en' %}IU DOTCOM{% else %}아이유 닷컴{% endif %}</h1>
     </div>
     
-    <!-- 검색창 -->
-    <div class="home-search-container">
-        <form action="{{ url_for('main.gallery') }}" method="get" class="home-search-form">
-            <div class="home-search-input-wrapper">
-                <i class="bi bi-search home-search-icon"></i>
-                <input type="text" name="q" class="form-control home-search-input" 
-                       placeholder="{% if current_lang == 'en' %}Search...{% else %}검색...{% endif %}"
-                       value="{{ request.args.get('q', '') }}"
-                       autocomplete="off">
-                <button type="submit" class="btn home-search-btn" aria-label="{% if current_lang == 'en' %}Search{% else %}검색{% endif %}">
-                    {% if current_lang == 'en' %}Search{% else %}검색{% endif %}
-                </button>
-            </div>
-        </form>
-    </div>
-
     <!-- 최근 스케줄 목록 -->
     <div class="home-schedules-container">
         {% if recent_schedules %}
@@ -93,6 +77,22 @@
                 <p>{% if current_lang == 'en' %}No schedules yet.{% else %}아직 등록된 스케줄이 없습니다.{% endif %}</p>
             </div>
         {% endif %}
+    </div>
+
+    <!-- 검색창 -->
+    <div class="home-search-container">
+        <form action="{{ url_for('main.gallery') }}" method="get" class="home-search-form">
+            <div class="home-search-input-wrapper">
+                <i class="bi bi-search home-search-icon"></i>
+                <input type="text" name="q" class="form-control home-search-input" 
+                       placeholder="{% if current_lang == 'en' %}Search...{% else %}검색...{% endif %}"
+                       value="{{ request.args.get('q', '') }}"
+                       autocomplete="off">
+                <button type="submit" class="btn home-search-btn" aria-label="{% if current_lang == 'en' %}Search{% else %}검색{% endif %}">
+                    {% if current_lang == 'en' %}Search{% else %}검색{% endif %}
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 {% endblock %}
