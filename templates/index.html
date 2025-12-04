@@ -25,19 +25,19 @@
             <div class="home-schedules-row home-schedules-row-1">
                 <div class="home-schedules-track">
                     {% for schedule in recent_schedules %}
-                    <div class="home-schedule-item">
+                    <a href="{% if schedule.category == 'gallery' %}{{ url_for('main.gallery_detail', post_id=schedule.id) }}{% elif schedule.category == 'archive_1' %}{{ url_for('main.archive_detail', type_name='archive_1', post_id=schedule.id) }}{% elif schedule.category == 'archive_2' %}{{ url_for('main.archive_detail', type_name='archive_2', post_id=schedule.id) }}{% endif %}" class="home-schedule-item">
                         <div class="schedule-content">
                             <div class="schedule-title">{{ schedule.title }}</div>
                         </div>
-                    </div>
+                    </a>
                     {% endfor %}
                     <!-- 복제본 (무한 스크롤용) -->
                     {% for schedule in recent_schedules %}
-                    <div class="home-schedule-item">
+                    <a href="{% if schedule.category == 'gallery' %}{{ url_for('main.gallery_detail', post_id=schedule.id) }}{% elif schedule.category == 'archive_1' %}{{ url_for('main.archive_detail', type_name='archive_1', post_id=schedule.id) }}{% elif schedule.category == 'archive_2' %}{{ url_for('main.archive_detail', type_name='archive_2', post_id=schedule.id) }}{% endif %}" class="home-schedule-item">
                         <div class="schedule-content">
                             <div class="schedule-title">{{ schedule.title }}</div>
                         </div>
-                    </div>
+                    </a>
                     {% endfor %}
                 </div>
             </div>
@@ -46,19 +46,19 @@
             <div class="home-schedules-row home-schedules-row-2">
                 <div class="home-schedules-track home-schedules-track-reverse">
                     {% for schedule in recent_schedules %}
-                    <div class="home-schedule-item">
+                    <a href="{% if schedule.category == 'gallery' %}{{ url_for('main.gallery_detail', post_id=schedule.id) }}{% elif schedule.category == 'archive_1' %}{{ url_for('main.archive_detail', type_name='archive_1', post_id=schedule.id) }}{% elif schedule.category == 'archive_2' %}{{ url_for('main.archive_detail', type_name='archive_2', post_id=schedule.id) }}{% endif %}" class="home-schedule-item">
                         <div class="schedule-content">
                             <div class="schedule-title">{{ schedule.title }}</div>
                         </div>
-                    </div>
+                    </a>
                     {% endfor %}
                     <!-- 복제본 (무한 스크롤용) -->
                     {% for schedule in recent_schedules %}
-                    <div class="home-schedule-item">
+                    <a href="{% if schedule.category == 'gallery' %}{{ url_for('main.gallery_detail', post_id=schedule.id) }}{% elif schedule.category == 'archive_1' %}{{ url_for('main.archive_detail', type_name='archive_1', post_id=schedule.id) }}{% elif schedule.category == 'archive_2' %}{{ url_for('main.archive_detail', type_name='archive_2', post_id=schedule.id) }}{% endif %}" class="home-schedule-item">
                         <div class="schedule-content">
                             <div class="schedule-title">{{ schedule.title }}</div>
                         </div>
-                    </div>
+                    </a>
                     {% endfor %}
                 </div>
             </div>
@@ -67,19 +67,19 @@
             <div class="home-schedules-row home-schedules-row-3">
                 <div class="home-schedules-track">
                     {% for schedule in recent_schedules %}
-                    <div class="home-schedule-item">
+                    <a href="{% if schedule.category == 'gallery' %}{{ url_for('main.gallery_detail', post_id=schedule.id) }}{% elif schedule.category == 'archive_1' %}{{ url_for('main.archive_detail', type_name='archive_1', post_id=schedule.id) }}{% elif schedule.category == 'archive_2' %}{{ url_for('main.archive_detail', type_name='archive_2', post_id=schedule.id) }}{% endif %}" class="home-schedule-item">
                         <div class="schedule-content">
                             <div class="schedule-title">{{ schedule.title }}</div>
                         </div>
-                    </div>
+                    </a>
                     {% endfor %}
                     <!-- 복제본 (무한 스크롤용) -->
                     {% for schedule in recent_schedules %}
-                    <div class="home-schedule-item">
+                    <a href="{% if schedule.category == 'gallery' %}{{ url_for('main.gallery_detail', post_id=schedule.id) }}{% elif schedule.category == 'archive_1' %}{{ url_for('main.archive_detail', type_name='archive_1', post_id=schedule.id) }}{% elif schedule.category == 'archive_2' %}{{ url_for('main.archive_detail', type_name='archive_2', post_id=schedule.id) }}{% endif %}" class="home-schedule-item">
                         <div class="schedule-content">
                             <div class="schedule-title">{{ schedule.title }}</div>
                         </div>
-                    </div>
+                    </a>
                     {% endfor %}
                 </div>
             </div>
