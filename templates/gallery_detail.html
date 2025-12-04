@@ -62,24 +62,11 @@
         </div>
     </div>
 
-    {% if current_user.is_authenticated and current_user.is_admin() %}
-    <div class="d-flex gap-2 mb-3 justify-content-end">
-        <button type="button" class="btn btn-sm btn-outline-primary text-nowrap" data-bs-toggle="modal" data-bs-target="#editPostModal" data-post-id="{{ post.id }}">
-            <i class="bi bi-pencil"></i> {% if current_lang == 'en' %}Edit{% else %}수정{% endif %}
-        </button>
-        <form action="{{ url_for('main.delete_post', post_id=post.id) }}" method="POST" class="d-inline" onsubmit="return confirm('{% if current_lang == 'en' %}Are you sure you want to delete this post?{% else %}정말 이 글을 삭제하시겠습니까?{% endif %}');">
-            <button type="submit" class="btn btn-sm btn-outline-danger text-nowrap">
-                <i class="bi bi-trash"></i> {% if current_lang == 'en' %}Delete{% else %}삭제{% endif %}
-            </button>
-        </form>
-    </div>
-    {% endif %}
-
     <div class="gallery-detail-info">
         <div class="card">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-start mb-3">
-                    <div>
+                    <div class="flex-grow-1">
                         <h5 class="card-title mb-2">{{ post.title|safe }}</h5>
                         <p class="card-text text-muted mb-0">
                             <small>
@@ -92,7 +79,23 @@
                         </p>
                     </div>
                     {% if current_user.is_authenticated and current_user.is_admin() %}
-                    <!-- 상단으로 이동시킴 -->
+                    <div class="post-actions-menu">
+                        <button type="button" class="post-menu-toggle" id="postMenuToggle-{{ post.id }}" aria-label="{% if current_lang == 'en' %}More options{% else %}더보기{% endif %}">
+                            <i class="bi bi-three-dots"></i>
+                        </button>
+                        <div class="post-menu-dropdown" id="postMenuDropdown-{{ post.id }}">
+                            <button type="button" class="post-menu-item" data-bs-toggle="modal" data-bs-target="#editPostModal" data-post-id="{{ post.id }}">
+                                <i class="bi bi-pencil me-2"></i>
+                                <span>{% if current_lang == 'en' %}Edit{% else %}수정{% endif %}</span>
+                            </button>
+                            <form action="{{ url_for('main.delete_post', post_id=post.id) }}" method="POST" class="post-menu-item-form" onsubmit="return confirm('{% if current_lang == 'en' %}Are you sure you want to delete this post?{% else %}정말 이 글을 삭제하시겠습니까?{% endif %}');">
+                                <button type="submit" class="post-menu-item post-menu-item-danger">
+                                    <i class="bi bi-trash me-2"></i>
+                                    <span>{% if current_lang == 'en' %}Delete{% else %}삭제{% endif %}</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
                     {% endif %}
                 </div>
                 {% if post.content %}
@@ -218,6 +221,98 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
+/* 포스트 액션 메뉴 스타일 */
+.post-actions-menu {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.post-menu-toggle {
+    background: none;
+    border: none;
+    padding: 0.5rem;
+    cursor: pointer;
+    color: var(--text-secondary);
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.post-menu-toggle:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: var(--text-primary);
+}
+
+.post-menu-toggle i {
+    font-size: 1.25rem;
+}
+
+.post-menu-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 0.5rem;
+    background-color: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    min-width: 160px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.2s ease;
+    z-index: 1000;
+    padding: 0.5rem 0;
+}
+
+.post-menu-dropdown.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.post-menu-item {
+    width: 100%;
+    background: none;
+    border: none;
+    padding: 0.75rem 1rem;
+    text-align: left;
+    cursor: pointer;
+    color: var(--text-primary);
+    font-size: 0.9375rem;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.2s ease;
+    font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
+}
+
+.post-menu-item:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.post-menu-item-danger {
+    color: #dc3545;
+}
+
+.post-menu-item-danger:hover {
+    background-color: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+}
+
+.post-menu-item-form {
+    margin: 0;
+    padding: 0;
+}
+
+.post-menu-item i {
+    font-size: 1rem;
+    width: 20px;
+}
+
 @media (max-width: 768px) {
     .gallery-detail-image-wrapper {
         padding: 1rem;
@@ -233,6 +328,39 @@
     }
 }
 </style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 포스트 메뉴 토글 기능
+    const menuToggle = document.getElementById('postMenuToggle-{{ post.id }}');
+    const menuDropdown = document.getElementById('postMenuDropdown-{{ post.id }}');
+    
+    if (menuToggle && menuDropdown) {
+        // 메뉴 토글 버튼 클릭
+        menuToggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            menuDropdown.classList.toggle('active');
+        });
+        
+        // 외부 클릭 시 메뉴 닫기
+        document.addEventListener('click', function(e) {
+            if (!menuToggle.contains(e.target) && !menuDropdown.contains(e.target)) {
+                menuDropdown.classList.remove('active');
+            }
+        });
+        
+        // 메뉴 아이템 클릭 시 메뉴 닫기
+        const menuItems = menuDropdown.querySelectorAll('.post-menu-item');
+        menuItems.forEach(item => {
+            item.addEventListener('click', function() {
+                menuDropdown.classList.remove('active');
+            });
+        });
+    }
+});
+</script>
 {% endblock %}
 {% endblock %}
 

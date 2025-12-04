@@ -20,6 +20,18 @@
 }
 
 /* 관리자 페이지 테이블 스타일 */
+.table-responsive {
+    margin: 1rem;
+}
+
+.table-responsive table tbody tr td:nth-child(4) form {
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
 .table-no-stripe {
     background-color: #ffffff;
     width: -webkit-fill-available !important;
@@ -99,7 +111,7 @@ a:hover {
     border: 1px solid rgba(0, 0, 0, 0.1);
     color: var(--sidebar-text);
     border-radius: 20px;
-    padding: 0.5rem 1.25rem;
+    padding: 0.5rem 1rem;
     font-size: 0.875rem;
     min-width: 140px;
     width: auto;
