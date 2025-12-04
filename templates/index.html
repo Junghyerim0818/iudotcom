@@ -21,46 +21,91 @@
     <!-- 최근 스케줄 목록 -->
     <div class="home-schedules-container">
         {% if recent_schedules %}
-            <div class="home-schedules-list">
-                {% for schedule in recent_schedules %}
-                <div class="home-schedule-item">
-                    <div class="schedule-logo">
-                        {% if schedule.category == 'gallery' %}
-                            <div class="schedule-logo-icon schedule-logo-gallery">
-                                <i class="bi bi-image"></i>
+            <!-- 1번줄: 오른쪽으로 이동 -->
+            <div class="home-schedules-row home-schedules-row-1">
+                <div class="home-schedules-track">
+                    {% for schedule in recent_schedules %}
+                    <div class="home-schedule-item">
+                        <div class="schedule-content">
+                            <div class="schedule-title">{{ schedule.title }}</div>
+                            <div class="schedule-meta">
+                                <span class="schedule-author">{{ schedule.author.name if schedule.author else 'Unknown' }}</span>
+                                <span class="schedule-date">{{ schedule.created_at.strftime('%Y.%m.%d') if schedule.created_at else '' }}</span>
                             </div>
-                        {% elif schedule.category == 'archive_1' %}
-                            <div class="schedule-logo-icon schedule-logo-archive1">
-                                <i class="bi bi-heart"></i>
-                            </div>
-                        {% elif schedule.category == 'archive_2' %}
-                            <div class="schedule-logo-icon schedule-logo-archive2">
-                                <i class="bi bi-hand-thumbs-up"></i>
-                            </div>
-                        {% else %}
-                            <div class="schedule-logo-icon schedule-logo-default">
-                                <i class="bi bi-file-text"></i>
-                            </div>
-                        {% endif %}
-                    </div>
-                    <div class="schedule-content">
-                        <div class="schedule-text">
-                            {% if schedule.category == 'gallery' %}
-                                <span class="schedule-hashtag schedule-hashtag-gallery">#갤러리</span>
-                            {% elif schedule.category == 'archive_1' %}
-                                <span class="schedule-hashtag schedule-hashtag-archive1">#프롬유</span>
-                            {% elif schedule.category == 'archive_2' %}
-                                <span class="schedule-hashtag schedule-hashtag-archive2">#서포트</span>
-                            {% endif %}
-                            <span class="schedule-title">{{ schedule.title }}</span>
-                        </div>
-                        <div class="schedule-meta">
-                            <span class="schedule-author">{{ schedule.author.name if schedule.author else 'Unknown' }}</span>
-                            <span class="schedule-date">{{ schedule.created_at.strftime('%Y.%m.%d') if schedule.created_at else '' }}</span>
                         </div>
                     </div>
+                    {% endfor %}
+                    <!-- 복제본 (무한 스크롤용) -->
+                    {% for schedule in recent_schedules %}
+                    <div class="home-schedule-item">
+                        <div class="schedule-content">
+                            <div class="schedule-title">{{ schedule.title }}</div>
+                            <div class="schedule-meta">
+                                <span class="schedule-author">{{ schedule.author.name if schedule.author else 'Unknown' }}</span>
+                                <span class="schedule-date">{{ schedule.created_at.strftime('%Y.%m.%d') if schedule.created_at else '' }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
+            </div>
+            
+            <!-- 2번줄: 왼쪽으로 이동 -->
+            <div class="home-schedules-row home-schedules-row-2">
+                <div class="home-schedules-track home-schedules-track-reverse">
+                    {% for schedule in recent_schedules %}
+                    <div class="home-schedule-item">
+                        <div class="schedule-content">
+                            <div class="schedule-title">{{ schedule.title }}</div>
+                            <div class="schedule-meta">
+                                <span class="schedule-author">{{ schedule.author.name if schedule.author else 'Unknown' }}</span>
+                                <span class="schedule-date">{{ schedule.created_at.strftime('%Y.%m.%d') if schedule.created_at else '' }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    <!-- 복제본 (무한 스크롤용) -->
+                    {% for schedule in recent_schedules %}
+                    <div class="home-schedule-item">
+                        <div class="schedule-content">
+                            <div class="schedule-title">{{ schedule.title }}</div>
+                            <div class="schedule-meta">
+                                <span class="schedule-author">{{ schedule.author.name if schedule.author else 'Unknown' }}</span>
+                                <span class="schedule-date">{{ schedule.created_at.strftime('%Y.%m.%d') if schedule.created_at else '' }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- 3번줄: 오른쪽으로 이동 -->
+            <div class="home-schedules-row home-schedules-row-3">
+                <div class="home-schedules-track">
+                    {% for schedule in recent_schedules %}
+                    <div class="home-schedule-item">
+                        <div class="schedule-content">
+                            <div class="schedule-title">{{ schedule.title }}</div>
+                            <div class="schedule-meta">
+                                <span class="schedule-author">{{ schedule.author.name if schedule.author else 'Unknown' }}</span>
+                                <span class="schedule-date">{{ schedule.created_at.strftime('%Y.%m.%d') if schedule.created_at else '' }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    <!-- 복제본 (무한 스크롤용) -->
+                    {% for schedule in recent_schedules %}
+                    <div class="home-schedule-item">
+                        <div class="schedule-content">
+                            <div class="schedule-title">{{ schedule.title }}</div>
+                            <div class="schedule-meta">
+                                <span class="schedule-author">{{ schedule.author.name if schedule.author else 'Unknown' }}</span>
+                                <span class="schedule-date">{{ schedule.created_at.strftime('%Y.%m.%d') if schedule.created_at else '' }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
         {% else %}
             <div class="home-schedules-empty">
