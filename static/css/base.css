@@ -1079,7 +1079,7 @@ html {
 
 
 .home-content-wrapper {
-    padding: 3rem 1rem 2rem;
+    padding: 3rem 0 2rem;
     max-width: 100%;
     margin: 0 auto;
     width: 100%;
@@ -1088,6 +1088,8 @@ html {
 /* 홈 검색창 */
 .home-search-container {
     margin-bottom: 3rem;
+    width: 50%;
+    margin: 0 auto 3rem;
 }
 
 .home-search-form {
