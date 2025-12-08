@@ -749,6 +749,7 @@ a:hover {
     display: flex;
     flex-direction: column;
     gap: 2rem;
+    height: 100%;
 }
 
 .sidebar-search {
@@ -951,6 +952,23 @@ html {
     text-align: center;
 }
 
+/* 우측 사이드바 하단 이미지 */
+.sidebar-bottom-image {
+    margin-top: auto;
+    padding-top: 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.sidebar-logo-img {
+    max-width: 100%;
+    height: auto;
+    object-fit: contain;
+    border-radius: 8px;
+}
+
 .sidebar-language {
     display: flex;
     flex-direction: column;
@@ -1115,7 +1133,7 @@ html {
 /* 홈 검색창 */
 .home-search-container {
     width: 50%;
-    margin: auto 3rem;
+    margin: 3rem auto;
 }
 
 .home-search-form {
