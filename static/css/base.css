@@ -1130,6 +1130,15 @@ html {
     margin: 0;
 }
 
+/* 홈 타이틀 이미지 */
+.home-title-image {
+    display: none;
+    max-width: 200px;
+    width: 100%;
+    height: auto;
+    margin: 0 auto;
+}
+
 /* 홈 검색창 */
 .home-search-container {
     width: 50%;
@@ -1286,7 +1295,12 @@ html {
     }
 
     .home-title {
+        display: none; /* 모바일에서 텍스트 숨김 */
         font-size: 2rem;
+    }
+    
+    .home-title-image {
+        display: block; /* 모바일에서 이미지 표시 */
     }
 
     .home-title-container {
