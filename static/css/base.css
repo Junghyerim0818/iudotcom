@@ -1,3 +1,10 @@
+@font-face {
+    font-family: 'InkLiquid';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_one@1.0/InkLipquid.woff') format('woff');
+    font-weight: normal;
+    font-display: swap;
+}
+
 :root {
     --sidebar-width: 280px;
     --sidebar-collapsed-width: 80px;
@@ -1122,22 +1129,13 @@ html {
 }
 
 .home-title {
-    display: none; /* 텍스트 숨김 */
     font-size: 3rem;
     font-weight: 700;
     color: var(--text-primary);
     letter-spacing: -0.03em;
     line-height: 1.2;
     margin: 0;
-}
-
-/* 홈 타이틀 이미지 */
-.home-title-image {
-    display: block; /* 항상 표시 */
-    max-width: 300px;
-    width: 100%;
-    height: auto;
-    margin: 0 auto;
+    font-family: 'InkLiquid', sans-serif; /* 지정한 폰트 적용 */
 }
 
 /* 홈 검색창 */
@@ -1295,8 +1293,8 @@ html {
         padding: 2rem 1rem 1rem !important;
     }
 
-    .home-title-image {
-        max-width: 200px; /* 모바일에서 이미지 크기 조정 */
+    .home-title {
+        font-size: 2rem;
     }
 
     .home-title-container {
