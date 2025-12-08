@@ -1122,6 +1122,7 @@ html {
 }
 
 .home-title {
+    display: none; /* 텍스트 숨김 */
     font-size: 3rem;
     font-weight: 700;
     color: var(--text-primary);
@@ -1132,8 +1133,8 @@ html {
 
 /* 홈 타이틀 이미지 */
 .home-title-image {
-    display: none;
-    max-width: 200px;
+    display: block; /* 항상 표시 */
+    max-width: 300px;
     width: 100%;
     height: auto;
     margin: 0 auto;
@@ -1294,13 +1295,8 @@ html {
         padding: 2rem 1rem 1rem !important;
     }
 
-    .home-title {
-        display: none; /* 모바일에서 텍스트 숨김 */
-        font-size: 2rem;
-    }
-    
     .home-title-image {
-        display: block; /* 모바일에서 이미지 표시 */
+        max-width: 200px; /* 모바일에서 이미지 크기 조정 */
     }
 
     .home-title-container {
