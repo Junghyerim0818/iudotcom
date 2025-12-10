@@ -1344,7 +1344,7 @@ html {
 
 .page-title {
     font-size: 2.75rem;
-    font-weight: 700;
+    font-weight: 300;
     margin-bottom: 1rem;
     color: var(--text-primary);
     letter-spacing: -0.03em;
